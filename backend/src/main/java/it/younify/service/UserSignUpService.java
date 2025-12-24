@@ -20,7 +20,7 @@ public class UserSignUpService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public String signIn(@NotNull UserSignUpRequest userSignUpRequest) {
+    public String signUp(@NotNull UserSignUpRequest userSignUpRequest) {
 
         String email = userSignUpRequest.getEmail();
         Optional<User> opt = userRepository.findByEmail(email);
