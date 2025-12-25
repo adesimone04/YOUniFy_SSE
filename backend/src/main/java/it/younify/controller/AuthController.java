@@ -27,7 +27,7 @@ public class AuthController {
     private final UserLogInService userLogInService;
     private final RefreshTokenService refreshTokenService;
 
-    @PostMapping("/signup")
+    @PostMapping("/user/signup")
     public ResponseEntity<Map<String, String>> signIn(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
 
         return ResponseEntity.ok(Collections.singletonMap("message", userSignUpService.signUp(userSignUpRequest)));

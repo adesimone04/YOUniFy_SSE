@@ -54,7 +54,7 @@ public class UserSignUpService {
                     return "Benvenuto " + firstName + " nella community di YOUniFy";
                 }
 
-                return "L'email: " + email + "non appartiene a nessuna istituzione universitaria italiana";
+                return "L'email: " + email + " non appartiene a nessuna istituzione universitaria italiana";
             }
 
             return "La password inserita non rispetta il pattern di sicurezza richiesto";
@@ -78,7 +78,7 @@ public class UserSignUpService {
                 "@studenti.unitelmasapienza.it", "@studbocconi.it"
         );
 
-        return email.matches("^[a-zA-Z0-9._%-]+@studenti\\.[a-zA-Z0-9-]+\\.it$") &&
+        return email.matches("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.]+\\.it$") &&
                 emailAccepted.stream().anyMatch(email::endsWith);
     }
 

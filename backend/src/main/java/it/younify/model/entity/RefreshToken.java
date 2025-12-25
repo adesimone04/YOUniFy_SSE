@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "users")
+@Table(name = "refresh_token")
 
 @Getter
 @Setter
@@ -17,7 +17,7 @@ public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String ID;
+    private Long ID;
 
     @Column(nullable = false, unique = true)
     private String token;
