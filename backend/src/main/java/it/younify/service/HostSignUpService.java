@@ -1,5 +1,6 @@
 package it.younify.service;
 
+import it.younify.adapter.emailsender.EmailProvider;
 import it.younify.model.dto.HostSignUpRequest;
 import it.younify.model.entity.Host;
 import it.younify.repository.HostRepository;
@@ -17,6 +18,7 @@ public class HostSignUpService {
 
     private final HostRepository hostRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailProvider emailProvider;
 
     public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
@@ -49,7 +51,11 @@ public class HostSignUpService {
                     //apply 2FA with design pattern before save in DB
                     hostRepository.save(host);
 
-                    return "Siamo felici di lavorare con te " + hostName;
+                    String message = "Siamo felici di lavorare con te " + hostName;
+
+                    //in production switch the API for send on PEC
+                    emailProvider.sendWelcomeEmail("younifytester@gmail.com", message);
+                    return message;
                 }
 
                 return "La PEC " + PEC + " non risulta associata alla P.IVA " + PIVA;

@@ -1,5 +1,6 @@
 package it.younify.service;
 
+import it.younify.adapter.emailsender.EmailProvider;
 import it.younify.model.dto.UserSignUpRequest;
 import it.younify.model.entity.User;
 import it.younify.repository.UserRepository;
@@ -19,6 +20,7 @@ public class UserSignUpService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailProvider emailProvider;
 
     public String signUp(@NotNull UserSignUpRequest userSignUpRequest) {
 
@@ -51,7 +53,10 @@ public class UserSignUpService {
                     //apply 2FA with design pattern before save in DB
                     userRepository.save(user);
 
-                    return "Benvenuto " + firstName + " nella community di YOUniFy";
+                    String message = "Benvenuto " + firstName + " nella community di YOUniFy";
+
+                    emailProvider.sendWelcomeEmail(email, message);
+                    return message;
                 }
 
                 return "L'email: " + email + " non appartiene a nessuna istituzione universitaria italiana";
