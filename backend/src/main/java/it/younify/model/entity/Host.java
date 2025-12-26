@@ -1,6 +1,5 @@
 package it.younify.model.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -24,10 +23,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Host implements UserDetails {
+
     @Id
     private String ID;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String hostName;
 
     @Column(nullable = false, unique = true)
@@ -51,6 +51,7 @@ public class Host implements UserDetails {
     private String uniList;
 
     public Host(String ID, String hostName, String PIVA, String PEC, String password, String province, String city, String uniList){
+
         this.ID = ID;
         this.hostName = hostName;
         this.PIVA = PIVA;
@@ -64,7 +65,7 @@ public class Host implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(new SimpleGrantedAuthority("ROLE_HOST"));
     }
 
     @Override

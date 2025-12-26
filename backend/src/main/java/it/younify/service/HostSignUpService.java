@@ -19,12 +19,17 @@ public class HostSignUpService {
     private final PasswordEncoder passwordEncoder;
 
     public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
+
         String PEC = hostSignUpRequest.getPEC();
 
         Optional<Host> alr = hostRepository.findByPEC(PEC);
+
         if (alr.isPresent()) {
+
             return "PEC already exists";
-        }else{
+        }
+        else{
+
             String hostName = hostSignUpRequest.getHostName();
             String password = hostSignUpRequest.getPassword();
             String PIVA = hostSignUpRequest.getPIVA();
@@ -34,16 +39,22 @@ public class HostSignUpService {
             String uniList = hostSignUpRequest.getUniList();
 
             if(validatePassword(password,confirmPassword)){
+
                 if(validatePEC(PEC, PIVA)){
+
                     String ID = "H-" + UUID.randomUUID();
                     password = passwordEncoder.encode(password);
                     Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList);
+
                     //apply 2FA with design pattern before save in DB
                     hostRepository.save(host);
+
                     return "Siamo felici di lavorare con te " + hostName;
                 }
-                return "La PEC " + PEC + "non risulta associata alla P.IVA " + PIVA;
+
+                return "La PEC " + PEC + " non risulta associata alla P.IVA " + PIVA;
             }
+
             return "La password inserita non rispetta il pattern di sicurezza richiesto";
         }
     }
@@ -58,6 +69,5 @@ public class HostSignUpService {
                 password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$");
 
     }
-
 }
 
