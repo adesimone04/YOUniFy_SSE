@@ -1,11 +1,14 @@
 package it.younify.service;
 
+import it.younify.config.TokenHashUtil;
 import it.younify.model.dto.AuthenticationResponse;
 import it.younify.model.dto.RefreshTokenRequest;
+import it.younify.model.entity.Host;
 import it.younify.model.entity.RefreshToken;
 import it.younify.model.entity.User;
 import it.younify.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -19,10 +22,13 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
 
+    @Value("${application.security.jwt.refresh-token.expiration}")
+    private int refreshExpiration;
+
 
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
-        RefreshToken existingToken = refreshTokenRepository.findByToken(refreshTokenRequest.getRefreshToken())
+        RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtil.hashToken(refreshTokenRequest.getRefreshToken()))
                 .orElseThrow(() -> new RuntimeException("Refresh Token not found"));
 
         if(existingToken.isRevoked()){ throw new RuntimeException("Refresh token revoked or not valid"); }
@@ -31,23 +37,44 @@ public class RefreshTokenService {
 
             existingToken.setRevoked(true);
             refreshTokenRepository.save(existingToken);
+
             throw new RuntimeException("Refresh token expired. Login requested");
         }
 
-        User user = existingToken.getUser();
+        String jwtToken = null;
 
-        String jwtToken = jwtService.generateToken(user);
         String refreshToken = UUID.randomUUID().toString();
         existingToken.setRevoked(true);
+        String tokenHashed = TokenHashUtil.hashToken(refreshToken);
 
-        RefreshToken token = RefreshToken.builder()
-                .token(refreshToken)
-                .revoked(false)
-                .expiryDate(Instant.now().plus(180, ChronoUnit.DAYS))
-                .user(user)
-                .build();
+        if(existingToken.getUser() != null) {
 
-        refreshTokenRepository.save(token);
+            User user = existingToken.getUser();
+            jwtToken = jwtService.generateToken(user);
+
+            RefreshToken token = RefreshToken.builder()
+                    .tokenHashed(tokenHashed)
+                    .revoked(false)
+                    .expiryDate(Instant.now().plus(refreshExpiration, ChronoUnit.DAYS))
+                    .user(user)
+                    .build();
+
+            refreshTokenRepository.save(token);
+        }
+        else{
+
+            Host host = existingToken.getHost();
+            jwtToken = jwtService.generateToken(host);
+
+            RefreshToken token = RefreshToken.builder()
+                    .tokenHashed(tokenHashed)
+                    .revoked(false)
+                    .expiryDate(Instant.now().plus(refreshExpiration, ChronoUnit.DAYS))
+                    .host(host)
+                    .build();
+
+            refreshTokenRepository.save(token);
+        }
 
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)

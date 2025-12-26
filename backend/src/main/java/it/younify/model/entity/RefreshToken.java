@@ -2,7 +2,6 @@ package it.younify.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.Instant;
 
 @Entity
@@ -20,7 +19,7 @@ public class RefreshToken {
     private Long ID;
 
     @Column(nullable = false, unique = true)
-    private String token;
+    private String tokenHashed;
 
     @Column(nullable = false)
     private boolean revoked;
@@ -29,6 +28,10 @@ public class RefreshToken {
     private Instant expiryDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "users_id")
-    public User user;
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id")
+    private Host host;
 }

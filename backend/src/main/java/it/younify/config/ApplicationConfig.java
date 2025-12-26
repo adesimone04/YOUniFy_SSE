@@ -1,5 +1,8 @@
 package it.younify.config;
 
+import it.younify.model.entity.Host;
+import it.younify.model.entity.User;
+import it.younify.repository.HostRepository;
 import it.younify.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,11 +16,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
     private final UserRepository userRepository;
+    private final HostRepository hostRepository;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -31,8 +37,20 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato"));
+        return username -> {
+
+            Optional<User> user = userRepository.findByEmail(username);
+            if (user.isPresent()) {
+                return user.get();
+            }
+
+            Optional<Host> host = hostRepository.findByPEC(username);
+            if (host.isPresent()) {
+                return host.get();
+            }
+
+            throw new UsernameNotFoundException("Nessun Utente o Host trovato con questa email/pec");
+        };
     }
 
     @Bean

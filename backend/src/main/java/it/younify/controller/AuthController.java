@@ -1,11 +1,9 @@
 package it.younify.controller;
 
-import it.younify.model.dto.AuthenticationResponse;
-import it.younify.model.dto.RefreshTokenRequest;
-import it.younify.model.dto.UserLogInRequest;
-import it.younify.model.dto.UserSignUpRequest;
+import it.younify.model.dto.*;
+import it.younify.service.HostSignUpService;
 import it.younify.service.RefreshTokenService;
-import it.younify.service.UserLogInService;
+import it.younify.service.LogInService;
 import it.younify.service.UserSignUpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +22,8 @@ import java.util.Map;
 public class AuthController {
 
     private final UserSignUpService userSignUpService;
-    private final UserLogInService userLogInService;
+    private final HostSignUpService hostSignUpService;
+    private final LogInService logInService;
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/user/signup")
@@ -34,10 +33,17 @@ public class AuthController {
     }
 
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> logIn(@Valid @RequestBody UserLogInRequest userLogInRequest) {
+    @PostMapping("/host/signup")
+    public ResponseEntity<Map<String, String>> signIn(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
 
-        AuthenticationResponse response = userLogInService.logIn(userLogInRequest);
+        return ResponseEntity.ok(Collections.singletonMap("message", hostSignUpService.signUp(hostSignUpRequest)));
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> logIn(@Valid @RequestBody LogInRequest logInRequest) {
+
+        AuthenticationResponse response = logInService.logIn(logInRequest);
 
         ResponseCookie cookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
                 .httpOnly(true)
