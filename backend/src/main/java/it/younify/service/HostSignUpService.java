@@ -1,5 +1,6 @@
 package it.younify.service;
 
+import it.younify.adapter.PIVAlidator.PIVAlidator;
 import it.younify.adapter.emailsender.EmailProvider;
 import it.younify.model.dto.HostSignUpRequest;
 import it.younify.model.entity.Host;
@@ -18,17 +19,22 @@ public class HostSignUpService {
 
     private final HostRepository hostRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailProvider emailProvider;
+    private final PIVAlidator pivalidator;
+    private final Generate2FAService generate2FAService;
 
     public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
         String PEC = hostSignUpRequest.getPEC();
-
         Optional<Host> alr = hostRepository.findByPEC(PEC);
 
         if (alr.isPresent()) {
+            if(!alr.get().isEnabled()){
+                String ID = alr.get().getID();
+                generate2FAService.send2FARequest(ID);
+                return ID;
+            }
 
-            return "PEC already exists";
+            return "PEC already exists and is enabled";
         }
         else{
 
@@ -47,15 +53,10 @@ public class HostSignUpService {
                     String ID = "H-" + UUID.randomUUID();
                     password = passwordEncoder.encode(password);
                     Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
-
-                    //apply 2FA with design pattern before save in DB
                     hostRepository.save(host);
 
-                    String message = "Siamo felici di lavorare con te " + hostName;
-
-                    //in production switch the API for send on PEC
-                    emailProvider.sendWelcomeEmail("younifytester@gmail.com", message);
-                    return message;
+                    generate2FAService.send2FARequest(ID);
+                    return ID;
                 }
 
                 return "La PEC " + PEC + " non risulta associata alla P.IVA " + PIVA;
@@ -66,7 +67,7 @@ public class HostSignUpService {
     }
 
     private boolean validatePEC(String PEC, String PIVA){
-        return true; //todo
+        return pivalidator.PIVAlidatePEC(PIVA).equals(PEC);
     }
 
     private boolean validatePassword(String password, String confirmPassword) {

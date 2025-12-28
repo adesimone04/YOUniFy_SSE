@@ -35,11 +35,11 @@ public class ITPECAdapter implements PIVAlidator {
                     .uri("/IT-pec/{vatCode}", vatCode)
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-
-                    .onStatus(status -> status.value() == 404, (request, response) -> {
-                        throw new RuntimeException("Partita IVA non trovata nel registro");
-                    })
-                    .body(PecResponse.class)).getPec();
+                    .onStatus(
+                            status -> status.value() == 404,
+                            (request, response) -> new RuntimeException("Partita IVA non trovata nel registro")
+                    )
+                    .body(PecResponse.class)).getData().getFirst().getPec();
 
         } catch (HttpClientErrorException.Unauthorized e) {
             throw new RuntimeException("Errore configurazione API: Token non valido");
@@ -47,6 +47,7 @@ public class ITPECAdapter implements PIVAlidator {
 
             System.err.println("Errore chiamata OpenAPI: " + e.getMessage());
             throw new RuntimeException("Impossibile verificare la Partita IVA al momento");
+
         }
     }
 }

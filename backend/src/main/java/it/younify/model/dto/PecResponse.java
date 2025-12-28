@@ -3,18 +3,32 @@ package it.younify.model.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PecResponse {
 
+    @JsonProperty("data")
+    private List<DataItem> data;
 
-    @JsonProperty("pec")
-    private String pec;
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DataItem {
+        @JsonProperty("pec")
+        private String pec;
 
-    @JsonProperty("denomination")
-    private String companyName;
+        @JsonProperty("history")
+        private List<HistoryItem> history;
+    }
 
-    @JsonProperty("vat_code")
-    private String vatCode;
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class HistoryItem {
+        @JsonProperty("pec")
+        private String pec;
+
+        @JsonProperty("timestamp")
+        private long timestamp;
+    }
 }
