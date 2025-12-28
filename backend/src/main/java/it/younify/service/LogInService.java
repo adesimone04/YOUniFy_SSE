@@ -1,6 +1,6 @@
 package it.younify.service;
 
-import it.younify.config.TokenHashUtil;
+import it.younify.config.TokenHashUtility;
 import it.younify.model.dto.LogInRequest;
 import it.younify.model.dto.AuthenticationResponse;
 import it.younify.model.entity.Host;
@@ -13,9 +13,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,6 +35,8 @@ public class LogInService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
+    private final Generate2FAService generate2FAService;
+    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     @Value("${application.security.jwt.refresh-token.expiration}")
@@ -40,7 +44,50 @@ public class LogInService {
 
     public AuthenticationResponse logIn(@NotNull LogInRequest logInRequest){
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(logInRequest.getEmail(), logInRequest.getPassword()));
+        try{
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(logInRequest.getEmail(), logInRequest.getPassword()));
+        }
+        catch (BadCredentialsException e) {
+
+            throw new RuntimeException("Email o Password errate");
+        }
+        catch(DisabledException e){
+
+            String ID = null;
+            String email =  logInRequest.getEmail();
+
+            Optional<User> optU = userRepository.findByEmail(email);
+            if(optU.isPresent()){
+
+                User user = optU.get();
+                if (!passwordEncoder.matches(logInRequest.getPassword(), user.getPassword())) {
+                    throw new BadCredentialsException("Password errata");
+                }
+
+                ID = user.getID();
+            }
+            else{
+
+                Optional<Host> optH = hostRepository.findByPEC(email);
+                if(optH.isPresent()){
+
+                    Host host = optH.get();
+                    if (!passwordEncoder.matches(logInRequest.getPassword(), host.getPassword())) {
+                        throw new BadCredentialsException("Password errata");
+                    }
+
+                    ID = host.getID();
+
+                }
+            }
+
+            generate2FAService.send2FARequest(ID);
+            return AuthenticationResponse.builder()
+                    .status("2FA_REQUIRED")
+                    .accountID(ID)
+                    .build();
+        }
+
 
         Optional<User> userOpt = userRepository.findByEmail(logInRequest.getEmail());
 
@@ -53,7 +100,7 @@ public class LogInService {
             jwtToken = jwtService.generateToken(user);
             refreshToken = UUID.randomUUID().toString();
 
-            String tokenHashed = TokenHashUtil.hashToken(refreshToken);
+            String tokenHashed = TokenHashUtility.hashToken(refreshToken);
 
             RefreshToken token = RefreshToken.builder()
                     .tokenHashed(tokenHashed)
@@ -72,7 +119,7 @@ public class LogInService {
             jwtToken = jwtService.generateToken(host);
             refreshToken = UUID.randomUUID().toString();
 
-            String tokenHashed = TokenHashUtil.hashToken(refreshToken);
+            String tokenHashed = TokenHashUtility.hashToken(refreshToken);
 
                     RefreshToken token = RefreshToken.builder()
                     .tokenHashed(tokenHashed)
@@ -88,6 +135,7 @@ public class LogInService {
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .status("LOGIN SUCCESS")
                 .build();
     }
 }

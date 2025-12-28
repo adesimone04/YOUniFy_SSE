@@ -46,7 +46,7 @@ public class HostSignUpService {
 
                     String ID = "H-" + UUID.randomUUID();
                     password = passwordEncoder.encode(password);
-                    Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList);
+                    Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
 
                     //apply 2FA with design pattern before save in DB
                     hostRepository.save(host);

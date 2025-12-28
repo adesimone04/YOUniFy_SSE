@@ -27,25 +27,34 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private String firstName;
+
     @Column(nullable = false)
     private String lastName;
+
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     private String password;
     private String profileImage;
+
     @Column(nullable = false)
     private String cdl;
     @Column(nullable = false)
     private String university;
+
     @Column(nullable = false)
     private LocalDate dateOfBirth;
+
     @Column(nullable = false)
     private String contactsInfo;
 
+    @Column(nullable = false)
+    private boolean enabled;
+
 
     public User(String ID, String firstName, String lastName, String email, String password,
-                String cdl, String university, LocalDate dateOfBirth, String contactsInfo) {
+                String cdl, String university, LocalDate dateOfBirth, String contactsInfo, boolean enabled) {
 
         this.ID = ID;
         this.firstName = firstName;
@@ -56,6 +65,7 @@ public class User implements UserDetails {
         this.university = university;
         this.dateOfBirth = dateOfBirth;
         this.contactsInfo = contactsInfo;
+        this.enabled = enabled;
     }
 
 
@@ -78,5 +88,5 @@ public class User implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    @Override public boolean isEnabled() { return enabled; }
 }

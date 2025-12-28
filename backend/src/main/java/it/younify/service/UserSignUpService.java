@@ -3,16 +3,16 @@ package it.younify.service;
 import it.younify.adapter.emailsender.EmailProvider;
 import it.younify.model.dto.UserSignUpRequest;
 import it.younify.model.entity.User;
+import it.younify.repository.Code2FARepository;
 import it.younify.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class UserSignUpService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailProvider emailProvider;
+    private final Generate2FAService generate2FAService;
 
     public String signUp(@NotNull UserSignUpRequest userSignUpRequest) {
 
@@ -29,7 +29,14 @@ public class UserSignUpService {
 
         if(opt.isPresent()) {
 
-            return "L'email inserita risulta già registrata";
+            if(!opt.get().isEnabled()) {
+
+                String ID = opt.get().getID();
+                generate2FAService.send2FARequest(ID);
+                return ID;
+            }
+
+            return "L'email inserita risulta già associata e attiva";
         }
         else {
 
@@ -48,15 +55,11 @@ public class UserSignUpService {
 
                     String ID = "U-" + UUID.randomUUID();
                     password = passwordEncoder.encode(password);
-                    User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo);
-
-                    //apply 2FA with design pattern before save in DB
+                    User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo, false);
                     userRepository.save(user);
 
-                    String message = "Benvenuto " + firstName + " nella community di YOUniFy";
-
-                    emailProvider.sendWelcomeEmail(email, message);
-                    return message;
+                    generate2FAService.send2FARequest(ID);
+                    return ID;
                 }
 
                 return "L'email: " + email + " non appartiene a nessuna istituzione universitaria italiana";

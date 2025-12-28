@@ -50,7 +50,10 @@ public class Host implements UserDetails {
     @Column(nullable = false)
     private String uniList;
 
-    public Host(String ID, String hostName, String PIVA, String PEC, String password, String province, String city, String uniList){
+    @Column(nullable = false)
+    private boolean enabled;
+
+    public Host(String ID, String hostName, String PIVA, String PEC, String password, String province, String city, String uniList, boolean enabled) {
 
         this.ID = ID;
         this.hostName = hostName;
@@ -60,6 +63,7 @@ public class Host implements UserDetails {
         this.province = province;
         this.city = city;
         this.uniList = uniList;
+        this.enabled = enabled;
     }
 
 
@@ -81,6 +85,6 @@ public class Host implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+    @Override public boolean isEnabled() { return enabled; }
 
 }

@@ -36,6 +36,18 @@ public class GmailEmailAdapter implements EmailProvider {
     @Async
     public void send2FAEmail(String email, String text) {
 
-        //TODO
+        try {
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Code 2FA Request");
+            message.setText(text);
+
+            mailSender.send(message);
+        }
+        catch (Exception e) {
+
+            System.err.println("Error during sending email: " + e.getMessage());
+        }
     }
 }

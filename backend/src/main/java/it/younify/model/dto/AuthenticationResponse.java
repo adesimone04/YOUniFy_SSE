@@ -13,4 +13,6 @@ public class AuthenticationResponse {
 
     private String accessToken;
     private String refreshToken;
+    private String accountID;
+    private String status;
 }

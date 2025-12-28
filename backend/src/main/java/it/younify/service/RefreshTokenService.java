@@ -1,6 +1,6 @@
 package it.younify.service;
 
-import it.younify.config.TokenHashUtil;
+import it.younify.config.TokenHashUtility;
 import it.younify.model.dto.AuthenticationResponse;
 import it.younify.model.dto.RefreshTokenRequest;
 import it.younify.model.entity.Host;
@@ -25,10 +25,9 @@ public class RefreshTokenService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private int refreshExpiration;
 
-
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
-        RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtil.hashToken(refreshTokenRequest.getRefreshToken()))
+        RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshTokenRequest.getRefreshToken()))
                 .orElseThrow(() -> new RuntimeException("Refresh Token not found"));
 
         if(existingToken.isRevoked()){ throw new RuntimeException("Refresh token revoked or not valid"); }
@@ -45,7 +44,7 @@ public class RefreshTokenService {
 
         String refreshToken = UUID.randomUUID().toString();
         existingToken.setRevoked(true);
-        String tokenHashed = TokenHashUtil.hashToken(refreshToken);
+        String tokenHashed = TokenHashUtility.hashToken(refreshToken);
 
         if(existingToken.getUser() != null) {
 

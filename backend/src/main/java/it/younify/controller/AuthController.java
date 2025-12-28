@@ -1,10 +1,7 @@
 package it.younify.controller;
 
 import it.younify.model.dto.*;
-import it.younify.service.HostSignUpService;
-import it.younify.service.RefreshTokenService;
-import it.younify.service.LogInService;
-import it.younify.service.UserSignUpService;
+import it.younify.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -13,8 +10,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,20 +18,28 @@ public class AuthController {
 
     private final UserSignUpService userSignUpService;
     private final HostSignUpService hostSignUpService;
+    private final Authentication2FAService authentication2FAService;
     private final LogInService logInService;
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/user/signup")
-    public ResponseEntity<Map<String, String>> signIn(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
+    public String signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
 
-        return ResponseEntity.ok(Collections.singletonMap("message", userSignUpService.signUp(userSignUpRequest)));
+        return userSignUpService.signUp(userSignUpRequest);
     }
 
 
     @PostMapping("/host/signup")
-    public ResponseEntity<Map<String, String>> signIn(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
+    public String signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
 
-        return ResponseEntity.ok(Collections.singletonMap("message", hostSignUpService.signUp(hostSignUpRequest)));
+        return hostSignUpService.signUp(hostSignUpRequest);
+    }
+
+
+    @PostMapping("/2FA")
+    public String confirm2FA(@Valid @RequestBody Authentication2FARequest authentication2FARequest) {
+
+        return authentication2FAService.confirm2FA(authentication2FARequest);
     }
 
 
