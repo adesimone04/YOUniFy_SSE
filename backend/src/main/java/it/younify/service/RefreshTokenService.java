@@ -1,8 +1,9 @@
 package it.younify.service;
 
 import it.younify.config.TokenHashUtility;
-import it.younify.model.dto.AuthenticationResponse;
-import it.younify.model.dto.RefreshTokenRequest;
+import it.younify.exception.TokenRefreshException;
+import it.younify.model.dto.response.AuthenticationResponse;
+import it.younify.model.dto.request.RefreshTokenRequest;
 import it.younify.model.entity.Host;
 import it.younify.model.entity.RefreshToken;
 import it.younify.model.entity.User;
@@ -28,16 +29,17 @@ public class RefreshTokenService {
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
         RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshTokenRequest.getRefreshToken()))
-                .orElseThrow(() -> new RuntimeException("Refresh Token not found"));
+                .orElseThrow(() -> new TokenRefreshException("Refresh Token not found"));
 
-        if(existingToken.isRevoked()){ throw new RuntimeException("Refresh token revoked or not valid"); }
+        if(existingToken.isRevoked()){ throw new TokenRefreshException("Refresh token revoked or not valid"); }
 
+        //SERIO PROBLEMA
         if (existingToken.getExpiryDate().isBefore(Instant.now())) {
 
             existingToken.setRevoked(true);
             refreshTokenRepository.save(existingToken);
 
-            throw new RuntimeException("Refresh token expired. Login requested");
+            throw new TokenRefreshException("Refresh token expired. Login requested");
         }
 
         String jwtToken = null;

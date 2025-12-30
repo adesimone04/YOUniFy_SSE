@@ -1,8 +1,9 @@
 package it.younify.service;
 
 import it.younify.adapter.PIVAlidator.PIVAlidator;
-import it.younify.adapter.emailsender.EmailProvider;
-import it.younify.model.dto.HostSignUpRequest;
+import it.younify.exception.BadRequestException;
+import it.younify.exception.ResourceAlreadyExistsException;
+import it.younify.model.dto.request.HostSignUpRequest;
 import it.younify.model.entity.Host;
 import it.younify.repository.HostRepository;
 import jakarta.validation.constraints.NotNull;
@@ -25,16 +26,18 @@ public class HostSignUpService {
     public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
         String PEC = hostSignUpRequest.getPEC();
-        Optional<Host> alr = hostRepository.findByPEC(PEC);
+        Optional<Host> opt = hostRepository.findByPEC(PEC);
 
-        if (alr.isPresent()) {
-            if(!alr.get().isEnabled()){
-                String ID = alr.get().getID();
+        if (opt.isPresent()) {
+
+            if(!opt.get().isEnabled()){
+
+                String ID = opt.get().getID();
                 generate2FAService.send2FARequest(ID);
                 return ID;
             }
 
-            return "PEC already exists and is enabled";
+            throw new ResourceAlreadyExistsException("Email or password incorrect");
         }
         else{
 
@@ -59,12 +62,14 @@ public class HostSignUpService {
                     return ID;
                 }
 
-                return "La PEC " + PEC + " non risulta associata alla P.IVA " + PIVA;
+                throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA);
             }
 
-            return "La password inserita non rispetta il pattern di sicurezza richiesto";
+            throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                    "one number, and one special symbol");
         }
     }
+
 
     private boolean validatePEC(String PEC, String PIVA){
         return pivalidator.PIVAlidatePEC(PIVA).equals(PEC);

@@ -11,6 +11,7 @@ import it.younify.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -58,6 +59,7 @@ public class Generate2FAService {
                 }
             }
         }
-        //throw exception for id not valid
+
+        throw new BadCredentialsException("ID account not exist");
     }
 }

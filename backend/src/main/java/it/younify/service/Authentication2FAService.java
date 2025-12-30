@@ -1,7 +1,8 @@
 package it.younify.service;
 
 import it.younify.adapter.emailsender.EmailProvider;
-import it.younify.model.dto.Authentication2FARequest;
+import it.younify.model.dto.request.Authentication2FARequest;
+import it.younify.model.dto.response.AccountSummary;
 import it.younify.model.entity.Code2FA;
 import it.younify.model.entity.Host;
 import it.younify.model.entity.User;
@@ -10,6 +11,8 @@ import it.younify.repository.HostRepository;
 import it.younify.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import it.younify.exception.BadRequestException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -25,7 +28,7 @@ public class Authentication2FAService {
     private final EmailProvider emailProvider;
     private final Generate2FAService generate2FAService;
 
-    public String confirm2FA(@NotNull Authentication2FARequest authentication2FARequest) {
+    public AccountSummary confirm2FA(@NotNull Authentication2FARequest authentication2FARequest) {
 
         String ID = authentication2FARequest.getID();
 
@@ -52,7 +55,11 @@ public class Authentication2FAService {
 
                             String message = "Benvenuto " + user.getFirstName() + " nella community di YOUniFy";
                             emailProvider.sendWelcomeEmail(user.getEmail(), message);
-                            return message;
+
+                              return AccountSummary.builder()
+                                    .accountName(user.getFirstName())
+                                    .accountEmail(user.getEmail())
+                                    .build();
                         }
                     }
                     else {
@@ -70,7 +77,11 @@ public class Authentication2FAService {
 
                             //in production switch the API for send on Host PEC
                             emailProvider.sendWelcomeEmail("younifytester@gmail.com", message);
-                            return message;
+
+                             return AccountSummary.builder()
+                                    .accountName(host.getHostName())
+                                    .accountEmail(host.getPEC())
+                                    .build();
                         }
                     }
                 }
@@ -81,21 +92,21 @@ public class Authentication2FAService {
 
                         code2FARepository.delete(code2FA);
                         generate2FAService.send2FARequest(ID);
-                        return "You achieved the maximum number of attempts: 3";
+
+                        throw new BadRequestException("You achieved the maximum number of attempts: 3");
                     }
 
-                    return "The code is incorrect. Retry, number of attempts remained:" + (3 - code2FA.getErrorCount());
+                    throw new BadRequestException("The code is incorrect. Retry, number of attempts remained:" + (3 - code2FA.getErrorCount()));
                 }
             }
             else {
 
                 code2FARepository.delete(code2FA);
                 generate2FAService.send2FARequest(ID);
-                return "The 2FA code is expired";
+                throw new BadRequestException("The 2FA code is expired");
             }
         }
 
-        //this return system must be changed with exception system (2fa for this id not exists(
-        return "";
+        throw new BadCredentialsException("ID account not exist");
     }
 }

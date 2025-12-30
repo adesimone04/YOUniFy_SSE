@@ -1,13 +1,12 @@
 package it.younify.service;
 
-import it.younify.adapter.emailsender.EmailProvider;
-import it.younify.model.dto.UserSignUpRequest;
+import it.younify.exception.BadRequestException;
+import it.younify.exception.ResourceAlreadyExistsException;
+import it.younify.model.dto.request.UserSignUpRequest;
 import it.younify.model.entity.User;
-import it.younify.repository.Code2FARepository;
 import it.younify.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +35,7 @@ public class UserSignUpService {
                 return ID;
             }
 
-            return "L'email inserita risulta già associata e attiva";
+            throw new ResourceAlreadyExistsException("Email or password incorrect");
         }
         else {
 
@@ -62,10 +61,11 @@ public class UserSignUpService {
                     return ID;
                 }
 
-                return "L'email: " + email + " non appartiene a nessuna istituzione universitaria italiana";
+                throw new BadRequestException("The email " + email + " does not belong to any Italian university");
             }
 
-            return "La password inserita non rispetta il pattern di sicurezza richiesto";
+            throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                    "one number, and one special symbol");
         }
     }
 

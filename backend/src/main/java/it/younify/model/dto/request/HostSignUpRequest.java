@@ -1,4 +1,4 @@
-package it.younify.model.dto;
+package it.younify.model.dto.request;
 
 
 import lombok.Data;

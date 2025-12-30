@@ -1,4 +1,4 @@
-package it.younify.model.dto;
+package it.younify.model.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

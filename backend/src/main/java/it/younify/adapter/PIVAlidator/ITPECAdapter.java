@@ -1,6 +1,6 @@
 package it.younify.adapter.PIVAlidator;
 
-import it.younify.model.dto.PecResponse;
+import it.younify.model.dto.response.PecResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;

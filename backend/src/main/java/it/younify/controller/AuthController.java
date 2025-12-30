@@ -1,7 +1,9 @@
 package it.younify.controller;
 
-import it.younify.model.dto.*;
-import it.younify.model.entity.RefreshToken;
+import it.younify.model.dto.request.*;
+import it.younify.model.dto.response.AccountSummary;
+import it.younify.model.dto.response.ApiResponse;
+import it.younify.model.dto.response.AuthenticationResponse;
 import it.younify.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,33 +22,55 @@ public class AuthController {
     private final UserSignUpService userSignUpService;
     private final HostSignUpService hostSignUpService;
     private final Authentication2FAService authentication2FAService;
-    private final LogInService logInService;
     private final RefreshTokenService refreshTokenService;
+    private final LogInService logInService;
     private final LogOutService logOutService;
 
-    @PostMapping("/user/signup")
-    public String signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
 
-        return userSignUpService.signUp(userSignUpRequest);
+    @PostMapping("/user/signup")
+    public ResponseEntity<ApiResponse<String>> signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
+
+        String ID = userSignUpService.signUp(userSignUpRequest);
+
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .message("USER_REGISTERED")
+                        .data(ID)
+                        .build()
+        );
     }
 
 
     @PostMapping("/host/signup")
-    public String signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
+    public ResponseEntity<ApiResponse<String>> signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
 
-        return hostSignUpService.signUp(hostSignUpRequest);
+        String ID = hostSignUpService.signUp(hostSignUpRequest);
+
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .message("HOST_REGISTERED")
+                        .data(ID)
+                        .build()
+        );
     }
 
 
     @PostMapping("/2FA")
-    public String confirm2FA(@Valid @RequestBody Authentication2FARequest authentication2FARequest) {
+    public ResponseEntity<ApiResponse<AccountSummary>> confirm2FA(@Valid @RequestBody Authentication2FARequest authentication2FARequest) {
 
-        return authentication2FAService.confirm2FA(authentication2FARequest);
+        AccountSummary summary= authentication2FAService.confirm2FA(authentication2FARequest);
+
+        return ResponseEntity.ok(
+                ApiResponse.<AccountSummary>builder()
+                    .message("2FA_CONFIRMED")
+                    .data(summary)
+                    .build());
+
     }
 
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> logIn(@Valid @RequestBody LogInRequest logInRequest) {
+    public ResponseEntity<ApiResponse<String>> logIn(@Valid @RequestBody LogInRequest logInRequest) {
 
         AuthenticationResponse response = logInService.logIn(logInRequest);
 
@@ -68,15 +92,20 @@ public class AuthController {
                 .build();
 
 
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString()).body(null);
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(
+                        ApiResponse.<String>builder()
+                                .message(response.getStatus())
+                                .data(response.getAccountID())
+                                .build()
+                );
     }
 
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthenticationResponse> refresh(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
+    public ResponseEntity<Void> refresh(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
 
         if (refreshTokenString == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -103,7 +132,7 @@ public class AuthController {
 
 
     @PostMapping("/logout")
-    public ResponseEntity<AuthenticationResponse> logout(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
+    public ResponseEntity<ApiResponse<Void>> logout(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
 
         logOutService.logOut(refreshTokenString);
 
@@ -123,9 +152,14 @@ public class AuthController {
                 .sameSite("Strict")
                 .build();
 
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, accessCookie.toString()).body(null);
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(
+                        ApiResponse.<Void>builder()
+                                .message("LOGOUT")
+                                .build()
+                );
     }
-
 }

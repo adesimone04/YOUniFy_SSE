@@ -1,6 +1,5 @@
 package it.younify.service;
 
-
 import it.younify.config.TokenHashUtility;
 import it.younify.model.entity.RefreshToken;
 import it.younify.repository.RefreshTokenRepository;
@@ -15,11 +14,9 @@ public class LogOutService {
 
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public String logOut(String refreshToken) {
+    public void logOut(String refreshToken) {
 
         Optional<RefreshToken> opt = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshToken));
         opt.ifPresent(refreshTokenRepository::delete);
-
-        return "logout successful";
     }
 }

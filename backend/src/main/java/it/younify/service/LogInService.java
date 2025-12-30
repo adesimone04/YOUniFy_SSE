@@ -1,8 +1,8 @@
 package it.younify.service;
 
 import it.younify.config.TokenHashUtility;
-import it.younify.model.dto.LogInRequest;
-import it.younify.model.dto.AuthenticationResponse;
+import it.younify.model.dto.request.LogInRequest;
+import it.younify.model.dto.response.AuthenticationResponse;
 import it.younify.model.entity.Host;
 import it.younify.model.entity.RefreshToken;
 import it.younify.model.entity.User;
@@ -47,10 +47,6 @@ public class LogInService {
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(logInRequest.getEmail(), logInRequest.getPassword()));
         }
-        catch (BadCredentialsException e) {
-
-            throw new RuntimeException("Email o Password errate");
-        }
         catch(DisabledException e){
 
             String ID = null;
@@ -61,7 +57,7 @@ public class LogInService {
 
                 User user = optU.get();
                 if (!passwordEncoder.matches(logInRequest.getPassword(), user.getPassword())) {
-                    throw new BadCredentialsException("Password errata");
+                    throw new BadCredentialsException("Email or password incorrect");
                 }
 
                 ID = user.getID();
@@ -73,11 +69,10 @@ public class LogInService {
 
                     Host host = optH.get();
                     if (!passwordEncoder.matches(logInRequest.getPassword(), host.getPassword())) {
-                        throw new BadCredentialsException("Password errata");
+                        throw new BadCredentialsException("Email or password incorrect");
                     }
 
                     ID = host.getID();
-
                 }
             }
 
@@ -114,7 +109,7 @@ public class LogInService {
         else{
 
             Host host = hostRepository.findByPEC(logInRequest.getEmail())
-                    .orElseThrow(() -> new UsernameNotFoundException("Nessun account è registrato con questo indirizzo: " + logInRequest.getEmail()));
+                    .orElseThrow(() -> new UsernameNotFoundException("Email or password incorrect"));
 
             jwtToken = jwtService.generateToken(host);
             refreshToken = UUID.randomUUID().toString();
@@ -135,7 +130,7 @@ public class LogInService {
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
-                .status("LOGIN SUCCESS")
+                .status("LOGIN")
                 .build();
     }
 }
