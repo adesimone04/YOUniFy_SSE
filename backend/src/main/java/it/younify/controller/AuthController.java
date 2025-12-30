@@ -1,6 +1,7 @@
 package it.younify.controller;
 
 import it.younify.model.dto.*;
+import it.younify.model.entity.RefreshToken;
 import it.younify.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class AuthController {
     private final Authentication2FAService authentication2FAService;
     private final LogInService logInService;
     private final RefreshTokenService refreshTokenService;
+    private final LogOutService logOutService;
 
     @PostMapping("/user/signup")
     public String signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
@@ -48,7 +50,7 @@ public class AuthController {
 
         AuthenticationResponse response = logInService.logIn(logInRequest);
 
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
                 .httpOnly(true)
                 .secure(false)  //in production (with https) set on true
                 .path("/")
@@ -56,11 +58,20 @@ public class AuthController {
                 .sameSite("Strict")
                 .build();
 
-        response.setRefreshToken(null);
+
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", response.getAccessToken())
+                .httpOnly(true)
+                .secure(false)  //in production (with https) set on true
+                .path("/")
+                .maxAge(15 * 60)
+                .sameSite("Strict")
+                .build();
+
+
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(response);
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString()).body(null);
     }
 
 
@@ -76,19 +87,45 @@ public class AuthController {
 
         AuthenticationResponse response = refreshTokenService.refresh(request);
 
-        ResponseCookie newCookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
+        ResponseCookie newAccessCookie = ResponseCookie.from("access_token", response.getAccessToken())
                 .httpOnly(true)
-                .secure(false) //in production (with https) set on true
+                .secure(false)  //in production (with https) set on true
                 .path("/")
-                .maxAge(180 * 24 * 60 * 60)
+                .maxAge(15 * 60)
                 .sameSite("Strict")
                 .build();
 
-        response.setRefreshToken(null);
-
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, newCookie.toString())
-                .body(response);
+                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
+                .body(null);
     }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthenticationResponse> logout(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
+
+        logOutService.logOut(refreshTokenString);
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
+                .httpOnly(true)
+                .secure(false)  //in production (with https) set on true
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
+                .httpOnly(true)
+                .secure(false)  //in production (with https) set on true
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString()).body(null);
+    }
+
 }
