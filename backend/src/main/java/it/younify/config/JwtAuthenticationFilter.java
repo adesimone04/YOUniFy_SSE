@@ -1,6 +1,6 @@
 package it.younify.config;
 
-import it.younify.service.JwtService;
+import it.younify.modules.sgac.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

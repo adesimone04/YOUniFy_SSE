@@ -1,9 +1,9 @@
 package it.younify.config;
 
-import it.younify.model.entity.Host;
-import it.younify.model.entity.User;
-import it.younify.repository.HostRepository;
-import it.younify.repository.UserRepository;
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
+import it.younify.modules.sgac.repository.HostRepository;
+import it.younify.modules.sgac.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
