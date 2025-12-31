@@ -14,6 +14,14 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * The {@code HostSignUpService} class is responsible for handling the sign-up process for hosts.
+ * It validates the host's information, creates a new host account, and triggers the 2FA process.
+ *
+ * @see it.younify.modules.sgac.repository.HostRepository
+ * @see it.younify.modules.sgac.adapter.PIVAlidator.PIVAlidator
+ * @see it.younify.modules.sgac.service.Generate2FAService
+ */
 @Service
 @RequiredArgsConstructor
 public class HostSignUpService {
@@ -23,6 +31,23 @@ public class HostSignUpService {
     private final PIVAlidator pivalidator;
     private final Generate2FAService generate2FAService;
 
+    /**
+     * Registers a new host.
+     * <p>
+     * This method performs several validation checks:
+     * <ul>
+     *     <li>Checks if a host with the given PEC already exists. If so, and the account is not enabled, it re-sends the 2FA code.</li>
+     *     <li>Validates the password complexity and confirmation.</li>
+     *     <li>Validates that the provided PEC is associated with the given "Partita IVA" with {@link PIVAlidator}.</li>
+     * </ul>
+     * If all validations pass, it creates a new {@link Host} account, saves it to the database,
+     * and sends a 2FA code to the host's PEC.
+     *
+     * @param hostSignUpRequest The request containing the host's sign-up information.
+     * @return The ID of the newly created host account.
+     * @throws ResourceAlreadyExistsException if a host with the given PEC already exists and is enabled.
+     * @throws BadRequestException if the password is invalid or the PEC does not match the "Partita IVA".
+     */
     public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
         String PEC = hostSignUpRequest.getPEC();
@@ -82,4 +107,3 @@ public class HostSignUpService {
 
     }
 }
-

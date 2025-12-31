@@ -18,6 +18,15 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * The {@code Authentication2FAService} class handles the logic for two-factor authentication (2FA).
+ * This service is responsible for confirming the 2FA code provided by the user after the initial login.
+ * It works for both {@link User} and {@link Host} account types.
+ *
+ * @see it.younify.modules.sgac.repository.Code2FARepository
+ * @see it.younify.modules.sgac.service.Generate2FAService
+ * @see it.younify.modules.sgac.adapter.emailsender.EmailProvider
+ */
 @Service
 @RequiredArgsConstructor
 public class Authentication2FAService {
@@ -28,6 +37,19 @@ public class Authentication2FAService {
     private final EmailProvider emailProvider;
     private final Generate2FAService generate2FAService;
 
+    /**
+     * Confirms the two-factor authentication code for a user or host.
+     * This method validates the provided 2FA code. If the code is correct, the account is enabled,
+     * and a welcome email is sent. If the code is incorrect, it manages the number of attempts
+     * and may trigger a new code to be sent.
+     *
+     * @param authentication2FARequest The request containing the account ID and the 2FA code.
+     * @return An {@link AccountSummary} containing the account name and email upon successful confirmation.
+     * @throws BadCredentialsException If the account ID does not exist.
+     * @throws BadRequestException If the 2FA code is expired, incorrect, or the maximum number of attempts has been reached.
+     * @see it.younify.modules.sgac.model.dto.request.Authentication2FARequest
+     * @see it.younify.modules.sgac.model.dto.response.AccountSummary
+     */
     public AccountSummary confirm2FA(@NotNull Authentication2FARequest authentication2FARequest) {
 
         String ID = authentication2FARequest.getID();

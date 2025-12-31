@@ -16,6 +16,14 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+/**
+ * The {@code RefreshTokenService} class is responsible for managing refresh tokens.
+ * This service handles the logic for creating, validating, and revoking refresh tokens,
+ * allowing users to obtain new access tokens without re-authenticating.
+ *
+ * @see it.younify.modules.sgac.repository.RefreshTokenRepository
+ * @see it.younify.modules.sgac.service.JwtService
+ */
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -26,6 +34,19 @@ public class RefreshTokenService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private int refreshExpiration;
 
+    /**
+     * Refreshes an access token using a provided refresh token.
+     * This method validates the refresh token, and if it is valid,
+     * revokes it and issues a new pair of access and refresh tokens.
+     *
+     * @param refreshTokenRequest The request containing the refresh token.
+     * @return An {@link AuthenticationResponse} containing the new access and refresh tokens.
+     * @throws TokenRefreshException If the refresh token is not found, has been revoked, or is expired.
+     * @see it.younify.modules.sgac.model.dto.request.RefreshTokenRequest
+     * @see it.younify.modules.sgac.model.dto.response.AuthenticationResponse
+     * @see it.younify.modules.sgac.model.entity.User
+     * @see it.younify.modules.sgac.model.entity.Host
+     */
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
         RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshTokenRequest.getRefreshToken()))

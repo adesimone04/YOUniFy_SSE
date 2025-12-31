@@ -25,7 +25,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
 
-
+/**
+ * The {@code LogInService} class is responsible for handling user and host login.
+ * It authenticates credentials, and if successful, generates a JWT and a refresh token.
+ * It also handles cases where two-factor authentication (2FA) is required.
+ *
+ * @see org.springframework.security.authentication.AuthenticationManager
+ * @see it.younify.modules.sgac.service.JwtService
+ * @see it.younify.modules.sgac.service.Generate2FAService
+ */
 @Service
 @RequiredArgsConstructor
 public class LogInService {
@@ -42,6 +50,19 @@ public class LogInService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private int refreshExpiration;
 
+    /**
+     * Attempts to log in a user or host with the provided credentials.
+     * <p>
+     * If the account is not yet enabled (i.e., 2FA has not been completed), it triggers the 2FA process
+     * and returns a response indicating that 2FA is required.
+     * <p>
+     * If authentication is successful and the account is enabled, it generates a JWT and a refresh token.
+     *
+     * @param logInRequest The login request containing the email and password.
+     * @return An {@link AuthenticationResponse} containing the tokens and status of the login attempt.
+     * @throws BadCredentialsException if the email or password is incorrect.
+     * @throws UsernameNotFoundException if the user or host is not found.
+     */
     public AuthenticationResponse logIn(@NotNull LogInRequest logInRequest){
 
         try{
