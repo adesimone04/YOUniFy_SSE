@@ -48,7 +48,7 @@ public class SessionController {
     @PostMapping("/2FA")
     public ResponseEntity<ApiResponse<AccountSummary>> confirm2FA(@Valid @RequestBody Authentication2FARequest authentication2FARequest) {
 
-        AccountSummary summary= authentication2FAService.confirm2FA(authentication2FARequest);
+        AccountSummary summary = authentication2FAService.confirm2FA(authentication2FARequest);
 
         return ResponseEntity.ok(
                 ApiResponse.<AccountSummary>builder()

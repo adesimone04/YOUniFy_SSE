@@ -81,7 +81,7 @@ public class AuthController {
     /**
      * Handles the login process for both users and hosts.
      * Upon successful authentication, it sets "refresh_token" and "access_token" cookies.
-     * If 2FA is required, it returns a response with the status "2FA_REQUIRED".
+     * If 2FA is required, it returns a response with the status "2FA_SENT".
      *
      * @param logInRequest The request body containing the login credentials.
      * @return A {@link ResponseEntity} with cookies set and an {@link ApiResponse} containing the login status and account ID.
@@ -123,7 +123,7 @@ public class AuthController {
                     );
         }
 
-        //handling status "2FA_REQUIRED"
+        //handling status "2FA_SENT"
         return ResponseEntity.ok()
                 .body(
                         ApiResponse.<String>builder()

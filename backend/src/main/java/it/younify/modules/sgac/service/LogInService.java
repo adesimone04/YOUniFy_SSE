@@ -99,7 +99,7 @@ public class LogInService {
 
             generate2FAService.send2FARequest(ID);
             return AuthenticationResponse.builder()
-                    .status("2FA_REQUIRED")
+                    .status("2FA_SENT")
                     .accountID(ID)
                     .build();
         }
