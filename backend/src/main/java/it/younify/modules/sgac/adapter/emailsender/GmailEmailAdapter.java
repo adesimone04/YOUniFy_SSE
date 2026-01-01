@@ -1,5 +1,6 @@
 package it.younify.modules.sgac.adapter.emailsender;
 
+import it.younify.core.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +28,7 @@ public class GmailEmailAdapter implements EmailProvider {
         }
         catch (Exception e) {
 
-            System.err.println("Error during sending email: " + e.getMessage());
+            throw new ResourceNotFoundException("Error during sending email: " + e.getMessage());
         }
     }
 
@@ -47,7 +48,7 @@ public class GmailEmailAdapter implements EmailProvider {
         }
         catch (Exception e) {
 
-            System.err.println("Error during sending email: " + e.getMessage());
+            throw new ResourceNotFoundException("Error during sending 2FA email: " + e.getMessage());
         }
     }
 }
