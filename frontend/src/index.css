@@ -1,0 +1,92 @@
+/* --- 1. Importazione Font --- */
+/* Carichiamo due font da Google Fonts:
+   - 'Inter': Font geometrico e pulito, usato per Titoli e UI (Navbar, Bottoni).
+   - 'Poppins': Font amichevole e leggibile, usato per il corpo del testo.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;600&display=swap');
+
+/* --- 2. Iniezione Tailwind CSS --- */
+/* Queste direttive iniettano gli stili base, i componenti e le utility di Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- 3. Personalizzazione del Layer Base --- */
+/* Qui sovrascriviamo o estendiamo gli stili di default del browser */
+@layer base {
+
+    /* Definizione delle variabili CSS globali per mantenere coerenza nei colori */
+    :root {
+        --bg-color: #020617;   /* Slate-950: Colore di sfondo principale */
+        --text-color: #f8fafc; /* Slate-50: Colore del testo principale */
+        --accent-color: #1d4ed8; /* Blue-700: Colore d'accento per evidenziazioni */
+    }
+
+    /* Reset universale: Rimuove margini e padding di default da tutti gli elementi
+       e imposta il box-sizing su border-box per un calcolo delle dimensioni prevedibile. */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Impostazioni globali per l'elemento HTML */
+    html {
+        height: 100%;
+        width: 100%;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+
+        /* --- GESTIONE SCROLL UX --- */
+        /* Abilita lo scorrimento fluido quando si clicca sui link della navbar */
+        scroll-behavior: smooth;
+
+        /* IMPERATIVO: Aggiunge un padding invisibile sopra ogni sezione targettata via ancora (#).
+           Senza questo, il titolo della sezione finirebbe nascosto SOTTO la Navbar fissa. */
+        scroll-padding-top: 120px;
+    }
+
+    /* Impostazioni globali per il Body */
+    body {
+        height: 100%;
+        width: 100%;
+        /* Font di default per tutto il sito (leggibilità) */
+        font-family: 'Poppins', sans-serif;
+
+        /* Previene lo scroll orizzontale indesiderato */
+        overflow-x: hidden;
+
+        /* Ottimizzazioni per il rendering dei font su diversi browser/OS */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Override Tipografico:
+       Forziamo l'uso di 'Inter' per tutti i titoli (h1-h6) e la navigazione
+       per dare un aspetto più tecnico e strutturato rispetto al testo normale. */
+    h1, h2, h3, h4, h5, h6, nav {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Tweak Tipografico:
+       Il font Inter risulta visivamente più compatto e professionale con un leggero
+       avvicinamento delle lettere (tracking negativo) sui titoli grandi. */
+    h1, h2, h3 {
+        letter-spacing: -0.02em;
+    }
+}
+
+/* --- 4. Utility Globali Personalizzate --- */
+
+/* Personalizza il colore di evidenziazione quando l'utente seleziona del testo */
+::selection {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Rimuove il bordo di focus standard (spesso blu o nero) dai bottoni cliccati.
+   Nota: Assicurarsi di avere stili visivi alternativi per l'accessibilità (es. ring di Tailwind). */
+button:focus {
+    outline: none;
+}
