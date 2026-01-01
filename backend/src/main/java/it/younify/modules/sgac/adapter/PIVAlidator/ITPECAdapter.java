@@ -1,5 +1,7 @@
 package it.younify.modules.sgac.adapter.PIVAlidator;
 
+import it.younify.core.exception.BadRequestException;
+import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.model.dto.response.PecResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,16 +39,16 @@ public class ITPECAdapter implements PIVAlidator {
                     .retrieve()
                     .onStatus(
                             status -> status.value() == 404,
-                            (request, response) -> new RuntimeException("Partita IVA non trovata nel registro")
+                            (request, response) -> new BadRequestException("Partita IVA non trovata nel registro")
                     )
                     .body(PecResponse.class)).getData().getFirst().getPec();
 
         } catch (HttpClientErrorException.Unauthorized e) {
-            throw new RuntimeException("Errore configurazione API: Token non valido");
+            throw new ResourceNotFoundException("Errore configurazione API: Token non valido");
         } catch (Exception e) {
 
             System.err.println("Errore chiamata OpenAPI: " + e.getMessage());
-            throw new RuntimeException("Impossibile verificare la Partita IVA al momento");
+            throw new ResourceNotFoundException("Impossibile verificare la Partita IVA al momento");
 
         }
     }
