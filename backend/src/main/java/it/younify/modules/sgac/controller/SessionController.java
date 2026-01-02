@@ -64,16 +64,11 @@ public class SessionController {
      * The refresh token is expected to be provided in a cookie.
      *
      * @param refreshTokenString The refresh token from the "refresh_token" cookie.
-     * @return A {@link ResponseEntity} with a new access token in a cookie.
-     *         Returns a 403 Forbidden status if the refresh token is missing.
+     * @return A {@link ResponseEntity} containing {@link ApiResponse} with a new access token in a {@link ResponseCookie}.
      * @throws it.younify.core.exception.TokenRefreshException If the refresh token is not found or is expired in the database.
      */
     @PostMapping("/refresh")
-    public ResponseEntity<Void> refresh(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
-
-        if (refreshTokenString == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+    public ResponseEntity<ApiResponse<Void>> refresh(@CookieValue(name = "refresh_token", required = false) String refreshTokenString) {
 
         RefreshTokenRequest request = new RefreshTokenRequest();
         request.setRefreshToken(refreshTokenString);
@@ -91,7 +86,11 @@ public class SessionController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                .body(null);
+                .body(
+                        ApiResponse.<Void>builder()
+                                .message("TOKEN_REFRESHED")
+                                .build()
+                );
     }
 
     /**

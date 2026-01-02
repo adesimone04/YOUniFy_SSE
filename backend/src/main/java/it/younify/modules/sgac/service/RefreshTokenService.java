@@ -49,12 +49,13 @@ public class RefreshTokenService {
      */
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
+        if(refreshTokenRequest.getRefreshToken() == null){ throw new TokenRefreshException("Refresh token not valid"); }
+
         RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshTokenRequest.getRefreshToken()))
                 .orElseThrow(() -> new TokenRefreshException("Refresh Token not found"));
 
         if(existingToken.isRevoked()){ throw new TokenRefreshException("Refresh token revoked or not valid"); }
 
-        //SERIO PROBLEMA
         if (existingToken.getExpiryDate().isBefore(Instant.now())) {
 
             existingToken.setRevoked(true);
