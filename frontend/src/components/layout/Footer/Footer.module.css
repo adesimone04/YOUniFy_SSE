@@ -1,0 +1,236 @@
+.footer {
+    padding: 3rem 0 2rem 0;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    background: transparent;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.footerContainer {
+    /* Sfondo bianco al 5% per matchare bg-white/[0.05] della Navbar */
+    background: rgba(255, 255, 255, 0.05);
+
+    /* Sfocatura profonda per matchare backdrop-blur-2xl (circa 40px) */
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+
+    /* Bordo sottile bianco al 10% per matchare border-white/10 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 70px;
+
+    /* Ombra pulita senza eccessivo blu per uniformità */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+    padding: 4rem 4rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 4rem;
+    align-items: start;
+    max-width: fit-content;
+    width: 85%;
+    position: relative; /* Necessario per il riflesso superiore */
+    overflow: hidden;   /* Taglia il riflesso ai bordi */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Layer decorativo: simuliamo il riflesso di luce (il gradiente nella Navbar) */
+.footerContainer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Assicuriamoci che il contenuto stia sopra il riflesso */
+.footerBrand, .footerNav {
+    position: relative;
+    z-index: 1;
+}
+
+.footerContainer:hover {
+    /* Effetto hover leggermente più luminoso come nella navbar */
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.footerBrand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footerLogoText {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+    text-align: left;
+}
+
+.highlight {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #3b82f6;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+}
+
+.footerTagline {
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 0.7;
+    max-width: 400px;
+    margin: 0;
+    text-align: left;
+}
+
+.footerNav {
+    display: flex;
+    gap: 3rem;
+    align-items: start;
+}
+
+.footerDivider {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.15),
+            rgba(255, 255, 255, 0)
+    );
+}
+
+.footerNavLinks {
+    font-weight: 550;
+    display: flex;
+    flex-direction: column;
+}
+
+.footerNavLinks a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    width: fit-content;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    background: transparent;
+}
+
+.footerNavLinks a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 30px;
+    background: rgba(220, 220, 220, 0.20);
+    border: 1px solid dimgrey;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.footerNavLinks a:hover {
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+.footerNavLinks a:hover::before {
+    opacity: 1;
+}
+
+.footerNavLinks a::after {
+    display: none;
+}
+.footerNavLinks a:hover::after {
+    width: 100%;
+}
+
+.contactSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.contactLabel {
+    font-size: 0.8rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+
+@media (max-width: 1200px) {
+    .footer {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .footerContainer {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        width: 90%;
+        margin: 0 auto;
+        max-width: 1100px;
+        border-radius: 70px;
+        box-sizing: border-box;
+
+    }
+
+    .footerNav {
+        display: flex;
+        flex-direction: row;
+        gap: 2.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .footerDivider {
+        height: 60px;
+        display: block;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer {
+        padding: 1rem 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .footerContainer {
+        width: 90%;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem;
+        border-radius: 50px;
+        box-sizing: border-box;
+    }
+
+    .footerNav {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: center;}
+
+    .footerDivider {
+        display: none;
+    }
+
+    .footerLogoText {
+        font-size: 1.3rem;
+        text-align: left;
+    }
+
+    .footerTagline {
+        font-size: 0.85rem;
+        text-align: left;
+    }
+}
