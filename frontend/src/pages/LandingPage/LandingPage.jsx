@@ -14,6 +14,8 @@ import MetaBalls from '../../components/ui/MetaBalls/MetaBalls';
 import { LogoLoop } from '../../components/ui/LogoLoop/LogoLoop';
 // Stili CSS Module per effetti specifici (es. background blobs)
 import styles from './LandingPage.module.css';
+import WebApp from '../../components/business/InstallAppGuide';
+import Footer from '../../components/layout/Footer/Footer';
 
 const LandingPage = () => {
 
@@ -57,13 +59,13 @@ const LandingPage = () => {
     const EVENT_CONTENT = {
         studenti: [
             { icon: <Compass size={24} />, text: "Esplora eventi ad hoc sulla base dei tuoi interessi" },
-            { icon: <Users size={24} />, text: "Visualizza i partecipanti in anteprima per socializzare" },
-            { icon: <ShieldCheck size={24} />, text: "Aderisci solo ad eventi sicuri e certificati" }
+            { icon: <Users size={24} />, text: "Visualizza i partecipanti in anteprima per socializzare pre e post evento" },
+            { icon: <ShieldCheck size={24} />, text: "Aderisci solo ad eventi sicuri, pensati per gli studenti e promossi da Host certificati" }
         ],
         host: [
-            { icon: <Megaphone size={24} />, text: "Promuovi gli eventi verso un pubblico mirato" },
+            { icon: <Megaphone size={24} />, text: "Promuovi e personalizza gli eventi in un unico posto, verso un pubblico mirato e certificato" },
             { icon: <BarChart3 size={24} />, text: "Monitora in tempo reale l'andamento delle adesioni" },
-            { icon: <Bell size={24} />, text: "Gestisci e notifica facilmente le informazioni ai partecipanti" }
+            { icon: <Bell size={24} />, text: "Gestisci e notifica facilmente le informazioni utili ai partecipanti" }
         ]
     };
 
@@ -150,7 +152,7 @@ const LandingPage = () => {
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     style={{ width: '154px' }}
                         />
-                        <button onClick={() => setActiveTab('studenti')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'studenti' ? 'text-white' : 'text-slate-300'}`}>Studenti</button>
+                        <button onClick={() => setActfiveTab('studenti')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'studenti' ? 'text-white' : 'text-slate-300'}`}>Studenti</button>
                         <button onClick={() => setActiveTab('host')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'host' ? 'text-white' : 'text-slate-300'}`}>Host</button>
                     </div>
 
@@ -245,7 +247,7 @@ const LandingPage = () => {
             <section id="thread" className="relative z-10 w-full max-w-7xl mx-auto px-8 py-24">
                 <div className="flex flex-col items-center text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight font-inter leading-tight max-w-5xl">
-                        Uno spazio di confronto, richieste, e condivisione di idee, <span className="text-younify-blue">sano e rispettoso</span>.
+                        Uno spazio di confronto e condivisione di idee, <span className="text-younify-blue">sano e rispettoso</span>.
                     </h2>
                 </div>
 
@@ -256,7 +258,7 @@ const LandingPage = () => {
                             <MessageSquarePlus size={32} />
                         </div>
                         <p className="text-xl font-medium text-slate-300 group-hover:text-white font-sans leading-relaxed">
-                            Pubblica domande, idee e curiosità in forma pubblica
+                            Pubblica domande, idee e curiosità
                         </p>
                     </div>
 
@@ -309,7 +311,8 @@ const LandingPage = () => {
                     )}
                 />
             </section>
-
+            <WebApp />
+            <Footer />
         </div>
     );
 };
