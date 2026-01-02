@@ -128,7 +128,7 @@ const LandingPage = () => {
                 <div className="ml-auto max-w-4xl text-right">
                     <TextType
                         text="Con lo scopo di costruire una community autentica, basata su connessioni personali reali, stiamo ridefinendo il modo in cui gli studenti vivono la propria università."
-                        className="text-xl md:text-2xl font-medium text-white leading-relaxed italic font-sans"
+                        className="text-xl md:text-xl font-medium text-white leading-relaxed font-sans"
                         typingSpeed={30}
                         startOnVisible={true}
                         loop={false}
@@ -152,7 +152,7 @@ const LandingPage = () => {
                                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                     style={{ width: '154px' }}
                         />
-                        <button onClick={() => setActfiveTab('studenti')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'studenti' ? 'text-white' : 'text-slate-300'}`}>Studenti</button>
+                        <button onClick={() => setActiveTab('studenti')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'studenti' ? 'text-white' : 'text-slate-300'}`}>Studenti</button>
                         <button onClick={() => setActiveTab('host')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'host' ? 'text-white' : 'text-slate-300'}`}>Host</button>
                     </div>
 
