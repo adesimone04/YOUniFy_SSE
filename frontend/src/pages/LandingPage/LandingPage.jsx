@@ -93,8 +93,8 @@ const LandingPage = () => {
                         YOUni<span className="text-younify-blue drop-shadow-[0_0_20px_rgba(29,78,216,0.4)] font-inter">Fy</span>
                     </h1>
 
-                    {/* Sottotitolo con testo rotante. */}
-                    <div className="mt-8 text-slate-400 tracking-[0.3em] text-xl font-medium flex items-baseline justify-center gap-4 font-sans lowercase leading-none">
+                    {/* Sottotitolo con testo rotante - MODIFICATO QUI */}
+                    <div className="mt-8 text-slate-400 tracking-[0.3em] text-2xl md:text-2xl font-bold flex items-baseline justify-center gap-4 font-sans lowercase leading-none">
                         <span>uniamo</span>
                         <RotatingText words={['studenti', 'università']} interval={3500} />
                     </div>
