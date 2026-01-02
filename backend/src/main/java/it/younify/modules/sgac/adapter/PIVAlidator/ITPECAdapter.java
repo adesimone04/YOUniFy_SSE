@@ -12,6 +12,13 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Objects;
 
+/**
+ * The {@code ITPECAdapter} class is an implementation of the {@link PIVAlidator} interface.
+ * It uses an external API to validate an Italian "Partita IVA" (VAT number) and retrieve
+ * the associated certified email address (PEC).
+ * <p>
+ * This adapter uses Spring's {@link RestClient} to make the API call.
+ */
 @Service
 @RequiredArgsConstructor
 public class ITPECAdapter implements PIVAlidator {
@@ -24,6 +31,14 @@ public class ITPECAdapter implements PIVAlidator {
 
     private final RestClient.Builder restClientBuilder;
 
+    /**
+     * Validates a given "Partita IVA" by calling an external API and returns the corresponding PEC.
+     *
+     * @param vatCode The "Partita IVA" to validate.
+     * @return The certified email address (PEC) associated with the given "Partita IVA".
+     * @throws BadRequestException if the "Partita IVA" is not found in the registry.
+     * @throws ResourceNotFoundException if the API token is invalid or there is a general error during the API call.
+     */
     @Override
     public String PIVAlidatePEC(String vatCode) {
 
@@ -43,13 +58,14 @@ public class ITPECAdapter implements PIVAlidator {
                     )
                     .body(PecResponse.class)).getData().getFirst().getPec();
 
-        } catch (HttpClientErrorException.Unauthorized e) {
+        }
+        catch (HttpClientErrorException.Unauthorized e) {
+
             throw new ResourceNotFoundException("Errore configurazione API: Token non valido");
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
 
-            System.err.println("Errore chiamata OpenAPI: " + e.getMessage());
             throw new ResourceNotFoundException("Impossibile verificare la Partita IVA al momento");
-
         }
     }
 }
