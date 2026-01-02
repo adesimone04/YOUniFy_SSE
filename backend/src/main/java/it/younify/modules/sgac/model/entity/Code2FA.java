@@ -1,10 +1,7 @@
 package it.younify.modules.sgac.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 
@@ -21,13 +18,15 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Code2FA {
 
     /**
      * The unique identifier for the 2FA code, which corresponds to the ID of the user or host.
      */
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     /**
      * The 6-digit 2FA code.
@@ -46,4 +45,12 @@ public class Code2FA {
      */
     @Column(nullable = false)
     private int errorCount;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id", unique = true)
+    private Host host;
 }

@@ -44,7 +44,6 @@ public class Generate2FAService {
      * Note: A new code is generated and sent, and a corresponding {@link Code2FA} entity is persisted.
      *
      * @param ID The unique identifier of the user or host account.
-     * @throws BadCredentialsException If the provided ID does not correspond to an existing user or host.
      * @see it.younify.modules.sgac.model.entity.User
      * @see it.younify.modules.sgac.model.entity.Host
      * @see it.younify.modules.sgac.model.entity.Code2FA
@@ -57,31 +56,37 @@ public class Generate2FAService {
 
         if (ID.startsWith("U")) {
 
-            Optional<User> optU = userRepository.findById(ID);
-            if(optU.isPresent()) {
+            User user = userRepository.findById(ID).get();
+            code2FARepository.deleteByUser(user);
+            code2FARepository.flush();
 
-                User user = optU.get();
-                code2FARepository.save(new Code2FA(user.getID(), code2FA, (Instant.now().plusMillis(expiration2FA)), 0));
-                emailProvider.send2FAEmail(user.getEmail(), message);
-                return;
-            }
+            code2FARepository.save(
+                        Code2FA.builder()
+                                .code(code2FA)
+                                .expiryDate((Instant.now().plusMillis(expiration2FA)))
+                                .errorCount(0)
+                                .user(user).
+                                build()
+            );
+
+            emailProvider.send2FAEmail(user.getEmail(), message);
         }
         else{
 
-            if(ID.startsWith("H")){
+            Host host = hostRepository.findById(ID).get();
+            code2FARepository.deleteByHost(host);
+            code2FARepository.flush();
 
-                Optional<Host> optH = hostRepository.findById(ID);
-                if(optH.isPresent()) {
-
-                    Host host = optH.get();
-                    code2FARepository.save(new Code2FA(host.getID(), code2FA, (Instant.now().plusMillis(expiration2FA)), 0));
-                    //in production switch the API for send on Host PEC
-                    emailProvider.send2FAEmail("younifytester@gmail.com", message);
-                    return;
-                }
-            }
+            code2FARepository.save(
+                    Code2FA.builder()
+                            .code(code2FA)
+                            .expiryDate((Instant.now().plusMillis(expiration2FA)))
+                            .errorCount(0)
+                            .host(host).
+                            build()
+            );
+            //in production switch the API for send on Host PEC
+            emailProvider.send2FAEmail("younifytester@gmail.com", message);
         }
-
-        throw new BadCredentialsException("ID account not exist");
     }
 }

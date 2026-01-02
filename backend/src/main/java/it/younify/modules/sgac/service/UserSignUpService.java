@@ -59,7 +59,7 @@ public class UserSignUpService {
                 return ID;
             }
 
-            throw new ResourceAlreadyExistsException("Email or password incorrect");
+            throw new ResourceAlreadyExistsException("This user already exists. Proceed to login");
         }
         else {
 
@@ -72,9 +72,9 @@ public class UserSignUpService {
             LocalDate dateOfBirth = userSignUpRequest.getDateOfBirth();
             String contactsInfo = userSignUpRequest.getContactsInfo();
 
-            if(validatePassword(password, confirmPassword)) {
+            if(validateEmail(email)) {
 
-                if(validateEmail(email)) {
+                if(validatePassword(password, confirmPassword)) {
 
                     String ID = "U-" + UUID.randomUUID();
                     password = passwordEncoder.encode(password);
@@ -85,11 +85,11 @@ public class UserSignUpService {
                     return ID;
                 }
 
-                throw new BadRequestException("The email " + email + " does not belong to any Italian university");
+                throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                        "one number, and one special symbol");
             }
 
-            throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                    "one number, and one special symbol");
+            throw new BadRequestException("The email " + email + " does not belong to any Italian university");
         }
     }
 

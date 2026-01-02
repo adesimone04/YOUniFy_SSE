@@ -71,7 +71,7 @@ public class LogInService {
         catch(DisabledException e){
 
             String ID = null;
-            String email =  logInRequest.getEmail();
+            String email = logInRequest.getEmail();
 
             Optional<User> optU = userRepository.findByEmail(email);
             if(optU.isPresent()){

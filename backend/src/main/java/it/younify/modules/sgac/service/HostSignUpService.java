@@ -62,7 +62,7 @@ public class HostSignUpService {
                 return ID;
             }
 
-            throw new ResourceAlreadyExistsException("Email or password incorrect");
+            throw new ResourceAlreadyExistsException("This host already exists. Proceed to login");
         }
         else{
 
@@ -74,9 +74,9 @@ public class HostSignUpService {
             String city = hostSignUpRequest.getCity();
             String uniList = hostSignUpRequest.getUniList();
 
-            if(validatePassword(password,confirmPassword)){
+            if(validatePEC(PEC, PIVA)){
 
-                if(validatePEC(PEC, PIVA)){
+                if(validatePassword(password, confirmPassword)){
 
                     String ID = "H-" + UUID.randomUUID();
                     password = passwordEncoder.encode(password);
@@ -87,11 +87,11 @@ public class HostSignUpService {
                     return ID;
                 }
 
-                throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA);
+                throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                        "one number, and one special symbol");
             }
 
-            throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                    "one number, and one special symbol");
+            throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA);
         }
     }
 
