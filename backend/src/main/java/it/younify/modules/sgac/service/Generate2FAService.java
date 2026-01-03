@@ -82,8 +82,8 @@ public class Generate2FAService {
                             .code(code2FA)
                             .expiryDate((Instant.now().plusMillis(expiration2FA)))
                             .errorCount(0)
-                            .host(host).
-                            build()
+                            .host(host)
+                            .build()
             );
             //in production switch the API for send on Host PEC
             emailProvider.send2FAEmail("younifytester@gmail.com", message);

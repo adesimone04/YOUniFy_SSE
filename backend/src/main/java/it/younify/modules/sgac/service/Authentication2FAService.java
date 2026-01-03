@@ -54,7 +54,7 @@ public class Authentication2FAService {
 
         String ID = authentication2FARequest.getID();
 
-        Optional<Code2FA> opt2FA = code2FARepository.findById(ID);
+        Optional<Code2FA> opt2FA = code2FARepository.findByOwnerId(ID);
         if (opt2FA.isPresent()) {
 
             Code2FA code2FA = opt2FA.get();
