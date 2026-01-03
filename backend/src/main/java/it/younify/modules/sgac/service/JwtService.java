@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,25 @@ public class JwtService {
      * @return A JWT string.
      */
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        if (userDetails instanceof User) {
+
+            extraClaims.put("accountId", ((User) userDetails).getID());
+            extraClaims.put("userType", "STUDENT");
+        }
+        else if (userDetails instanceof Host) {
+
+            extraClaims.put("accountId", ((Host) userDetails).getID());
+            extraClaims.put("userType", "HOST");
+        }
+        else {
+
+            throw new IllegalArgumentException("Tipo di utente non supportato per la generazione token");
+        }
+
+        return generateToken(extraClaims, userDetails);
     }
 
     /**
