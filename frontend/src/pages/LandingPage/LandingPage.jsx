@@ -91,12 +91,12 @@ const LandingPage = () => {
                     animate={isLoaded ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 1.5 }}
                 >
-                    <h1 className="text-8xl md:text-9xl font-black tracking-tighter text-white leading-none font-inter">
+                    <h1 className="text-7xl md:text-8xl font-black tracking-tighter text-white leading-none font-inter">
                         YOUni<span className="text-younify-blue drop-shadow-[0_0_20px_rgba(29,78,216,0.4)] font-inter">Fy</span>
                     </h1>
 
-                    {/* Sottotitolo con testo rotante - MODIFICATO QUI */}
-                    <div className="mt-8 text-slate-400 tracking-[0.3em] text-2xl md:text-2xl font-bold flex items-baseline justify-center gap-4 font-sans lowercase leading-none">
+                    {/* Sottotitolo con testo rotante */}
+                    <div className="mt-8 text-slate-400 tracking-[0.3em] text-xl md:text-xl text-white font-bold flex items-baseline justify-center gap-4 font-sans lowercase leading-none">
                         <span>uniamo</span>
                         <RotatingText words={['studenti', 'università']} interval={3500} />
                     </div>
@@ -113,8 +113,8 @@ const LandingPage = () => {
                             "Laddove oggi esistono spazi confusi e insicuri...",
                             "...noi nasciamo per eliminarne il rumore."
                         ]}
-                        className="text-3xl md:text-4xl font-black text-white leading-[1.1] tracking-tight font-inter"
-                        typingSpeed={50}
+                        className="text-3xl md:text-3xl font-black text-white leading-[1.1] tracking-tight font-inter"
+                        typingSpeed={60}
                         deletingSpeed={30}
                         pauseDuration={2000}
                         loop={true}
@@ -129,11 +129,11 @@ const LandingPage = () => {
                     <TextType
                         text="Con lo scopo di costruire una community autentica, basata su connessioni personali reali, stiamo ridefinendo il modo in cui gli studenti vivono la propria università."
                         className="text-xl md:text-xl font-medium text-white leading-relaxed font-sans"
-                        typingSpeed={30}
+                        typingSpeed={20}
                         startOnVisible={true}
                         loop={false}
                         showCursor={false}
-                        initialDelay={1000}
+                        initialDelay={8700}
                     />
                 </div>
             </section>
@@ -142,15 +142,22 @@ const LandingPage = () => {
             {/* Include il sistema di tab per cambiare contenuto */}
             <section id="events" className="relative z-10 w-full py-32 px-8">
                 <div className="max-w-6xl mx-auto flex flex-col items-center gap-16 font-inter text-center">
-                    <h2 className="text-3xl md:text-5xl font-black text-white font-inter">Un nuovo modo di vivere e promuovere gli eventi</h2>
+                    <h2 className="text-3xl md:text-4xl font-black text-white font-inter">Un nuovo modo di
+                        <span className="text-younify-blue font-inter"> vivere</span> e
+                        <span className="text-younify-blue font-inter"> promuovere</span> gli
+                        <span className="text-younify-blue font-inter"> eventi</span>
+                    </h2>
 
                     {/* Switcher Tab personalizzato */}
                     <div className="relative p-1 bg-slate-900/50 backdrop-blur-md border border-white/10 rounded-full flex items-center w-80 font-sans shadow-xl">
                         {/* Sfondo animato che segue il tab attivo */}
-                        <motion.div className="absolute h-10 bg-younify-blue rounded-full z-0"
-                                    animate={{ x: activeTab === 'studenti' ? 4 : 154 }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    style={{ width: '154px' }}
+                        <motion.div
+                            className="absolute bg-younify-blue rounded-full z-0 inset-y-1 left-1"
+                            // Calcola la larghezza dinamicamente: (Metà contenitore) - (4px di padding)
+                            style={{ width: 'calc(50% - 4px)' }}
+                            // Se Studenti: stai fermo (0%). Se Host: spostati di tutta la tua larghezza (100%)
+                            animate={{ x: activeTab === 'studenti' ? '0%' : '100%' }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
                         />
                         <button onClick={() => setActiveTab('studenti')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'studenti' ? 'text-white' : 'text-slate-300'}`}>Studenti</button>
                         <button onClick={() => setActiveTab('host')} className={`relative z-10 flex-1 py-2 text-xs font-bold uppercase tracking-widest ${activeTab === 'host' ? 'text-white' : 'text-slate-300'}`}>Host</button>
@@ -184,13 +191,13 @@ const LandingPage = () => {
                         <div className="flex flex-col gap-10 font-sans">
                             <div className="flex items-center gap-6 group">
                                 <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/20 shadow-lg"><Heart className="text-rose-500" size={24} /></div>
-                                <p className="text-xl md:text-2xl font-medium text-slate-300 group-hover:text-white leading-relaxed font-sans">
+                                <p className="text-xl md:text-xl font-medium text-slate-300 group-hover:text-white leading-relaxed font-sans">
                                     Effettua matching con studenti con interessi simili
                                 </p>
                             </div>
                             <div className="flex items-center gap-6 group">
                                 <div className="p-3 bg-teal-500/10 rounded-xl border border-teal-500/20 shadow-lg"><Share2 className="text-teal-500" size={24} /></div>
-                                <p className="text-xl md:text-2xl font-medium text-slate-300 group-hover:text-white leading-relaxed font-sans">
+                                <p className="text-xl md:text-xl font-medium text-slate-300 group-hover:text-white leading-relaxed font-sans">
                                     Scambia informazioni di contatto social per creare e rafforzare interazioni autentiche
                                 </p>
                             </div>
@@ -246,8 +253,10 @@ const LandingPage = () => {
             {/* Sezione informativa con layout a 3 colonne */}
             <section id="thread" className="relative z-10 w-full max-w-7xl mx-auto px-8 py-24">
                 <div className="flex flex-col items-center text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight font-inter leading-tight max-w-5xl">
-                        Uno spazio di confronto e condivisione di idee, <span className="text-younify-blue">sano e rispettoso</span>.
+                    <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight font-inter leading-tight max-w-5xl">
+                        Uno spazio di confronto e condivisione di idee,
+
+                        <span className="text-younify-blue block">sano e rispettoso.</span>
                     </h2>
                 </div>
 

@@ -9,12 +9,12 @@ const InstallAppGuide = () => {
 
             <div className={styles.contentWrapper}>
                 <div className={styles.header}>
-                    <h2 className="text-3xl md:text-5xl font-black text-white font-inter">
+                    <h2 className="text-3xl md:text-4xl font-black text-white font-inter">
                         Stanco di doverci sempre <span className="text-younify-blue font-inter">cercare sul browser </span>?
                     </h2>
 
                     <div className={styles.subtitle}>
-                        <p className="text-xl md:text-2xl font-medium text-slate-300 group-hover:text-white leading-relaxed font-sans">
+                        <p className="text-xl md:text-xl font-medium text-slate-300 group-hover:text-white leading-relaxed font-sans">
                             Puoi aggiungerci alla schermata Home del tuo dispositivo!
                         </p>
                     </div>
@@ -38,7 +38,7 @@ const InstallAppGuide = () => {
                                 <div className={styles.plusSymbol}>+</div>
                             </div>
                             <div className={styles.stepNumber}>1</div>
-                            <p className={styles.stepDescription}>Aggiungendoci alla tua Home. .</p>
+                            <p className={styles.stepDescription}>Aggiungendoci alla tua Home</p>
                         </div>
                     </div>
 
@@ -56,7 +56,7 @@ const InstallAppGuide = () => {
                             </div>
 
                             <div className={styles.stepNumber}>2</div>
-                            <p className={styles.stepDescription}>. . YOUniFy sarà pronta per essere raggiunta comodamente.</p>
+                            <p className={styles.stepDescription}>YOUniFy sarà pronta per essere raggiunta comodamente.</p>
                         </div>
                     </div>
 
