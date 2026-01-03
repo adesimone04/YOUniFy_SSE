@@ -1,0 +1,92 @@
+.blob {
+    position: absolute; /* Posizionamento libero rispetto al contenitore padre */
+    width: 400px;
+    height: 400px;
+    border-radius: 50%; /* Rende l'elemento circolare */
+
+    /* Applica una forte sfocatura per creare l'effetto "luce diffusa" o "liquido" */
+    filter: blur(60px);
+
+    z-index: 0; /* Posiziona i blob dietro il contenuto principale */
+    pointer-events: none; /* Fondamentale: permette ai click di passare attraverso i blob e raggiungere i pulsanti sottostanti */
+    opacity: 0.7; /* Leggera trasparenza per la fusione dei colori */
+
+    /* Assegna l'animazione 'float' definita in fondo al file */
+    animation: float 12s ease-in-out infinite;
+}
+
+/* --- Varianti di Colore e Posizione ---
+   Ogni classe definisce un colore specifico, una posizione iniziale
+   e altera la durata/ritardo dell'animazione per evitare che si muovano tutti all'unisono.
+*/
+
+.blue {
+    background-color: #0000ff;
+    top: -100px;
+    left: -50px;
+    animation-duration: 14s; /* Durata personalizzata per variare la velocità */
+}
+
+.indigo {
+    background-color: #a000ff;
+    bottom: -50px;
+    right: 10%;
+    animation-delay: -3s; /* Delay negativo: l'animazione parte già "in corso" */
+    animation-duration: 18s;
+}
+
+.rose {
+    background-color: #ff007f;
+    top: 10%;
+    right: 5%;
+    animation-delay: -6s;
+    animation-duration: 15s;
+}
+
+.teal {
+    background-color: #00ffff;
+    bottom: 15%;
+    left: 10%;
+    animation-delay: -9s;
+    animation-duration: 12s;
+}
+
+.purple {
+    background-color: #7000ff;
+    top: 40%;
+    left: -100px;
+    animation-delay: -4s;
+    animation-duration: 20s;
+}
+
+.cyan {
+    background-color: #00d4ff;
+    top: 30%;
+    right: -50px;
+    animation-delay: -12s;
+    animation-duration: 16s;
+}
+
+/* Definisce un percorso complesso che combina spostamento (translate),
+   ridimensionamento (scale) e rotazione (rotate) per simulare un movimento organico. */
+@keyframes float {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    25% {
+        /* Spostamento verso destra-basso e leggero ingrandimento */
+        transform: translate(250px, 150px) scale(1.2) rotate(30deg);
+    }
+    50% {
+        /* Spostamento verso sinistra-basso e rimpicciolimento */
+        transform: translate(-150px, 300px) scale(0.8) rotate(-20deg);
+    }
+    75% {
+        /* Spostamento verso sinistra-alto e rotazione accentuata */
+        transform: translate(-280px, -150px) scale(1.1) rotate(45deg);
+    }
+    100% {
+        /* Ritorno alla posizione originale per garantire un loop fluido senza scatti */
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+}
