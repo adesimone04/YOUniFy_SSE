@@ -22,6 +22,7 @@ public class CommentPostService {
 
     private final ThreadRepository threadRepository;
     private final CommentRepository commentRepository;
+    private final CensorshipService censorshipService;
 
     public void post(@NotNull CommentPostRequest commentPostRequest) {
 
@@ -29,6 +30,12 @@ public class CommentPostService {
 
         String content = commentPostRequest.getContent();
         Long id = commentPostRequest.getThreadId();
+
+
+        if(censorshipService.containsSensitiveContent(content)){
+
+            content = censorshipService.censorText(content);
+        }
 
         Optional<Threads> optT = threadRepository.findById(id);
 
