@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CensorshipService {
 
-    private Trie trie;
+    private volatile Trie trie;
 
     @Value("${app.censorship.bad-words:#{T(java.util.Collections).emptyList()}}")
     private List<String> badWords;

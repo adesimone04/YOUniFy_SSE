@@ -3,15 +3,14 @@ package it.younify.modules.sgtr.controller;
 import it.younify.core.model.ApiResponse;
 import it.younify.modules.sgtr.model.dto.request.CommentPostRequest;
 import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
+import it.younify.modules.sgtr.service.CommentDeleteService;
 import it.younify.modules.sgtr.service.CommentPostService;
+import it.younify.modules.sgtr.service.ThreadDeleteService;
 import it.younify.modules.sgtr.service.ThreadPostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/thread")
@@ -20,7 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ThreadController {
 
     private final ThreadPostService threadPostService;
+    private final ThreadDeleteService threadDeleteService;
+
     private final CommentPostService commentPostService;
+    private final CommentDeleteService commentDeleteService;
+
+
 
     @PostMapping("/post")
     public ResponseEntity<ApiResponse<Void>> post(@Valid @RequestBody ThreadPostRequest threadPostRequest) {
@@ -48,8 +52,28 @@ public class ThreadController {
     }
 
 
+    @DeleteMapping("/delete/{threadId}")
+    public ResponseEntity<ApiResponse<Void>> deleteThread(@PathVariable("threadId") Long threadId) {
+
+        threadDeleteService.delete(threadId);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("DELETED SUCCESSFULLY")
+                        .build()
+        );
+    }
 
 
+    @DeleteMapping("/comment/delete/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable("commentId") Long commentId) {
 
+        commentDeleteService.delete(commentId);
 
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("DELETED SUCCESSFULLY")
+                        .build()
+        );
+    }
 }

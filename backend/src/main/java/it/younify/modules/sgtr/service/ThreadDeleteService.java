@@ -9,6 +9,7 @@ import it.younify.modules.sgtr.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -18,35 +19,39 @@ public class ThreadDeleteService {
 
     private final ThreadRepository threadRepository;
 
-    public void delete(Long postId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Long threadId) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Threads> opt = threadRepository.findByID(postId);
-        if (opt.isPresent()) {
+        Optional<Threads> optT = threadRepository.findByID(threadId);
+
+        if(optT.isPresent()) {
+
             if(principal instanceof User) {
 
-                User user = (User) principal;
+                Threads thread = optT.get();
 
+                User userC = (User) principal;
+                User userT = thread.getUser();
 
-                Threads thread = opt.get();
-                User userT = thread.getIDUser();
-
-                if((userT.getID()).equals(user.getID())){
+                if((userT.getID()).equals(userC.getID())){
 
                     threadRepository.delete(thread);
                 }
+            }
+            else{
 
-            }else if(principal instanceof Host){
+                if(principal instanceof Host){
 
-                Host host = (Host) principal;
+                    Threads thread = optT.get();
 
+                    Host hostC = (Host) principal;
+                    Host hostT = thread.getHost();
 
-                Threads thread = opt.get();
-                Host hostT = thread.getIDHost();
+                    if((hostT.getID()).equals(hostC.getID())){
 
-                if((hostT.getID()).equals(host.getID())){
-
-                    threadRepository.delete(thread);
+                        threadRepository.delete(thread);
+                    }
                 }
             }
         }

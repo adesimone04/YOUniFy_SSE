@@ -9,11 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ThreadRepository extends JpaRepository<Threads, Long> {
+
     Optional<Threads> findByID(Long ID);
     Optional<Threads> findByFlag(String flag);
-    Optional<Threads> findByIDUser(User user);
-    Optional<Threads> findByIDHost(Host host);
-    Optional<Threads> findBypublicationDate(Instant publicationDate);
+    Optional<Threads> findByUser(User user);
+    Optional<Threads> findByHost(Host host);
+    Optional<Threads> findByPublicationDate(Instant publicationDate);
+
     List<Threads> findAllByOrderByCFUAsc(User user);
     List<Threads> findAllByOrderByCFUDesc(User user);
 }
