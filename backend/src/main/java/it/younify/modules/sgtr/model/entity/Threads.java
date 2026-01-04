@@ -29,6 +29,9 @@ public class Threads {
     private String content;
 
     @Column(nullable = false)
+    private String flag;
+
+    @Column(nullable = false)
     private Instant publicationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
