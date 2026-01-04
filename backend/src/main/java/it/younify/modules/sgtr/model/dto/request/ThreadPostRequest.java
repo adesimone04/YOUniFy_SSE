@@ -9,4 +9,7 @@ public class ThreadPostRequest {
     @NotBlank
     private String content;
 
+    @NotBlank
+    private String flag;
+
 }
