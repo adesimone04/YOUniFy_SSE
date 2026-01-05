@@ -13,14 +13,18 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ThreadViewService {
+
     private final ThreadRepository threadRepository;
 
     public Page<ThreadResponse> getThreadsByDate(Pageable pageable) {
+
         return threadRepository.findAllByOrderByPublicationDateDesc(pageable).map(this::toResponse);
     }
 
     private ThreadResponse toResponse(Threads thread) {
+
         if(thread.getUser() != null){
+
             return new ThreadResponse(
                     thread.getID(),
                     thread.getContent(),
@@ -30,7 +34,9 @@ public class ThreadViewService {
                     "",
                     thread.getUser().getFirstName()+" "+thread.getUser().getLastName()
             );
-        }else{
+        }
+        else{
+
             return new ThreadResponse(
                     thread.getID(),
                     thread.getContent(),
@@ -41,6 +47,5 @@ public class ThreadViewService {
                     ""
             );
         }
-
     }
 }

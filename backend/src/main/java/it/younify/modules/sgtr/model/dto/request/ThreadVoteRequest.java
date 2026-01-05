@@ -9,6 +9,5 @@ public class ThreadVoteRequest {
 
     private Long threadId;
 
-    @NotBlank
     private VoteType voteType;
 }
