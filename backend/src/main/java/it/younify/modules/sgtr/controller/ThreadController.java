@@ -3,6 +3,7 @@ package it.younify.modules.sgtr.controller;
 import it.younify.core.model.ApiResponse;
 import it.younify.modules.sgtr.model.dto.request.CommentPostRequest;
 import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
+import it.younify.modules.sgtr.model.dto.response.CommentResponse;
 import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
 import it.younify.modules.sgtr.service.*;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ public class ThreadController {
     private final ThreadViewService threadViewService;
     private final ThreadDeleteService threadDeleteService;
     private final CommentDeleteService commentDeleteService;
+    private final CommentViewService commentViewService;
 
     @PostMapping("/post")
     public ResponseEntity<ApiResponse<Void>> post(@Valid @RequestBody ThreadPostRequest threadPostRequest) {
@@ -81,7 +83,19 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .data(threadViewService.getThreadsByDate(pageable))
-                        .message("DELETED SUCCESSFULLY")
+                        .message("VIEW SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+    @GetMapping("/comment/{threadId}")
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComment(@PathVariable("threadId") Long threadId,
+                                                                         @PageableDefault(size = 10) Pageable pageable){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<CommentResponse>>builder()
+                        .data(commentViewService.getCommentByCFU(threadId, pageable ))
+                        .message("VIEW SUCCESSFULLY")
                         .build()
         );
     }
