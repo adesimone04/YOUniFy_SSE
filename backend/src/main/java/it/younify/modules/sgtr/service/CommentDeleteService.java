@@ -5,6 +5,7 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Comment;
 import it.younify.modules.sgtr.repository.CommentRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class CommentDeleteService {
     private final CommentRepository commentRepository;
 
     @Transactional(rollbackFor = Exception.class)
-    public void delete(Long commentId) {
+    public void delete(@NotNull Long commentId) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Comment> optC = commentRepository.findByID(commentId);

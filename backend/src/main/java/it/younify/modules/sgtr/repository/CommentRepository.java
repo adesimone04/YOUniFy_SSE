@@ -3,6 +3,9 @@ package it.younify.modules.sgtr.repository;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Comment;
+import it.younify.modules.sgtr.model.entity.Threads;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
@@ -17,4 +20,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Optional<Comment> findByPublicationDate(Instant publicationDate);
     List<Comment> findAllByOrderByCFUAsc();
     List<Comment> findAllByOrderByCFUDesc();
+
+    Page<Comment> findByThreadIdOrderByCFUDesc(Threads thread, Pageable pageable);
+    Page<Comment> findByThreadIdOrderByPublicationDateDesc(Threads thread, Pageable pageable);
 }

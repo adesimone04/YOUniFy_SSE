@@ -7,6 +7,7 @@ import lombok.Data;
 public class CommentPostRequest {
 
     private Long threadId;
+
     @NotBlank
     private String content;
 }

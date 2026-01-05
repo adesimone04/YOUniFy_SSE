@@ -6,6 +6,7 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class ThreadDeleteService {
     private final ThreadRepository threadRepository;
 
     @Transactional(rollbackFor = Exception.class)
-    public void delete(Long threadId) {
+    public void delete(@NotNull Long threadId) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Threads> optT = threadRepository.findByID(threadId);
