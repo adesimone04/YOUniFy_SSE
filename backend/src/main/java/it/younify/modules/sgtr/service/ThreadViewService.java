@@ -19,6 +19,15 @@ public class ThreadViewService {
         return threadRepository.findAllByOrderByPublicationDateDesc(pageable).map(this::toResponse);
     }
 
+    public Page<ThreadResponse> getThreadsByFlag(String flag, Pageable pageable) {
+        return threadRepository.findAllByFlagOrderByPublicationDateDesc(flag, pageable).map(this::toResponse);
+    }
+
+    public Page<ThreadResponse> getThreadsByUniversity(String university, Pageable pageable) {
+        return threadRepository.findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(university, university, pageable).map(this::toResponse);
+    }
+
+
     private ThreadResponse toResponse(Threads thread) {
         if(thread.getUser() != null){
             return new ThreadResponse(
@@ -26,6 +35,7 @@ public class ThreadViewService {
                     thread.getContent(),
                     thread.getCFU(),
                     thread.getFlag(),
+                    thread.getUser().getUniversity(),
                     thread.getPublicationDate(),
                     "",
                     thread.getUser().getFirstName()+" "+thread.getUser().getLastName()
@@ -36,11 +46,11 @@ public class ThreadViewService {
                     thread.getContent(),
                     thread.getCFU(),
                     thread.getFlag(),
+                    thread.getHost().getUniList(),
                     thread.getPublicationDate(),
                     thread.getHost().getHostName(),
                     ""
             );
         }
-
     }
 }

@@ -78,11 +78,35 @@ public class ThreadController {
     }
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreads(@PageableDefault(size = 10) Pageable pageable){
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByDate(@PageableDefault(size = 10) Pageable pageable){
 
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .data(threadViewService.getThreadsByDate(pageable))
+                        .message("VIEW SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+    @GetMapping("/flag/{flag}")
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByFlag(@PathVariable("flag") String flag,
+                                                                              @PageableDefault(size = 10) Pageable pageable){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ThreadResponse>>builder()
+                        .data(threadViewService.getThreadsByFlag(flag, pageable))
+                        .message("VIEW SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+    @GetMapping("/uni/{university}")
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByUniversity(@PathVariable("university") String university,
+                                                                              @PageableDefault(size = 10) Pageable pageable){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ThreadResponse>>builder()
+                        .data(threadViewService.getThreadsByUniversity(university, pageable))
                         .message("VIEW SUCCESSFULLY")
                         .build()
         );
