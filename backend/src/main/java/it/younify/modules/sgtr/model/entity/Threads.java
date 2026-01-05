@@ -36,10 +36,10 @@ public class Threads {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id")
-    private Host Host;
+    private Host host;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User User;
+    private User user;
 
 }

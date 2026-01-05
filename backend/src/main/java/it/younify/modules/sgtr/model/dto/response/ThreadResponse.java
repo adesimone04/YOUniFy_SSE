@@ -22,6 +22,8 @@ public class ThreadResponse {
 
     private String flag;
 
+    private String University;
+
     private Instant publicationDate;
 
     private String hostUsername;

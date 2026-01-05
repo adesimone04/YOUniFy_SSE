@@ -41,7 +41,7 @@ public class ThreadPostService {
                             .CFU(0)
                             .flag(threadPostRequest.getFlag())
                             .publicationDate(Instant.now())
-                            .User((User) principal)
+                            .user((User) principal)
                             .build()
             );
         }
@@ -55,7 +55,7 @@ public class ThreadPostService {
                                 .CFU(0)
                                 .flag(threadPostRequest.getFlag())
                                 .publicationDate(Instant.now())
-                                .Host((Host) principal)
+                                .host((Host) principal)
                                 .build()
                 );
             }

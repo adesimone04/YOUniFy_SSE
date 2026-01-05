@@ -2,7 +2,7 @@ package it.younify.modules.sgtr.repository;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Threads;
-import org.jspecify.annotations.NonNull;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,7 +22,11 @@ public interface ThreadRepository extends JpaRepository<Threads, Long> {
     List<Threads> findAllByOrderByCFUAsc(User user);
     List<Threads> findAllByOrderByCFUDesc(User user);
 
-    Page<Threads> findAllByOrderByCFUDesc(Pageable pageable);
     Page<Threads> findAllByOrderByPublicationDateDesc(Pageable pageable);
-
+    Page<Threads> findAllByFlagOrderByPublicationDateDesc(String flag, Pageable pageable);
+    Page<Threads> findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(
+            String universityInHost,
+            String universityInUser,
+            Pageable pageable
+    );
 }

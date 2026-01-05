@@ -27,7 +27,6 @@ public class ThreadController {
     private final CommentDeleteService commentDeleteService;
     private final CommentViewService commentViewService;
 
-
     @PostMapping("/post")
     public ResponseEntity<ApiResponse<Void>> post(@Valid @RequestBody ThreadPostRequest threadPostRequest) {
 
@@ -35,7 +34,7 @@ public class ThreadController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("POSTED_SUCCESSFULLY")
+                        .message("POSTED SUCCESSFULLY")
                         .build()
         );
     }
@@ -48,11 +47,10 @@ public class ThreadController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("POSTED_SUCCESSFULLY")
+                        .message("POSTED SUCCESSFULLY")
                         .build()
         );
     }
-
 
     @DeleteMapping("/delete/{threadId}")
     public ResponseEntity<ApiResponse<Void>> deleteThread(@PathVariable("threadId") Long threadId) {
@@ -61,7 +59,7 @@ public class ThreadController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("DELETED_SUCCESSFULLY")
+                        .message("DELETED SUCCESSFULLY")
                         .build()
         );
     }
@@ -74,23 +72,45 @@ public class ThreadController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                        .message("DELETED_SUCCESSFULLY")
+                        .message("DELETED SUCCESSFULLY")
                         .build()
         );
     }
 
-
     @GetMapping()
-    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreads(@PageableDefault(size = 10) Pageable pageable){
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByDate(@PageableDefault(size = 10) Pageable pageable){
 
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .data(threadViewService.getThreadsByDate(pageable))
-                        .message("VIEW_SUCCESSFULLY")
+                        .message("VIEW SUCCESSFULLY")
                         .build()
         );
     }
 
+    @GetMapping("/flag/{flag}")
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByFlag(@PathVariable("flag") String flag,
+                                                                              @PageableDefault(size = 10) Pageable pageable){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ThreadResponse>>builder()
+                        .data(threadViewService.getThreadsByFlag(flag, pageable))
+                        .message("VIEW SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+    @GetMapping("/uni/{university}")
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByUniversity(@PathVariable("university") String university,
+                                                                              @PageableDefault(size = 10) Pageable pageable){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ThreadResponse>>builder()
+                        .data(threadViewService.getThreadsByUniversity(university, pageable))
+                        .message("VIEW SUCCESSFULLY")
+                        .build()
+        );
+    }
 
     @GetMapping("/comment/{threadId}")
     public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComment(@PathVariable("threadId") Long threadId,
@@ -99,7 +119,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<CommentResponse>>builder()
                         .data(commentViewService.getCommentByCFU(threadId, pageable ))
-                        .message("VIEW_SUCCESSFULLY")
+                        .message("VIEW SUCCESSFULLY")
                         .build()
         );
     }
