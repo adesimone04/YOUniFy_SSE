@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class CommentPostService {
     private final CommentRepository commentRepository;
     private final CensorshipService censorshipService;
 
+    @Transactional(rollbackFor = Exception.class)
     public void post(@NotNull CommentPostRequest commentPostRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

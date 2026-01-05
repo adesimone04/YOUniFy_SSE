@@ -8,14 +8,12 @@ import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.Code2FARepository;
 import it.younify.modules.sgac.repository.HostRepository;
 import it.younify.modules.sgac.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
 
 /**
  * The {@code Generate2FAService} class is responsible for generating and sending two-factor authentication (2FA) codes.
@@ -48,7 +46,7 @@ public class Generate2FAService {
      * @see it.younify.modules.sgac.model.entity.Host
      * @see it.younify.modules.sgac.model.entity.Code2FA
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void send2FARequest(String ID){
 
         String code2FA = TwoFactorUtility.generateCode();
