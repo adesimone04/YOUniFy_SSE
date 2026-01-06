@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -29,6 +30,8 @@ public class ThreadController {
     private final ThreadViewService threadViewService;
     private final ThreadDeleteService threadDeleteService;
     private final ThreadVoteService threadVoteService;
+
+    private final CensorshipService censorshipService;
 
 
     @PostMapping("/post")
@@ -122,6 +125,19 @@ public class ThreadController {
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
                         .data(threadViewService.getThreadsByUniversity(university, pageable))
+                        .build()
+        );
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/utility/refresh-censorship")
+    public ResponseEntity<ApiResponse<Void>> refreshCensorshipList(){
+
+        censorshipService.init();
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("UPDATE_SUCCESSFULLY")
                         .build()
         );
     }
