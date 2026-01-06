@@ -1,8 +1,10 @@
 package it.younify.modules.sgtr.service;
 
+import it.younify.core.exception.BadRequestException;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
+import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
 import jakarta.validation.constraints.NotNull;
@@ -25,8 +27,12 @@ public class ThreadPostService {
     public void post(@NotNull ThreadPostRequest threadPostRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        FlagCategory flag = FlagCategory.valueOf(threadPostRequest.getFlag());
 
         String content = threadPostRequest.getContent();
+
+        if(content.length() > 500) throw new BadRequestException("Content too long");
+
         if (censorshipService.containsSensitiveContent(content)) {
 
             content = censorshipService.censorText(content);
@@ -39,7 +45,7 @@ public class ThreadPostService {
                     Threads.builder()
                             .content(content)
                             .CFU(0)
-                            .flag(threadPostRequest.getFlag())
+                            .flag(flag)
                             .publicationDate(Instant.now())
                             .user((User) principal)
                             .build()
@@ -53,7 +59,7 @@ public class ThreadPostService {
                         Threads.builder()
                                 .content(content)
                                 .CFU(0)
-                                .flag(threadPostRequest.getFlag())
+                                .flag(flag)
                                 .publicationDate(Instant.now())
                                 .host((Host) principal)
                                 .build()

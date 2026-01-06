@@ -1,6 +1,7 @@
 package it.younify.modules.sgtr.repository;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
+import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
 
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ import java.util.Optional;
 public interface ThreadRepository extends JpaRepository<Threads, Long> {
 
     Optional<Threads> findByID(Long ID);
-    Optional<Threads> findByFlag(String flag);
+    Optional<Threads> findByFlag(FlagCategory flag);
     Optional<Threads> findByUser(User user);
     Optional<Threads> findByHost(Host host);
     Optional<Threads> findByPublicationDate(Instant publicationDate);
@@ -23,8 +24,9 @@ public interface ThreadRepository extends JpaRepository<Threads, Long> {
     List<Threads> findAllByOrderByCFUDesc(User user);
 
     Page<Threads> findAllByOrderByPublicationDateDesc(Pageable pageable);
-    Page<Threads> findAllByFlagOrderByPublicationDateDesc(String flag, Pageable pageable);
+    Page<Threads> findAllByFlagOrderByPublicationDateDesc(FlagCategory flag, Pageable pageable);
     Page<Threads> findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(
+
             String universityInHost,
             String universityInUser,
             Pageable pageable

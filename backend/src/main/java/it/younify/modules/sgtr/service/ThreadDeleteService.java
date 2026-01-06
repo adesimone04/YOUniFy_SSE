@@ -28,9 +28,9 @@ public class ThreadDeleteService {
 
         if(optT.isPresent()) {
 
-            if(principal instanceof User) {
+            Threads thread = optT.get();
 
-                Threads thread = optT.get();
+            if(principal instanceof User) {
 
                 User userC = (User) principal;
                 User userT = thread.getUser();
@@ -44,8 +44,6 @@ public class ThreadDeleteService {
 
                 if(principal instanceof Host){
 
-                    Threads thread = optT.get();
-
                     Host hostC = (Host) principal;
                     Host hostT = thread.getHost();
 
@@ -54,6 +52,7 @@ public class ThreadDeleteService {
                         threadRepository.delete(thread);
                     }
                 }
+                else threadRepository.delete(thread);
             }
         }
         else throw new ResourceNotFoundException("Thread not found");
