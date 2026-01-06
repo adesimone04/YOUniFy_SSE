@@ -29,7 +29,8 @@ public class Threads {
     private String content;
 
     @Column(nullable = false)
-    private String flag;
+    @Enumerated(EnumType.STRING)
+    private FlagCategory flag;
 
     @Column(nullable = false)
     private Instant publicationDate;
@@ -41,5 +42,4 @@ public class Threads {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
 }

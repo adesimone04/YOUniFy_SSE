@@ -2,6 +2,7 @@ package it.younify.modules.sgtr.service;
 
 
 import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
+import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class ThreadViewService {
         return threadRepository.findAllByOrderByPublicationDateDesc(pageable).map(this::toResponse);
     }
 
-    public Page<ThreadResponse> getThreadsByFlag(String flag, Pageable pageable) {
+    public Page<ThreadResponse> getThreadsByFlag(FlagCategory flag, Pageable pageable) {
         return threadRepository.findAllByFlagOrderByPublicationDateDesc(flag, pageable).map(this::toResponse);
     }
 
@@ -42,7 +43,7 @@ public class ThreadViewService {
                     thread.getUser().getUniversity(),
                     thread.getPublicationDate(),
                     "",
-                    thread.getUser().getFirstName()+" "+thread.getUser().getLastName()
+                    thread.getUser().getFirstName() + " " + thread.getUser().getLastName()
             );
         }
         else{

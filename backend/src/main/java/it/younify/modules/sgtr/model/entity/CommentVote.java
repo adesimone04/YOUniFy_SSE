@@ -19,6 +19,7 @@ public class CommentVote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ID;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private VoteType voteType;
 

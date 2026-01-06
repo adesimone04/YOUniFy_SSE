@@ -94,6 +94,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 

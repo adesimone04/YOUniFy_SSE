@@ -1,7 +1,7 @@
 package it.younify.modules.sgtr.model.dto.response;
 
 
-import jakarta.annotation.Nullable;
+import it.younify.modules.sgtr.model.entity.FlagCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,13 +14,14 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ThreadResponse {
+
     private Long ID;
 
     private String content;
 
     private int CFU;
 
-    private String flag;
+    private FlagCategory flag;
 
     private String University;
 

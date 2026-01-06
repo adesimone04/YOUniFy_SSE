@@ -27,9 +27,9 @@ public class CommentDeleteService {
 
         if(optC.isPresent()) {
 
-            if(principal instanceof User) {
+            Comment comment = optC.get();
 
-                Comment comment = optC.get();
+            if(principal instanceof User) {
 
                 User userP = (User) principal;
                 User userC = comment.getUser();
@@ -43,8 +43,6 @@ public class CommentDeleteService {
 
                 if(principal instanceof Host){
 
-                    Comment comment = optC.get();
-
                     Host hostP = (Host) principal;
                     Host hostC = comment.getHost();
 
@@ -53,6 +51,7 @@ public class CommentDeleteService {
                         commentRepository.delete(comment);
                     }
                 }
+                else commentRepository.delete(comment);
             }
         }
         else throw new ResourceNotFoundException("Comment not found");
