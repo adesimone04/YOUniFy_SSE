@@ -1,9 +1,6 @@
 package it.younify.modules.sgac.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -91,6 +88,10 @@ public class Host implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.HOST;
+
     public Host(String ID, String hostName, String PIVA, String PEC, String password, String province, String city, String uniList, boolean enabled) {
 
         this.ID = ID;
@@ -113,7 +114,8 @@ public class Host implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_HOST"));
+        // Spring Security vuole il prefisso "ROLE_" per convenzione
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     /**

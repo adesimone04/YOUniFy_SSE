@@ -94,6 +94,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
 
     public User(String ID, String firstName, String lastName, String email, String password,
                 String cdl, String university, LocalDate dateOfBirth, String contactsInfo, boolean enabled) {
@@ -114,13 +117,12 @@ public class User implements UserDetails {
 
     /**
      * Returns the authorities granted to the user.
-     * In this case, it's always "ROLE_USER".
-     *
      * @return A collection of granted authorities.
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        // Spring Security vuole il prefisso "ROLE_" per convenzione
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     /**
