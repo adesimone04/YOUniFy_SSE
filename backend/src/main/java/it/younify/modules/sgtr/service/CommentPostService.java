@@ -1,6 +1,5 @@
 package it.younify.modules.sgtr.service;
 
-import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
@@ -33,8 +32,6 @@ public class CommentPostService {
 
         String content = commentPostRequest.getContent();
         Long id = commentPostRequest.getThreadId();
-
-        if(content.length() > 500) throw new BadRequestException("Content too long");
 
         if(censorshipService.containsSensitiveContent(content)){
 
