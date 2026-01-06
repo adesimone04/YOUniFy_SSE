@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
     const [hoveredLink, setHoveredLink] = useState(null);
+
+
+    const navigate = useNavigate();
 
     const navLinks = [
         { name: 'Events', href: '#events' },
@@ -61,6 +65,10 @@ const Navbar = () => {
                 <div className="justify-self-end z-10">
                     <a
                         href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate("/auth");
+                        }}
                         className="px-6 py-2.5 bg-white text-slate-950 rounded-full font-bold text-sm tracking-wide hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 font-sans"
                     >
                         Get Started

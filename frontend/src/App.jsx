@@ -1,19 +1,20 @@
 import React from 'react';
-// Importazione del componente pagina principale (LandingPage).
-// Questo file funge da entry point visivo per la struttura della pagina.
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; //Import del gestore delle rotte
+//Import delle pagine
 import LandingPage from './pages/LandingPage/LandingPage';
+import AuthPage from './pages/Auth/AuthPage';
+import LoginPage from './pages/Auth/LoginPage';
 
-/*
- * Componente Root (App).
- * Funge da contenitore principale per l'intera applicazione React.
- * Attualmente, l'applicazione è strutturata come una "Single Page" che renderizza la LandingPage.
- */
 function App() {
     return (
-        // Container globale dell'applicazione.
-        // La classe "App" può essere utilizzata per stili globali o reset CSS specifici.
         <div className="App">
-            <LandingPage />
+            <Router>
+                <Routes>
+                    <Route path="/" element={<LandingPage />} /> {/*Se l'indirizzo è solo "/", mostra LandingPage */}
+                    <Route path="/auth" element={<AuthPage />} /> {/*Se l'indirizzo è "/auth", mostra AuthPage */}
+                    <Route path="/login" element={<LoginPage />} /> {/*Se l'indirizzo è "/login", mostra LoginPage */}
+                </Routes>
+            </Router>
         </div>
     );
 }
