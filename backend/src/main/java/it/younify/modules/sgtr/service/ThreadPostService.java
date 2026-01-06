@@ -1,5 +1,6 @@
 package it.younify.modules.sgtr.service;
 
+import it.younify.core.exception.BadRequestException;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
@@ -29,6 +30,9 @@ public class ThreadPostService {
         FlagCategory flag = FlagCategory.valueOf(threadPostRequest.getFlag());
 
         String content = threadPostRequest.getContent();
+
+        if(content.length() > 500) throw new BadRequestException("Content too long");
+
         if (censorshipService.containsSensitiveContent(content)) {
 
             content = censorshipService.censorText(content);
