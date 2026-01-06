@@ -4,6 +4,7 @@ import it.younify.modules.sgac.adapter.PIVAlidator.PIVAlidator;
 import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.modules.sgac.model.dto.request.HostSignUpRequest;
+import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.repository.HostRepository;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,33 +50,40 @@ public class HostSignUpService {
      * @throws ResourceAlreadyExistsException if a host with the given PEC already exists and is enabled.
      * @throws BadRequestException if the password is invalid or the PEC does not match the "Partita IVA".
      */
-    public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
+    public AccountSummary signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
+        String hostName = hostSignUpRequest.getHostName();
         String PEC = hostSignUpRequest.getPEC();
-        Optional<Host> opt = hostRepository.findByPEC(PEC);
 
+        Optional<Host> opt = hostRepository.findByPEC(PEC);
         if (opt.isPresent()) {
 
             if(!opt.get().isEnabled()){
 
                 String ID = opt.get().getID();
-                generate2FAService.send2FARequest(ID);
-                return ID;
+                Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                return AccountSummary.builder()
+                        .ID(ID)
+                        .accountName(hostName)
+                        .accountEmail(PEC)
+                        .expiryDate(expiryDate)
+                        .build();
             }
 
             throw new ResourceAlreadyExistsException("This host already exists. Proceed to login");
         }
         else{
 
-            String hostName = hostSignUpRequest.getHostName();
-            String password = hostSignUpRequest.getPassword();
             String PIVA = hostSignUpRequest.getPIVA();
+            boolean association = hostSignUpRequest.isAssociation();
+            String password = hostSignUpRequest.getPassword();
             String confirmPassword = hostSignUpRequest.getConfirmPassword();
             String province = hostSignUpRequest.getProvince();
             String city = hostSignUpRequest.getCity();
             String uniList = hostSignUpRequest.getUniList();
 
-            if(validatePEC(PEC, PIVA)){
+            if(association || validatePEC(PEC, PIVA)){
 
                 if(validatePassword(password, confirmPassword)){
 
@@ -83,8 +92,14 @@ public class HostSignUpService {
                     Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
                     hostRepository.save(host);
 
-                    generate2FAService.send2FARequest(ID);
-                    return ID;
+                    Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                    return AccountSummary.builder()
+                            .ID(ID)
+                            .accountName(hostName)
+                            .accountEmail(PEC)
+                            .expiryDate(expiryDate)
+                            .build();
                 }
 
                 throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +

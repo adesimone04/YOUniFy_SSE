@@ -1,5 +1,6 @@
 package it.younify.modules.sgac.model.dto.request;
 
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
@@ -19,6 +20,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 30)
     private String firstName;
 
     /**
@@ -26,6 +28,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 30)
     private String lastName;
 
     /**
@@ -33,6 +36,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 40)
     private String email;
 
     /**
@@ -40,6 +44,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(min = 8, max = 100)
     private String password;
 
     /**
@@ -48,6 +53,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(min = 8, max = 100)
     private String confirmPassword;
 
     /**
@@ -55,6 +61,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 100)
     private String cdl;
 
     /**
@@ -62,6 +69,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 50)
     private String university;
 
     /**
@@ -74,5 +82,6 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 50)
     private String contactsInfo;
 }

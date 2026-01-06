@@ -3,6 +3,7 @@ package it.younify.modules.sgac.controller;
 import it.younify.modules.sgac.model.dto.request.HostSignUpRequest;
 import it.younify.modules.sgac.model.dto.request.LogInRequest;
 import it.younify.modules.sgac.model.dto.request.UserSignUpRequest;
+import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.service.HostSignUpService;
 import it.younify.modules.sgac.service.LogInService;
 import it.younify.modules.sgac.service.UserSignUpService;
@@ -43,14 +44,14 @@ public class AuthController {
      * @throws it.younify.core.exception.BadRequestException if the password or email is invalid.
      */
     @PostMapping("/user/signup")
-    public ResponseEntity<ApiResponse<String>> signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
+    public ResponseEntity<ApiResponse<AccountSummary>> signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
 
-        String ID = userSignUpService.signUp(userSignUpRequest);
+        AccountSummary summary = userSignUpService.signUp(userSignUpRequest);
 
         return ResponseEntity.ok(
-                ApiResponse.<String>builder()
+                ApiResponse.<AccountSummary>builder()
                         .message("USER_REGISTERED")
-                        .data(ID)
+                        .data(summary)
                         .build()
         );
     }
@@ -65,14 +66,14 @@ public class AuthController {
      * @throws it.younify.core.exception.BadRequestException if the password is invalid or the PEC does not match the "Partita IVA".
      */
     @PostMapping("/host/signup")
-    public ResponseEntity<ApiResponse<String>> signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
+    public ResponseEntity<ApiResponse<AccountSummary>> signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
 
-        String ID = hostSignUpService.signUp(hostSignUpRequest);
+        AccountSummary summary = hostSignUpService.signUp(hostSignUpRequest);
 
         return ResponseEntity.ok(
-                ApiResponse.<String>builder()
+                ApiResponse.<AccountSummary>builder()
                         .message("HOST_REGISTERED")
-                        .data(ID)
+                        .data(summary)
                         .build()
         );
     }
@@ -88,7 +89,7 @@ public class AuthController {
      * @throws org.springframework.security.authentication.BadCredentialsException if the credentials are invalid.
      */
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> logIn(@Valid @RequestBody LogInRequest logInRequest) {
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> logIn(@Valid @RequestBody LogInRequest logInRequest) {
 
         AuthenticationResponse response = logInService.logIn(logInRequest);
 
@@ -112,23 +113,27 @@ public class AuthController {
                     .build();
 
 
+            response.setRefreshToken(null);
+            response.setAccessToken(null);
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                     .body(
-                            ApiResponse.<String>builder()
+                            ApiResponse.<AuthenticationResponse>builder()
                                     .message(response.getStatus())
-                                    .data(response.getAccountID())
+                                    .data(response)
                                     .build()
                     );
         }
 
+
         //handling status "2FA_SENT"
         return ResponseEntity.ok()
                 .body(
-                        ApiResponse.<String>builder()
+                        ApiResponse.<AuthenticationResponse>builder()
                                 .message(response.getStatus())
-                                .data(response.getAccountID())
+                                .data(response)
                                 .build()
                 );
     }

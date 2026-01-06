@@ -3,6 +3,7 @@ package it.younify.modules.sgac.service;
 import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.modules.sgac.model.dto.request.UserSignUpRequest;
+import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -45,25 +47,31 @@ public class UserSignUpService {
      * @throws ResourceAlreadyExistsException if a user with the given email already exists and is enabled.
      * @throws BadRequestException if the password or email is invalid.
      */
-    public String signUp(@NotNull UserSignUpRequest userSignUpRequest) {
+    public AccountSummary signUp(@NotNull UserSignUpRequest userSignUpRequest) {
 
+        String firstName = userSignUpRequest.getFirstName();
         String email = userSignUpRequest.getEmail();
-        Optional<User> opt = userRepository.findByEmail(email);
 
+        Optional<User> opt = userRepository.findByEmail(email);
         if(opt.isPresent()) {
 
             if(!opt.get().isEnabled()) {
 
                 String ID = opt.get().getID();
-                generate2FAService.send2FARequest(ID);
-                return ID;
+                Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                return AccountSummary.builder()
+                        .ID(ID)
+                        .accountName(firstName)
+                        .accountEmail(email)
+                        .expiryDate(expiryDate)
+                        .build();
             }
 
             throw new ResourceAlreadyExistsException("This user already exists. Proceed to login");
         }
         else {
 
-            String firstName = userSignUpRequest.getFirstName();
             String lastName = userSignUpRequest.getLastName();
             String password = userSignUpRequest.getPassword();
             String confirmPassword = userSignUpRequest.getConfirmPassword();
@@ -81,8 +89,14 @@ public class UserSignUpService {
                     User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo, false);
                     userRepository.save(user);
 
-                    generate2FAService.send2FARequest(ID);
-                    return ID;
+                    Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                    return AccountSummary.builder()
+                            .ID(ID)
+                            .accountName(firstName)
+                            .accountEmail(email)
+                            .expiryDate(expiryDate)
+                            .build();
                 }
 
                 throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +

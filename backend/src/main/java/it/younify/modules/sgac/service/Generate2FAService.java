@@ -49,7 +49,7 @@ public class Generate2FAService {
      * @see it.younify.modules.sgac.model.entity.Code2FA
      */
     @Transactional
-    public void send2FARequest(String ID){
+    public Instant send2FARequest(String ID){
 
         String code2FA = TwoFactorUtility.generateCode();
         String message = "Your code 2FA is: " + code2FA;
@@ -60,16 +60,19 @@ public class Generate2FAService {
             code2FARepository.deleteByUser(user);
             code2FARepository.flush();
 
+            Instant expiry = Instant.now().plusSeconds(expiration2FA);
+
             code2FARepository.save(
                         Code2FA.builder()
                                 .code(code2FA)
-                                .expiryDate((Instant.now().plusMillis(expiration2FA)))
+                                .expiryDate(expiry)
                                 .errorCount(0)
                                 .user(user).
                                 build()
             );
 
             emailProvider.send2FAEmail(user.getEmail(), message);
+            return expiry;
         }
         else{
 
@@ -77,16 +80,20 @@ public class Generate2FAService {
             code2FARepository.deleteByHost(host);
             code2FARepository.flush();
 
+            Instant expiry = Instant.now().plusSeconds(expiration2FA);
+
             code2FARepository.save(
                     Code2FA.builder()
                             .code(code2FA)
-                            .expiryDate((Instant.now().plusMillis(expiration2FA)))
+                            .expiryDate(expiry)
                             .errorCount(0)
                             .host(host)
                             .build()
             );
+
             //in production switch the API for send on Host PEC
             emailProvider.send2FAEmail("younifytester@gmail.com", message);
+            return expiry;
         }
     }
 }
