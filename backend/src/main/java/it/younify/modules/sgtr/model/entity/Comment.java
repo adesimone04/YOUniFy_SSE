@@ -24,7 +24,7 @@ public class Comment {
     @Column(nullable = false)
     private int CFU;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String content;
 
     @Column(nullable = false)

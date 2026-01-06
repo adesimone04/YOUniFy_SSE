@@ -33,7 +33,6 @@ public class CommentPostService {
         String content = commentPostRequest.getContent();
         Long id = commentPostRequest.getThreadId();
 
-
         if(censorshipService.containsSensitiveContent(content)){
 
             content = censorshipService.censorText(content);

@@ -1,5 +1,6 @@
 package it.younify.modules.sgtr.model.dto.request;
 
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.NotBlank;
 public class ThreadPostRequest {
 
     @NotBlank
+    @Size(min = 1, max = 500)
     private String content;
 
     @NotBlank

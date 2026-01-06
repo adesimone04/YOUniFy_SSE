@@ -29,6 +29,7 @@ public class ThreadPostService {
         FlagCategory flag = FlagCategory.valueOf(threadPostRequest.getFlag());
 
         String content = threadPostRequest.getContent();
+
         if (censorshipService.containsSensitiveContent(content)) {
 
             content = censorshipService.censorText(content);
