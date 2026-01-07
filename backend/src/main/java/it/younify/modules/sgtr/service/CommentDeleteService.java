@@ -1,6 +1,7 @@
 package it.younify.modules.sgtr.service;
 
 import it.younify.core.exception.ResourceNotFoundException;
+import it.younify.core.utils.SecurityUtils;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Comment;
@@ -46,12 +47,18 @@ public class CommentDeleteService {
                     Host hostP = (Host) principal;
                     Host hostC = comment.getHost();
 
-                    if((hostC.getID()).equals(hostC.getID())){
+                    if((hostP.getID()).equals(hostC.getID())){
 
                         commentRepository.delete(comment);
                     }
                 }
-                else commentRepository.delete(comment);
+                else {
+
+                    if (SecurityUtils.isAdmin()) {
+
+                        commentRepository.delete(comment);
+                    }
+                }
             }
         }
         else throw new ResourceNotFoundException("Comment not found");

@@ -1,6 +1,7 @@
 package it.younify.modules.sgtr.controller;
 
 import it.younify.core.model.ApiResponse;
+import it.younify.modules.sgtr.facade.CommentFacade;
 import it.younify.modules.sgtr.model.dto.request.CommentPostRequest;
 import it.younify.modules.sgtr.model.dto.request.CommentVoteRequest;
 import it.younify.modules.sgtr.model.dto.response.CommentResponse;
@@ -18,16 +19,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CommentController {
 
-    private final CommentPostService commentPostService;
-    private final CommentDeleteService commentDeleteService;
-    private final CommentViewService commentViewService;
-    private final CommentVoteService commentVoteService;
-
+    private final CommentFacade commentFacade;
 
     @PostMapping("/comment/post")
     public ResponseEntity<ApiResponse<Void>> post(@Valid @RequestBody CommentPostRequest commentPostRequest) {
 
-        commentPostService.post(commentPostRequest);
+        commentFacade.createComment(commentPostRequest);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
@@ -40,7 +37,7 @@ public class CommentController {
     @DeleteMapping("/comment/delete/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable("commentId") Long commentId) {
 
-        commentDeleteService.delete(commentId);
+        commentFacade.deleteComment(commentId);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
@@ -53,7 +50,7 @@ public class CommentController {
     @PostMapping("/comment/react")
     public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody CommentVoteRequest commentVoteRequest) {
 
-        commentVoteService.vote(commentVoteRequest);
+        commentFacade.reactionComment(commentVoteRequest);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
@@ -62,13 +59,16 @@ public class CommentController {
         );
     }
 
+
     @GetMapping("/comment/{threadId}")
     public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComment(@PathVariable("threadId") Long threadId,
                                                                          @PageableDefault(size = 10) Pageable pageable){
 
+        Page<CommentResponse> page = commentFacade.commentView(threadId, pageable);
+
         return ResponseEntity.ok(
                 ApiResponse.<Page<CommentResponse>>builder()
-                        .data(commentViewService.getCommentByCFU(threadId, pageable))
+                        .data(page)
                         .message("VIEW_SUCCESSFULLY")
                         .build()
         );
