@@ -1,6 +1,7 @@
 package it.younify.modules.sgtr.controller;
 
 import it.younify.core.model.ApiResponse;
+import it.younify.modules.sgtr.facade.ThreadFacade;
 import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
 import it.younify.modules.sgtr.model.dto.request.ThreadVoteRequest;
 import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
@@ -26,18 +27,13 @@ import java.util.stream.Collectors;
 
 public class ThreadController {
 
-    private final ThreadPostService threadPostService;
-    private final ThreadViewService threadViewService;
-    private final ThreadDeleteService threadDeleteService;
-    private final ThreadVoteService threadVoteService;
-
-    private final CensorshipService censorshipService;
+private final ThreadFacade threadFacade;
 
 
     @PostMapping("/post")
     public ResponseEntity<ApiResponse<Void>> post(@Valid @RequestBody ThreadPostRequest threadPostRequest) {
 
-        threadPostService.post(threadPostRequest);
+        threadFacade.createThread(threadPostRequest);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
@@ -50,7 +46,7 @@ public class ThreadController {
     @DeleteMapping("/delete/{threadId}")
     public ResponseEntity<ApiResponse<Void>> deleteThread(@PathVariable("threadId") Long threadId) {
 
-        threadDeleteService.delete(threadId);
+        threadFacade.deleteThread(threadId);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
@@ -63,7 +59,7 @@ public class ThreadController {
     @PostMapping("/react")
     public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody ThreadVoteRequest threadVoteRequest) {
 
-        threadVoteService.vote(threadVoteRequest);
+        threadFacade.voteThread(threadVoteRequest);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
@@ -76,10 +72,12 @@ public class ThreadController {
     @GetMapping()
     public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByDate(@PageableDefault(size = 10) Pageable pageable){
 
+        Page<ThreadResponse> page = threadFacade.getThreadsByDate(pageable);
+
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
-                        .data(threadViewService.getThreadsByDate(pageable))
+                        .data(page)
                         .build()
         );
     }
@@ -107,12 +105,13 @@ public class ThreadController {
     @GetMapping("/flag/{flag}")
     public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByFlag(@PathVariable("flag") String flag,
                                                                               @PageableDefault(size = 10) Pageable pageable) {
-        //NON FUNZIONA
-        FlagCategory flagCategory = FlagCategory.valueOf(flag);
+
+        Page<ThreadResponse> page = threadFacade.getThreadsByFlag(flag, pageable);
+
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
-                        .data(threadViewService.getThreadsByFlag(flagCategory, pageable))
+                        .data(page)
                         .build()
         );
     }
@@ -121,10 +120,12 @@ public class ThreadController {
     @GetMapping("/uni/{university}")
     public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByUniversity(@PathVariable("university") String university,
                                                                               @PageableDefault(size = 10) Pageable pageable){
+
+        Page<ThreadResponse> page = threadFacade.getThreadsByUniversity(university, pageable);
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
-                        .data(threadViewService.getThreadsByUniversity(university, pageable))
+                        .data(page)
                         .build()
         );
     }
@@ -133,7 +134,7 @@ public class ThreadController {
     @PostMapping("/utility/refresh-censorship")
     public ResponseEntity<ApiResponse<Void>> refreshCensorshipList(){
 
-        censorshipService.init();
+        threadFacade.refreshCensorship();
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()

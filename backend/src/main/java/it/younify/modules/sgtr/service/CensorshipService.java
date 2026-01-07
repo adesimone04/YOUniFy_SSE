@@ -22,7 +22,7 @@ public class CensorshipService {
     private List<String> badWords;
 
     @PostConstruct
-    public void init() {
+    public void refresh() {
 
         Trie.TrieBuilder builder =
                 Trie.builder()

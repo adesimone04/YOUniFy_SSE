@@ -30,12 +30,6 @@ public class ThreadPostService {
 
         String content = threadPostRequest.getContent();
 
-        if (censorshipService.containsSensitiveContent(content)) {
-
-            content = censorshipService.censorText(content);
-        }
-
-
         if (principal instanceof User) {
 
             threadRepository.save(

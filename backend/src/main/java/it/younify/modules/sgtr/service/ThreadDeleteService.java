@@ -2,12 +2,14 @@ package it.younify.modules.sgtr.service;
 
 
 import it.younify.core.exception.ResourceNotFoundException;
+import it.younify.core.utils.SecurityUtils;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +54,13 @@ public class ThreadDeleteService {
                         threadRepository.delete(thread);
                     }
                 }
-                else threadRepository.delete(thread);
+                else {
+
+                    if (SecurityUtils.isAdmin()) {
+
+                        threadRepository.delete(thread);
+                    }
+                }
             }
         }
         else throw new ResourceNotFoundException("Thread not found");
