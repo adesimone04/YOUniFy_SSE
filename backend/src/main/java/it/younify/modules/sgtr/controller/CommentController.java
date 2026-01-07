@@ -14,6 +14,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * The {@code CommentController} class handles all HTTP requests related to comments on threads.
+ * This includes creating, deleting, voting, and retrieving comments.
+ * It uses the {@link CommentFacade} to coordinate these actions.
+ *
+ * @see it.younify.modules.sgtr.facade.CommentFacade
+ */
 @RestController
 @RequestMapping("/api/thread")
 @RequiredArgsConstructor
@@ -21,6 +28,14 @@ public class CommentController {
 
     private final CommentFacade commentFacade;
 
+    /**
+     * Creates a new comment on a thread.
+     * The comment's content is validated for appropriateness before being saved.
+     *
+     * @param commentPostRequest The request body containing the comment's content and the parent thread's ID.
+     * @return A {@link ResponseEntity} with a success message.
+     * @throws it.younify.core.exception.ResourceNotFoundException if the parent thread does not exist.
+     */
     @PostMapping("/comment/post")
     public ResponseEntity<ApiResponse<Void>> post(@Valid @RequestBody CommentPostRequest commentPostRequest) {
 
@@ -34,6 +49,15 @@ public class CommentController {
     }
 
 
+    /**
+     * Deletes a comment by its ID.
+     * This operation is restricted and can only be performed by the comment's author or an admin.
+     *
+     * @param commentId The unique identifier of the comment to be deleted.
+     * @return A {@link ResponseEntity} with a success message.
+     * @throws org.springframework.security.access.AccessDeniedException if the current user is not authorized to delete the comment.
+     * @throws it.younify.core.exception.ResourceNotFoundException if the comment does not exist.
+     */
     @DeleteMapping("/comment/delete/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable("commentId") Long commentId) {
 
@@ -46,7 +70,14 @@ public class CommentController {
         );
     }
 
-
+    /**
+     * Casts a vote (upvote or downvote) on a comment.
+     * A user cannot vote on their own comment.
+     *
+     * @param commentVoteRequest The request body containing the comment ID and the vote type.
+     * @return A {@link ResponseEntity} with a success message.
+     * @throws it.younify.core.exception.ResourceNotFoundException if the comment does not exist.
+     */
     @PostMapping("/comment/react")
     public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody CommentVoteRequest commentVoteRequest) {
 
@@ -60,6 +91,13 @@ public class CommentController {
     }
 
 
+    /**
+     * Retrieves a paginated list of comments for a specific thread.
+     *
+     * @param threadId The ID of the thread whose comments are to be retrieved.
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} containing a paginated list of {@link CommentResponse}.
+     */
     @GetMapping("/comment/{threadId}")
     public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComment(@PathVariable("threadId") Long threadId,
                                                                          @PageableDefault(size = 10) Pageable pageable){

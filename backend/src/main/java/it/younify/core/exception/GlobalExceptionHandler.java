@@ -4,6 +4,7 @@ import it.younify.core.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,7 +54,7 @@ public class GlobalExceptionHandler {
      * @param request The current HTTP request.
      * @return A {@link ResponseEntity} containing the standardized error response.
      */
-    @ExceptionHandler(TokenRefreshException.class) // (403)
+    @ExceptionHandler({TokenRefreshException.class, AccessDeniedException.class}) // (403)
     public ResponseEntity<ApiErrorResponse> handleTokenRefreshException(TokenRefreshException ex, HttpServletRequest request) {
 
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
