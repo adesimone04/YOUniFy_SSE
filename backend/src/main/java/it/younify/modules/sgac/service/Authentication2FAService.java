@@ -1,5 +1,6 @@
 package it.younify.modules.sgac.service;
 
+import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.adapter.emailsender.EmailProvider;
 import it.younify.modules.sgac.model.dto.request.Authentication2FARequest;
 import it.younify.modules.sgac.model.dto.response.AccountSummary;
@@ -35,12 +36,11 @@ public class Authentication2FAService {
     private final HostRepository hostRepository;
     private final Code2FARepository code2FARepository;
     private final EmailProvider emailProvider;
-    private final Generate2FAService generate2FAService;
 
     /**
      * Confirms the two-factor authentication code for a user or host.
      * This method validates the provided 2FA code. If the code is correct, the account is enabled,
-     * and a welcome email is sent. If the code is incorrect, it manages the number of attempts
+     * and a welcome email is sent. If the code is incorrect or expired, it manages the number of attempts
      * and may trigger a new code to be sent.
      *
      * @param authentication2FARequest The request containing the account ID and the 2FA code.
@@ -113,8 +113,6 @@ public class Authentication2FAService {
                     if (code2FA.getErrorCount() == 3) {
 
                         code2FARepository.delete(code2FA);
-                        generate2FAService.send2FARequest(ID);
-
                         throw new BadRequestException("You achieved the maximum number of attempts: 3");
                     }
 
@@ -124,11 +122,10 @@ public class Authentication2FAService {
             else {
 
                 code2FARepository.delete(code2FA);
-                generate2FAService.send2FARequest(ID);
                 throw new BadRequestException("The 2FA code is expired");
             }
         }
 
-        throw new BadCredentialsException("ID account not exist");
+        throw new ResourceNotFoundException("ID account not exist or 2FA code not found");
     }
 }

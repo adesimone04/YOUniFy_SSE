@@ -94,6 +94,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    /**
+     * The user's role, which defines their permissions and defaults to USER.
+     */
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
@@ -121,7 +124,7 @@ public class User implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Spring Security vuole il prefisso "ROLE_" per convenzione
+
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 

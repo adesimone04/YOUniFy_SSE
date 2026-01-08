@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class}) // (401)
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(Exception ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Email o password non validi", request);
+        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
     /**

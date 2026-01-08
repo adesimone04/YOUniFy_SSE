@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 /**
  * The {@code AuthenticationResponse} class is a Data Transfer Object (DTO) that holds
  * the results of an authentication attempt.
@@ -34,7 +36,12 @@ public class AuthenticationResponse {
     private String accountID;
 
     /**
-     * The status of the authentication attempt (e.g., "LOGIN SUCCESSFUL", "2FA_REQUIRED").
+     * The status of the authentication attempt (e.g., "LOGIN SUCCESSFUL", "2FA_SENT").
      */
     private String status;
+
+    /**
+     * The expiry date of 2FA code returned in case of status "2FA_SENT".
+     */
+    private Instant expiryDate;
 }

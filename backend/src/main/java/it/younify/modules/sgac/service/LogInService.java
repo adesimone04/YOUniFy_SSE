@@ -97,10 +97,12 @@ public class LogInService {
                 }
             }
 
-            generate2FAService.send2FARequest(ID);
+            Instant expiry = generate2FAService.send2FARequest(ID);
+
             return AuthenticationResponse.builder()
                     .status("2FA_SENT")
                     .accountID(ID)
+                    .expiryDate(expiry)
                     .build();
         }
 

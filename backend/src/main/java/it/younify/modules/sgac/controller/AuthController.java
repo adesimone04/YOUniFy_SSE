@@ -3,6 +3,7 @@ package it.younify.modules.sgac.controller;
 import it.younify.modules.sgac.model.dto.request.HostSignUpRequest;
 import it.younify.modules.sgac.model.dto.request.LogInRequest;
 import it.younify.modules.sgac.model.dto.request.UserSignUpRequest;
+import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.service.HostSignUpService;
 import it.younify.modules.sgac.service.LogInService;
 import it.younify.modules.sgac.service.UserSignUpService;
@@ -35,44 +36,44 @@ public class AuthController {
 
 
     /**
-     * Handles the sign-up process for a new user.
+     * Handles the sign-up process for a new user, which triggers the 2FA process.
      *
      * @param userSignUpRequest The request body containing the user's sign-up information.
-     * @return A {@link ResponseEntity} containing an {@link ApiResponse} with the new user's ID.
-     * @throws it.younify.core.exception.ResourceAlreadyExistsException if a user with the given email already exists.
+     * @return A {@link ResponseEntity} containing an {@link ApiResponse} with an {@link AccountSummary}.
+     * @throws it.younify.core.exception.ResourceAlreadyExistsException if a user with the given email already exists and is enabled.
      * @throws it.younify.core.exception.BadRequestException if the password or email is invalid.
      */
     @PostMapping("/user/signup")
-    public ResponseEntity<ApiResponse<String>> signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
+    public ResponseEntity<ApiResponse<AccountSummary>> signUp(@Valid @RequestBody UserSignUpRequest userSignUpRequest) {
 
-        String ID = userSignUpService.signUp(userSignUpRequest);
+        AccountSummary summary = userSignUpService.signUp(userSignUpRequest);
 
         return ResponseEntity.ok(
-                ApiResponse.<String>builder()
+                ApiResponse.<AccountSummary>builder()
                         .message("USER_REGISTERED")
-                        .data(ID)
+                        .data(summary)
                         .build()
         );
     }
 
 
     /**
-     * Handles the sign-up process for a new host.
+     * Handles the sign-up process for a new host, which triggers the 2FA process.
      *
      * @param hostSignUpRequest The request body containing the host's sign-up information.
-     * @return A {@link ResponseEntity} containing an {@link ApiResponse} with the new host's ID.
-     * @throws it.younify.core.exception.ResourceAlreadyExistsException if a host with the given PEC already exists.
+     * @return A {@link ResponseEntity} containing an {@link ApiResponse} with an {@link AccountSummary}.
+     * @throws it.younify.core.exception.ResourceAlreadyExistsException if a host with the given PEC already exists and is enabled.
      * @throws it.younify.core.exception.BadRequestException if the password is invalid or the PEC does not match the "Partita IVA".
      */
     @PostMapping("/host/signup")
-    public ResponseEntity<ApiResponse<String>> signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
+    public ResponseEntity<ApiResponse<AccountSummary>> signUp(@Valid @RequestBody HostSignUpRequest hostSignUpRequest) {
 
-        String ID = hostSignUpService.signUp(hostSignUpRequest);
+        AccountSummary summary = hostSignUpService.signUp(hostSignUpRequest);
 
         return ResponseEntity.ok(
-                ApiResponse.<String>builder()
+                ApiResponse.<AccountSummary>builder()
                         .message("HOST_REGISTERED")
-                        .data(ID)
+                        .data(summary)
                         .build()
         );
     }
@@ -80,15 +81,19 @@ public class AuthController {
 
     /**
      * Handles the login process for both users and hosts.
-     * Upon successful authentication, it sets "refresh_token" and "access_token" cookies.
-     * If 2FA is required, it returns a response with the status "2FA_SENT".
+     * <p>
+     * If authentication is successful, it returns an {@link AuthenticationResponse} and sets
+     * the access and refresh tokens in secure, HTTP-only cookies.
+     * <p>
+     * If the account requires 2FA, it returns a response with the status "2FA_SENT"
+     * and no cookies are set.
      *
      * @param logInRequest The request body containing the login credentials.
-     * @return A {@link ResponseEntity} with cookies set and an {@link ApiResponse} containing the login status and account ID.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing the {@link AuthenticationResponse}.
      * @throws org.springframework.security.authentication.BadCredentialsException if the credentials are invalid.
      */
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> logIn(@Valid @RequestBody LogInRequest logInRequest) {
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> logIn(@Valid @RequestBody LogInRequest logInRequest) {
 
         AuthenticationResponse response = logInService.logIn(logInRequest);
 
@@ -112,23 +117,27 @@ public class AuthController {
                     .build();
 
 
+            response.setRefreshToken(null);
+            response.setAccessToken(null);
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                     .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                     .body(
-                            ApiResponse.<String>builder()
+                            ApiResponse.<AuthenticationResponse>builder()
                                     .message(response.getStatus())
-                                    .data(response.getAccountID())
+                                    .data(response)
                                     .build()
                     );
         }
 
+
         //handling status "2FA_SENT"
         return ResponseEntity.ok()
                 .body(
-                        ApiResponse.<String>builder()
+                        ApiResponse.<AuthenticationResponse>builder()
                                 .message(response.getStatus())
-                                .data(response.getAccountID())
+                                .data(response)
                                 .build()
                 );
     }

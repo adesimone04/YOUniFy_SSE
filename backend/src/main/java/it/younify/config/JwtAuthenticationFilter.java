@@ -80,7 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         catch (Exception e) {
 
-            throw new BadCredentialsException(e.getMessage());
+            throw new BadCredentialsException("Email or password incorrect");
         }
 
         filterChain.doFilter(request, response);
