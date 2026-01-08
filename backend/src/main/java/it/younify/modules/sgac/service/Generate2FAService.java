@@ -3,7 +3,6 @@ package it.younify.modules.sgac.service;
 import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.adapter.emailsender.EmailProvider;
 import it.younify.core.utils.TwoFactorUtility;
-import it.younify.modules.sgac.model.dto.request.Resend2FARequest;
 import it.younify.modules.sgac.model.entity.Code2FA;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;

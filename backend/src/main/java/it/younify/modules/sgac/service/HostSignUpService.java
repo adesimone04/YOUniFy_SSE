@@ -85,25 +85,30 @@ public class HostSignUpService {
 
             if(association || validatePEC(PEC, PIVA)){
 
-                if(validatePassword(password, confirmPassword)){
+                if(PEC.matches("^[a-zA-Z0-9._%+-]+@.*(pec|legal|cert|sicurezza|posta).*\\.[a-zA-Z]{2,}$")) {
 
-                    String ID = "H-" + UUID.randomUUID();
-                    password = passwordEncoder.encode(password);
-                    Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
-                    hostRepository.save(host);
+                    if(validatePassword(password, confirmPassword)){
 
-                    Instant expiryDate = generate2FAService.send2FARequest(ID);
+                        String ID = "H-" + UUID.randomUUID();
+                        password = passwordEncoder.encode(password);
+                        Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
+                        hostRepository.save(host);
 
-                    return AccountSummary.builder()
-                            .ID(ID)
-                            .accountName(hostName)
-                            .accountEmail(PEC)
-                            .expiryDate(expiryDate)
-                            .build();
+                        Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                        return AccountSummary.builder()
+                                .ID(ID)
+                                .accountName(hostName)
+                                .accountEmail(PEC)
+                                .expiryDate(expiryDate)
+                                .build();
+                    }
+
+                    throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                            "one number, and one special symbol");
                 }
 
-                throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                        "one number, and one special symbol");
+                throw new BadRequestException("The PEC address " + PEC + " is not valid");
             }
 
             throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA);
@@ -111,7 +116,7 @@ public class HostSignUpService {
     }
 
 
-    private boolean validatePEC(String PEC, String PIVA){
+    private boolean validatePEC(String PEC, String PIVA) {
         return pivalidator.PIVAlidatePEC(PIVA).equals(PEC);
     }
 
