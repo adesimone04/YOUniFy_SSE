@@ -1,5 +1,6 @@
 package it.younify.modules.sgac.model.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.LocalDate;
@@ -75,6 +76,7 @@ public class UserSignUpRequest {
     /**
      * The user's date of birth.
      */
+    @NotNull
     private LocalDate dateOfBirth;
 
     /**
