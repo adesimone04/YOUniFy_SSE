@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Mail, Lock, Eye, EyeOff, AlertCircle, LogIn
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from "react-router-dom";
 
-
-// --- IMPORT STILI ---
 import styles from '../LandingPage/LandingPage.module.css';
 
 // --- COMPONENTI DI SUPPORTO ---
 
-const ErrorMessage = ({ message }) => (
+// Questo è lo stesso componente usato per gli errori dei campi
+const ErrorMessage = ({ message, centered = false }) => (
     <AnimatePresence>
         {message && (
             <motion.div
                 initial={{ opacity: 0, y: -5, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -5, height: 0 }}
-                className="overflow-hidden" // RIMOSSO: absolute -bottom-5 left-0 w-full
+                className="overflow-hidden"
             >
-                <div className="flex items-center gap-1 text-red-500 text-[11px] ml-1 mt-1.5 font-medium">
+                <div className={`flex items-center gap-1 text-red-500 text-[11px] mt-1.5 font-medium ${centered ? 'justify-center' : 'ml-1'}`}>
                     <AlertCircle size={12} /> <span>{message}</span>
                 </div>
             </motion.div>
@@ -31,7 +31,6 @@ const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, dis
     const [showPassword, setShowPassword] = useState(false);
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
-    // Cambiato mb-5 in mb-3 per bilanciare lo spazio quando esce l'errore
     return (
         <div className={`mb-3 relative ${className}`}>
             <div className={`relative group ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -61,7 +60,7 @@ const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, dis
                     </button>
                 )}
             </div>
-            {/* L'errore è qui sotto, relativo, e farà scorrere il contenuto */}
+            {/* Errore specifico del campo (es. campo vuoto) */}
             <ErrorMessage message={errorMessage} />
         </div>
     );
@@ -69,34 +68,71 @@ const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, dis
 
 const LoginPage = () => {
     const [loginData, setLoginData] = useState({ email: '', password: '' });
-    const [errors, setErrors] = useState({ email: false, password: false });
+
+    // Errori formali (campi vuoti o malformati) -> Colorano il bordo di rosso
+    const [fieldErrors, setFieldErrors] = useState({ email: false, password: false });
+
+    // Errore Logico (Credenziali errate) -> NON colora il bordo, ma mostra il testo
+    const [generalError, setGeneralError] = useState("");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setLoginData(prev => ({ ...prev, [name]: value }));
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: false }));
+
+        // Pulisce errori specifici mentre scrivi
+        if (fieldErrors[name]) {
+            setFieldErrors(prev => ({ ...prev, [name]: false }));
+        }
+
+        // Pulisce l'errore generico appena tocchi qualcosa per riprovare
+        if (generalError) {
+            setGeneralError("");
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const newErrors = {};
-        if (!loginData.email) newErrors.email = "Inserisci l'email";
-        if (!loginData.password) newErrors.password = "Inserisci la password";
+        const newFieldErrors = {};
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+        // 1. VALIDAZIONE FORMALE
+        if (!loginData.email) {
+            newFieldErrors.email = "Inserisci l'email";
+        } else if (!emailRegex.test(loginData.email)) {
+            newFieldErrors.email = "Email non valida";
+        }
+
+        if (!loginData.password) {
+            newFieldErrors.password = "Inserisci la password";
+        }
+
+        if (Object.keys(newFieldErrors).length > 0) {
+            setFieldErrors(newFieldErrors);
             return;
         }
-        console.log("Login:", loginData);
-        alert("Login simulato! Invio al backend...");
+
+        // --- 2. SIMULAZIONE BACKEND ---
+        console.log("Invio dati al server...", loginData);
+
+        const MOCK_USER = {
+            email: "student@younify.it",
+            password: "Younify2024!"
+        };
+
+        if (loginData.email === MOCK_USER.email && loginData.password === MOCK_USER.password) {
+            alert("Login riuscito!");
+        } else {
+            // ERRORE DI SICUREZZA (Credenziali errate)
+            setGeneralError("Email o Password errati");
+
+            // NOTA: Ho rimosso la riga che cancellava la password.
+            // Ora la password errata rimane scritta, così se riclicchi non ti dice "Inserisci password".
+        }
     };
 
     return (
         <div className="h-dvh md:min-h-screen w-full bg-slate-950 flex flex-col font-sans overflow-hidden relative">
-
-            {/* --- BACKGROUND LAYER --- */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`${styles.blob} ${styles.blue}`}></div>
                 <div className={`${styles.blob} ${styles.indigo}`}></div>
@@ -106,19 +142,10 @@ const LoginPage = () => {
                 <div className={`${styles.blob} ${styles.cyan}`}></div>
             </div>
 
-            {/* Container principale centrato */}
             <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6">
-
-                {/* --- CARD UNIFICATA (Stile AuthPage) ---
-                    Questa applica lo sfondo scuro e il blur sia a mobile che desktop
-                */}
                 <div className="relative bg-slate-900/60 border border-white/10 w-full max-w-[1050px] h-full md:h-[600px] rounded-none md:rounded-[30px] shadow-2xl flex flex-col md:flex-row overflow-hidden backdrop-blur-md">
 
-                    {/* =======================================
-                        1. LAYOUT DESKTOP
-                       ======================================= */}
-
-                    {/* LATO SINISTRO (Testo Introduttivo) */}
+                    {/* DESKTOP LEFT */}
                     <div className="hidden md:flex w-1/2 p-12 flex-col justify-center relative z-20">
                         <div className="mb-6">
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6">
@@ -137,42 +164,28 @@ const LoginPage = () => {
                                 <span className="block mb-0">Accedi a YOUniFy.</span>
                                 Scopri e promuovi eventi, crea nuove connessioni e cogli le migliori opportunità del mondo universitario.</p>
                         </div>
-
                         <div className="mt-auto">
                             <p className="text-slate-500 text-sm [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">
                                 Non hai ancora un account?{' '}
-                                <a href="/register" className="text-white font-bold hover:underline decoration-younify-blue underline-offset-4 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">
+                                <Link to="/register" className="text-white font-bold hover:underline decoration-younify-blue underline-offset-4 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">
                                     Registrati qui
-                                </a>
+                                </Link>
                             </p>
                         </div>
                     </div>
 
-                    {/* LATO DESTRO (Mockup Telefono Desktop) */}
+                    {/* DESKTOP RIGHT */}
                     <div className="hidden md:flex w-1/2 h-full flex-col justify-center items-center relative z-30">
-                        <div className="
-                            w-[320px] h-[580px]
-                            bg-black
-                            border-[3px] border-slate-800
-                            rounded-[44px] shadow-2xl
-                            flex flex-col overflow-hidden relative
-                            absolute
-                            md:bottom-[-50px]
-                            right-0
-                            rotate-[-2deg] hover:rotate-0
-                            transition-transform duration-500 ease-out
-                        ">
+                        <div className="w-[320px] h-[580px] bg-black border-[3px] border-slate-800 rounded-[44px] shadow-2xl flex flex-col overflow-hidden relative absolute md:bottom-[-50px] right-0 rotate-[-2deg] hover:rotate-0 transition-transform duration-500 ease-out">
                             <div className="flex-1 bg-slate-950/80 md:bg-slate-950 p-6 flex flex-col justify-center relative">
-                                {/* Dynamic Island Desktop */}
                                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-[96px] h-[26px] bg-black rounded-full z-50 justify-between items-center px-3 shadow-sm flex">
                                     <div className="w-2 h-2 rounded-full bg-[#1a1a1a]"></div>
                                     <div className="w-4 h-4 rounded-full bg-[#1a1a1a]"></div>
                                 </div>
-                                {/* Decorazione sfumata */}
                                 <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-younify-blue/20 to-transparent pointer-events-none opacity-50 z-0"></div>
 
                                 <div className="relative z-10 mt-6 md:mt-0">
-                                    <div className="text-center mb-8">
+                                    <div className="text-center mb-6">
                                         <div className="w-12 h-12 bg-gradient-to-tr from-younify-blue to-purple-600 rounded-xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-purple-500/20">
                                             <LogIn className="text-white w-6 h-6" />
                                         </div>
@@ -180,30 +193,29 @@ const LoginPage = () => {
                                         <p className="text-slate-400 text-xs mt-1">Inserisci le credenziali per entrare</p>
                                     </div>
 
-                                    <form onSubmit={handleSubmit}>
-                                        <InputGroup icon={<Mail size={18} />} placeholder="Email" type="email" name="email" onChange={handleChange} errorMessage={errors.email} />
-                                        <InputGroup icon={<Lock size={18} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={errors.password} />
-                                        <button type="submit" className="w-full mt-6 py-3 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/25 hover:shadow-younify-blue/40 transition-all hover:scale-[1.02] active:scale-95">
+                                    <form onSubmit={handleSubmit} noValidate>
+                                        <InputGroup icon={<Mail size={18} />} placeholder="Email / PEC" type="email" name="email" onChange={handleChange} errorMessage={fieldErrors.email} />
+                                        <InputGroup icon={<Lock size={18} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={fieldErrors.password} />
+
+                                        {/* ERRORE GENERALE: Stesso stile degli altri, posizionato sopra il bottone */}
+                                        <div className="mb-2">
+                                            <ErrorMessage message={generalError} centered={true} />
+                                        </div>
+
+                                        <button type="submit" className="w-full mt-2 py-3 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/25 hover:shadow-younify-blue/40 transition-all hover:scale-[1.02] active:scale-95">
                                             Accedi
                                         </button>
                                     </form>
                                 </div>
-                                {/* Home Bar Desktop */}
                                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[35%] h-[4px] bg-slate-100/30 rounded-full block z-50"></div>
                             </div>
                         </div>
                     </div>
 
-
-                    {/* =======================================
-                        2. LAYOUT MOBILE (PULITO - SENZA MOCKUP)
-                       ======================================= */}
+                    {/* MOBILE LAYOUT */}
                     <div className="md:hidden w-full h-full relative z-20 overflow-y-auto px-6 py-8 scrollbar-hide">
-
-                        {/* Wrapper centrato verticalmente */}
                         <div className="min-h-full flex flex-col justify-center">
-
-                            <div className="text-center mb-10">
+                            <div className="text-center mb-8">
                                 <div className="w-16 h-16 bg-gradient-to-tr from-younify-blue to-purple-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-purple-500/20">
                                     <LogIn className="text-white w-8 h-8" />
                                 </div>
@@ -211,11 +223,16 @@ const LoginPage = () => {
                                 <p className="text-slate-400 text-sm mt-2">Inserisci le credenziali per entrare</p>
                             </div>
 
-                            <form onSubmit={handleSubmit}>
-                                <InputGroup icon={<Mail size={20} />} placeholder="Email" type="email" name="email" onChange={handleChange} errorMessage={errors.email} />
-                                <InputGroup icon={<Lock size={20} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={errors.password} />
+                            <form onSubmit={handleSubmit} noValidate>
+                                <InputGroup icon={<Mail size={20} />} placeholder="Email / PEC" type="email" name="email" onChange={handleChange} errorMessage={fieldErrors.email} />
+                                <InputGroup icon={<Lock size={20} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={fieldErrors.password} />
 
-                                <button type="submit" className="w-full mt-6 py-3.5 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/25 active:scale-95 transition-transform">
+                                {/* ERRORE GENERALE (MOBILE) */}
+                                <div className="mb-2">
+                                    <ErrorMessage message={generalError} centered={true} />
+                                </div>
+
+                                <button type="submit" className="w-full mt-2 py-3.5 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/25 active:scale-95 transition-transform">
                                     Accedi
                                 </button>
                             </form>
@@ -223,7 +240,9 @@ const LoginPage = () => {
                             <div className="mt-12 text-center">
                                 <p className="text-slate-500 text-xs">
                                     Non hai un account? <br/>
-                                    <a href="/register" className="text-younify-blue font-bold hover:underline ml-1">Registrati qui</a>
+                                    <Link to="/register" className="text-younify-blue font-bold hover:underline ml-1">
+                                        Registrati qui
+                                    </Link>
                                 </p>
                             </div>
                         </div>

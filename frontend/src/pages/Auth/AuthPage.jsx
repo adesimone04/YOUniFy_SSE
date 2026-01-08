@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from "react-router-dom";
 import {
     User, ArrowRight, ArrowLeft, Mail, Lock, IdCard,
     Building2, Hash, CheckCircle, GraduationCap,
@@ -18,6 +19,7 @@ import { UNIVERSITY_DATA } from '../../data/universities';
 import { CDL_DATA } from '../../data/cdl';
 
 const AuthPage = () => {
+    const navigate = useNavigate();
     const [isHostMode, setIsHostMode] = useState(false);
     const [isAssociation, setIsAssociation] = useState(false);
 
@@ -80,11 +82,17 @@ const AuthPage = () => {
     const handleStudentChange = (e) => {
         const { name, value } = e.target;
 
-        // 1. Aggiorna lo stato
         setStudentData(prev => ({ ...prev, [name]: value }));
 
-        // 2. Validazione Realtime
         let errorMsg = null;
+
+        // --- NUOVO: Controllo lunghezza Nome e Cognome ---
+        if (name === 'firstName' || name === 'lastName') {
+            // Se c'è del testo ma è inferiore a 3 caratteri
+            if (value && value.trim().length < 3) {
+                errorMsg = "Minimo 3 caratteri";
+            }
+        }
 
         if (name === 'email') {
             if (value && !validateEmail(value)) errorMsg = "Email universitaria non valida";
@@ -98,8 +106,6 @@ const AuthPage = () => {
             if (value && value !== studentData.password) errorMsg = "Le password non coincidono";
         }
 
-        // Se il campo non è vuoto, mostra l'errore (o null se corretto).
-        // Se è vuoto, rimuovi l'errore per non "urlare" subito.
         setErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
     };
 
@@ -107,8 +113,13 @@ const AuthPage = () => {
         e.preventDefault();
         const newErrors = {};
 
+        // --- MODIFICA: Controllo lunghezza min 3 ---
         if (!studentData.firstName) newErrors.firstName = "Nome richiesto";
+        else if (studentData.firstName.trim().length < 3) newErrors.firstName = "Minimo 3 caratteri";
+
         if (!studentData.lastName) newErrors.lastName = "Cognome richiesto";
+        else if (studentData.lastName.trim().length < 3) newErrors.lastName = "Minimo 3 caratteri";
+
         if (!studentData.dateOfBirth) newErrors.dateOfBirth = "Data di nascita richiesta";
 
         if (!studentData.email) newErrors.email = "Email richiesta";
@@ -123,9 +134,16 @@ const AuthPage = () => {
         if (!studentData.cdl) newErrors.cdl = "Seleziona un corso";
         if (!studentData.university) newErrors.university = "Seleziona università";
 
+        // --- NUOVO: Controllo Instagram Obbligatorio ---
+        // Rimuoviamo il prefisso e controlliamo se rimane qualcosa
+        const instaUser = studentData.contactsInfo.replace('instagram.com/', '').trim();
+        if (!instaUser) {
+            newErrors.contactsInfo = "Username Instagram richiesto";
+        }
+
         setErrors(newErrors);
 
-        if (Object.keys(newErrors).length > 0) return; // Blocca se ci sono errori
+        if (Object.keys(newErrors).length > 0) return;
 
         alert("Registrazione Studente Riuscita!");
     };
@@ -196,9 +214,14 @@ const AuthPage = () => {
         if (!hostData.province) newErrors.province = "Seleziona provincia";
         if (!hostData.city) newErrors.city = "Seleziona città";
 
+        // --- NUOVO: Controllo Lista Università vuota ---
+        if (hostData.uniList.length === 0) {
+            newErrors.uniList = "Seleziona almeno un'università";
+        }
+
         setHostErrors(newErrors);
 
-        if (Object.keys(newErrors).length > 0) return; // Blocca
+        if (Object.keys(newErrors).length > 0) return;
 
         alert("Registrazione Host Riuscita!");
     };
@@ -222,11 +245,24 @@ const AuthPage = () => {
     };
 
     const handleHostMultiSelect = (val) => {
+        // 1. Aggiorna la lista (logica esistente)
         setHostData(prev => {
             const currentList = prev.uniList;
-            if (currentList.includes(val)) return { ...prev, uniList: currentList.filter(item => item !== val) };
-            else return currentList.length < 5 ? { ...prev, uniList: [...currentList, val] } : prev;
+            if (currentList.includes(val)) {
+                // Se c'è già, la rimuove
+                return { ...prev, uniList: currentList.filter(item => item !== val) };
+            } else {
+                // Se non c'è, la aggiunge (max 5)
+                return currentList.length < 5 ? { ...prev, uniList: [...currentList, val] } : prev;
+            }
         });
+
+        // 2. Rimuovi l'errore se presente (NUOVO)
+        // Usiamo un timeout brevissimo o controlliamo lo stato precedente perché setHostData è asincrono,
+        // ma per l'errore basta sapere che l'utente ha interagito.
+        if (hostErrors.uniList) {
+            setHostErrors(prev => ({ ...prev, uniList: null }));
+        }
     };
 
     const isPasswordValid = studentData.password.length > 0;
@@ -257,8 +293,38 @@ const AuthPage = () => {
         }
     }, [isAssociation]);
 
+    // --- FIX: Aggiorna errore PIVA/CF al cambio della checkbox ---
+    useEffect(() => {
+        // Se esiste già un errore nel campo piva...
+        if (hostErrors.piva) {
+            // ...e il campo è vuoto (quindi l'errore è che manca il dato)
+            if (!hostData.piva) {
+                // Aggiorniamo il testo dell'errore in base alla modalità corrente
+                setHostErrors(prev => ({
+                    ...prev,
+                    piva: isAssociation ? "Codice Fiscale richiesto" : "Partita IVA richiesta"
+                }));
+            } else {
+                // Se invece il campo era compilato (quindi era un errore di formato/regex),
+                // lo puliamo per permettere all'utente di modificarlo senza vedere rosso subito.
+                setHostErrors(prev => ({ ...prev, piva: null }));
+            }
+        }
+    }, [isAssociation]); // Si attiva ogni volta che clicchi la checkbox "Sono un'associazione"
+
+    // [FIX SFONDO MOBILE]
+    useEffect(() => {
+        document.body.style.backgroundColor = '#020617';
+        document.body.style.overscrollBehaviorY = 'none';
+        return () => {
+            document.body.style.backgroundColor = '';
+            document.body.style.overscrollBehaviorY = '';
+        };
+    }, []);
+
     return (
-        <div className="h-dvh w-full bg-slate-950 flex flex-col font-sans overflow-hidden relative">
+        // [FIX LAYOUT] 'fixed inset-0' blocca la viewport evitando che la barra indirizzi crei problemi
+        <div className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
             {/* BACKGROUND */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`${styles.blob} ${styles.blue}`}></div>
@@ -269,155 +335,177 @@ const AuthPage = () => {
                 <div className={`${styles.blob} ${styles.cyan}`}></div>
             </div>
 
-            <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6">
+            <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6 h-full">
                 <div className="relative bg-slate-900/60 border border-white/10 w-full max-w-[1100px] h-full md:h-[750px] rounded-none md:rounded-[30px] shadow-2xl flex flex-col md:flex-row overflow-hidden backdrop-blur-md">
 
-                    {/* --- LAYOUT MOBILE --- */}
-                    <div className="md:hidden flex flex-col w-full h-full relative z-20 overflow-y-auto px-4 pb-4 scrollbar-hide">
+                    {/* ============================================================
+                        LAYOUT MOBILE CON MASCHERA DI SFUMATURA
+                       ============================================================ */}
+                    <div className="md:hidden w-full h-full relative overflow-hidden bg-transparent">
 
-                        {/* 1. TOGGLE - STICKY IN ALTO */}
-                        {/* Ho aggiunto mt-6 per staccarlo dal bordo superiore dato che ho tolto il padding globale */}
-                        <div className="flex w-full bg-slate-950/80 p-1 rounded-xl border border-white/10 mt-6 mb-2 backdrop-blur-md sticky top-0 z-50 shadow-lg shrink-0">
-                            <button onClick={() => setIsHostMode(false)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-300 ${!isHostMode ? 'bg-younify-blue text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Studente</button>
-                            <button onClick={() => setIsHostMode(true)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-300 ${isHostMode ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Host</button>
-                        </div>
-
-                        {/* 2. BLOCCO CENTRALE (TITOLO + FORM) - Centrato Verticalmente */}
-                        <div className="flex-1 flex flex-col justify-center w-full min-h-min py-4">
-
-                            {/* Intestazione Dinamica */}
-                            <AnimatePresence mode='wait'>
-                                <motion.div
-                                    key={isHostMode ? "host-header" : "student-header"}
-                                    // --- MODIFICA QUI: SLIDE LATERALE FLUIDO ---
-                                    // Se diventa Host, entra da destra (x: 30). Se diventa Studente, entra da sinistra (x: -30).
-                                    initial={{ opacity: 0, x: isHostMode ? 30 : -30 }}
-                                    // Si posiziona al centro
-                                    animate={{ opacity: 1, x: 0 }}
-                                    // Se era Host, esce a sinistra (x: -30). Se era Studente, esce a destra (x: 30).
-                                    exit={{ opacity: 0, x: isHostMode ? -30 : 30 }}
-                                    // Usiamo easeInOut per una partenza e un arrivo morbidi
-                                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                                    // -------------------------------------------
-                                    className="text-center mb-6 shrink-0 overflow-hidden" // Aggiunto overflow-hidden per sicurezza
-                                >
-                                    <h2 className="text-xl font-black text-white font-inter [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">{isHostMode ? "Registrati come Host Partner" : "Registrati come studente"}</h2>
-                                    <p className="text-slate-400 text-xs">{isHostMode ? "Registra la tua attività" : "Compila i dati del tuo profilo"}</p>
-                                </motion.div>
-                            </AnimatePresence>
-
-                            {/* Contenitore Form */}
-                            <div className="relative w-full">
-                                <AnimatePresence mode='wait' initial={false}>
-                                    {!isHostMode && (
-                                        <motion.div key="student-mobile" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} transition={{ duration: 0.3, ease: "easeInOut" }}>
-                                            <form className="flex flex-col gap-3" onSubmit={handleStudentSubmit}>
-                                                <div className="flex gap-2 w-full">
-                                                    <InputGroup className="w-1/2 !mb-0" icon={<User size={15} />} placeholder="Nome" type="text" name="firstName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.firstName} />
-                                                    <InputGroup className="w-1/2 !mb-0" icon={<User size={15} />} placeholder="Cognome" type="text" name="lastName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.lastName} />
-                                                </div>
-                                                <InputGroup className="!mb-0" icon={<Calendar size={15} />} placeholder="Data di nascita" type="date" name="dateOfBirth" value={studentData.dateOfBirth} onChange={handleStudentChange} errorMessage={errors.dateOfBirth} />
-                                                <InputGroup className="!mb-0" icon={<Mail size={15} />} placeholder="Email universitaria" type="email" name="email" maxLength={40} onChange={handleStudentChange} errorMessage={errors.email} />
-                                                <div className="flex gap-2 w-full">
-                                                    <div className="w-1/2"><InputGroup className="!mb-0" icon={<Lock size={15} />} placeholder="Password" type="password" name="password" maxLength={100} onChange={handleStudentChange} errorMessage={errors.password} /></div>
-                                                    <div className="w-1/2"><InputGroup className="!mb-0" icon={<CheckCircle size={15} />} placeholder="Conferma" type="password" name="confirmPassword" maxLength={100} onChange={handleStudentChange} errorMessage={errors.confirmPassword} disabled={!isPasswordValid} /></div>
-                                                </div>
-                                                <SearchableDropdown label="Corso di Laurea" icon={<GraduationCap size={15} />} options={CDL_DATA} selected={studentData.cdl} onSelect={(val) => handleSingleSelect('cdl', val)} isGrouped={true} isMulti={false} errorMessage={errors.cdl} />
-                                                <SearchableDropdown label="Università" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={studentData.university} onSelect={(val) => handleSingleSelect('university', val)} isGrouped={true} isMulti={false} errorMessage={errors.university} />
-                                                <div className="w-full bg-slate-950/50 border border-slate-700 rounded-xl flex items-center focus-within:border-younify-blue focus-within:ring-1 focus-within:ring-younify-blue transition-all group overflow-hidden py-0.5 mb-2">
-                                                    <div className="pl-3 text-slate-400 group-focus-within:text-younify-blue transition-colors flex-shrink-0"><Instagram size={15} /></div>
-                                                    <span className="text-slate-500 text-xs font-medium select-none ml-2 flex-shrink-0">instagram.com/</span>
-                                                    <input type="text" placeholder="username" value={studentData.contactsInfo.replace('instagram.com/', '')} onChange={(e) => setStudentData({...studentData, contactsInfo: 'instagram.com/' + e.target.value})} maxLength={50} className="flex-1 bg-transparent border-none text-white placeholder-slate-600 focus:outline-none focus:ring-0 text-sm py-2 px-1" />
-                                                </div>
-                                                <button type="submit" className="w-full mt-2 py-3 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/20">Registrati</button>
-                                            </form>
-                                        </motion.div>
-                                    )}
-
-                                    {isHostMode && (
-                                        <motion.div key="host-mobile" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} transition={{ duration: 0.3, ease: "easeInOut" }}>
-                                            <form className="flex flex-col gap-3" onSubmit={handleHostSubmit}>
-                                                <InputGroup className="!mb-0" icon={<Building2 size={15} />} placeholder="Nome Attività" type="text" name="hostName" maxLength={30} onChange={handleHostChange} errorMessage={hostErrors.hostName} />
-
-                                                {/* CHECKBOX ASSOCIAZIONE - MOBILE */}
-                                                <div className="flex items-center justify-start gap-2 px-1 mb-1 w-full pl-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        id="isAssocMobile"
-                                                        checked={isAssociation}
-                                                        onChange={(e) => setIsAssociation(e.target.checked)}
-                                                        className="appearance-none w-4 h-4 rounded border border-slate-600 bg-slate-950 checked:bg-purple-600 checked:border-purple-600 focus:ring-0 focus:ring-offset-0 cursor-pointer relative
-                                                        after:content-[''] after:hidden checked:after:block after:absolute after:top-[2px] after:left-[5px] after:w-[5px] after:h-[9px] after:border-r-2 after:border-b-2 after:border-white after:rotate-45"
-                                                    />
-                                                    <label htmlFor="isAssocMobile" className="text-slate-400 text-[11px] cursor-pointer select-none mt-0.5 hover:text-white transition-colors">
-                                                        Sono un'associazione
-                                                    </label>
-                                                </div>
-
-                                                {/* LOGICA CONDIZIONALE MOBILE */}
-                                                <motion.div layout className="w-full relative mb-1">
-                                                    <AnimatePresence mode='wait'>
-                                                        {isAssociation ? (
-                                                            <motion.div key="mobile-assoc" {...inputTransition} className="w-full">
-                                                                <InputGroup
-                                                                    className="!mb-0"
-                                                                    icon={<CreditCard size={15} />}
-                                                                    placeholder="Codice Fiscale Ente"
-                                                                    type="text"
-                                                                    name="piva"
-                                                                    value={hostData.piva}
-                                                                    onChange={handleHostChange}
-                                                                    maxLength={16}
-                                                                    errorMessage={hostErrors.piva}
-                                                                />
-                                                            </motion.div>
-                                                        ) : (
-                                                            <motion.div key="mobile-piva" {...inputTransition} className="w-full">
-                                                                <InputGroup
-                                                                    className="!mb-0"
-                                                                    icon={<Receipt size={15} />}
-                                                                    placeholder="Partita IVA"
-                                                                    type="text"
-                                                                    name="piva"
-                                                                    value={hostData.piva}
-                                                                    onChange={handleHostChange}
-                                                                    maxLength={11}
-                                                                    errorMessage={hostErrors.piva}
-                                                                />
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
-                                                </motion.div>
-
-                                                <InputGroup className="!mb-0" icon={<FileCheck size={15} />} placeholder="PEC" type="email" name="pec" maxLength={40} onChange={handleHostChange} errorMessage={hostErrors.pec} />
-                                                <div className="flex gap-2 w-full">
-                                                    <div className="w-1/2"><InputGroup className="!mb-0" icon={<Lock size={15} />} placeholder="Password" type="password" name="password" maxLength={100} onChange={handleHostChange} errorMessage={hostErrors.password} /></div>
-                                                    <div className="w-1/2"><InputGroup className="!mb-0" icon={<CheckCircle size={15} />} placeholder="Conferma" type="password" name="confirmPassword" maxLength={100} onChange={handleHostChange} errorMessage={hostErrors.confirmPassword} disabled={!isHostPasswordValid} /></div>
-                                                </div>
-                                                <div className="flex gap-2 w-full">
-                                                    <div className="w-1/3"><SearchableDropdown label="Provincia" icon={<MapPin size={15} />} options={Object.keys(italianPlaces).sort()} selected={hostData.province} onSelect={(val) => handleSingleSelect('province', val, true)} isGrouped={false} errorMessage={hostErrors.province} /></div>
-                                                    <div className="w-2/3"><SearchableDropdown label="Città" icon={<MapPin size={15} />} options={hostData.province ? (italianPlaces[hostData.province] || []) : []} selected={hostData.city} onSelect={(val) => handleSingleSelect('city', val, true)} isGrouped={false} disabled={!hostData.province} errorMessage={hostErrors.city} /></div>
-                                                </div>
-                                                <SearchableDropdown label="Università (massimo 5)" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={hostData.uniList} onSelect={handleHostMultiSelect} isGrouped={true} isMulti={true} limit={5} />
-                                                <button type="submit" className="w-full mt-2 py-3 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-lg shadow-purple-600/20">Registrati</button>
-                                            </form>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                        {/* 1. HEADER (SLIDER) - BLOCCATO IN ALTO */}
+                        {/* Nessun bg, nessun blur. Solo trasparenza pura come richiesto. */}
+                        <div className="absolute top-0 left-0 w-full z-50 px-4 pt-6 pb-2 bg-transparent">
+                            <div className="flex w-full bg-slate-950/80 p-1 rounded-xl border border-white/10 shadow-lg">
+                                <button type="button" onClick={() => setIsHostMode(false)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-300 ${!isHostMode ? 'bg-younify-blue text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Studente</button>
+                                <button type="button" onClick={() => setIsHostMode(true)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-300 ${isHostMode ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}>Host</button>
                             </div>
                         </div>
 
-                        {/* 3. LINK LOGIN - IN BASSO */}
-                        <AnimatePresence mode='wait'>
-                            {/* Aggiunto shrink-0 per evitare che venga schiacciato e mb-4 per staccarlo dal bordo */}
-                            <motion.div key={isHostMode ? "host-login-link" : "student-login-link"} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="mt-4 text-center shrink-0 mb-6">
-                                <p className="text-slate-500 text-xs">Hai già un account? <br/> <a href="#" className={`font-bold hover:underline ${isHostMode ? 'text-purple-400' : 'text-younify-blue'}`}>Accedi qui</a></p>
-                            </motion.div>
-                        </AnimatePresence>
+                        {/* 2. AREA DI SCROLL CON MASCHERA */}
+                        {/* La maschera CSS rende trasparente il contenuto nei primi 90px (dove sta l'header),
+                            così il testo non si vede "sotto" l'header trasparente, ma vedi i blob. */}
+                        <div
+                            className="w-full h-full overflow-y-auto scrollbar-hide"
+                            style={{
+                                maskImage: 'linear-gradient(to bottom, transparent 0px, transparent 80px, black 95px, black 100%)',
+                                WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, transparent 80px, black 95px, black 100%)'
+                            }}
+                        >
+                            {/* pt-[90px] per spingere il contenuto iniziale sotto l'area mascherata */}
+                            <div className="min-h-full flex flex-col px-4 pt-[90px] pb-10">
+
+                                {/* WRAPPER CENTRATO PER IL FORM */}
+                                <motion.div layout className="mt-auto mb-auto w-full flex flex-col justify-center">
+
+                                    {/* Intestazione Dinamica */}
+                                    <AnimatePresence mode='wait'>
+                                        <motion.div
+                                            layout
+                                            key={isHostMode ? "host-header" : "student-header"}
+                                            initial={{ opacity: 0, x: isHostMode ? 30 : -30 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: isHostMode ? -30 : 30 }}
+                                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                                            className="text-center mb-6 shrink-0 overflow-hidden"
+                                        >
+                                            <h2 className="text-xl font-black text-white font-inter [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">{isHostMode ? "Registrati come Host Partner" : "Registrati come studente"}</h2>
+                                            <p className="text-slate-400 text-xs">{isHostMode ? "Registra la tua attività" : "Compila i dati del tuo profilo"}</p>
+                                        </motion.div>
+                                    </AnimatePresence>
+
+                                    {/* Form */}
+                                    <div className="relative w-full">
+                                        <AnimatePresence mode='wait' initial={false}>
+                                            {!isHostMode && (
+                                                <motion.div
+                                                    key="student-mobile"
+                                                    initial={{ opacity: 0, x: -50 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: 50 }}
+                                                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                >
+                                                    <form className="flex flex-col gap-3" onSubmit={handleStudentSubmit}>
+                                                        <div className="flex gap-2 w-full">
+                                                            <InputGroup className="w-1/2 !mb-0" icon={<User size={15} />} placeholder="Nome" type="text" name="firstName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.firstName} />
+                                                            <InputGroup className="w-1/2 !mb-0" icon={<User size={15} />} placeholder="Cognome" type="text" name="lastName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.lastName} />
+                                                        </div>
+                                                        <InputGroup className="!mb-0" icon={<Calendar size={15} />} placeholder="Data di nascita" type="date" name="dateOfBirth" value={studentData.dateOfBirth} onChange={handleStudentChange} errorMessage={errors.dateOfBirth} />
+                                                        <InputGroup className="!mb-0" icon={<Mail size={15} />} placeholder="Email universitaria" type="email" name="email" maxLength={40} onChange={handleStudentChange} errorMessage={errors.email} />
+                                                        <div className="flex gap-2 w-full">
+                                                            <div className="w-1/2"><InputGroup className="!mb-0" icon={<Lock size={15} />} placeholder="Password" type="password" name="password" maxLength={100} onChange={handleStudentChange} errorMessage={errors.password} /></div>
+                                                            <div className="w-1/2"><InputGroup className="!mb-0" icon={<CheckCircle size={15} />} placeholder="Conferma" type="password" name="confirmPassword" maxLength={100} onChange={handleStudentChange} errorMessage={errors.confirmPassword} disabled={!isPasswordValid} /></div>
+                                                        </div>
+                                                        <SearchableDropdown label="Corso di Laurea" icon={<GraduationCap size={15} />} options={CDL_DATA} selected={studentData.cdl} onSelect={(val) => handleSingleSelect('cdl', val)} isGrouped={true} isMulti={false} errorMessage={errors.cdl} />
+                                                        <SearchableDropdown label="Università" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={studentData.university} onSelect={(val) => handleSingleSelect('university', val)} isGrouped={true} isMulti={false} errorMessage={errors.university} />
+                                                        <div className="mb-1 md:mb-2 w-full">
+                                                            <div className={`w-full bg-slate-950/50 border rounded-xl flex items-center focus-within:ring-1 transition-all group overflow-hidden py-0.5
+                                                                ${errors.contactsInfo
+                                                                ? 'border-red-500 text-red-500 focus-within:border-red-500 focus-within:ring-red-500'
+                                                                : 'border-slate-700 focus-within:border-younify-blue focus-within:ring-younify-blue'}`}>
+                                                                <div className={`pl-3 transition-colors flex-shrink-0 ${errors.contactsInfo ? 'text-red-500' : 'text-slate-400 group-focus-within:text-younify-blue'}`}>
+                                                                    <Instagram size={15} />
+                                                                </div>
+                                                                <span className={`text-xs font-medium select-none ml-2 flex-shrink-0 ${errors.contactsInfo ? 'text-red-500' : 'text-slate-500'}`}>
+                                                                    instagram.com/
+                                                                </span>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="username"
+                                                                    value={studentData.contactsInfo.replace('instagram.com/', '')}
+                                                                    onChange={(e) => {
+                                                                        const newVal = 'instagram.com/' + e.target.value;
+                                                                        setStudentData({...studentData, contactsInfo: newVal});
+                                                                        if(errors.contactsInfo && e.target.value.trim().length > 0) {
+                                                                            setErrors(prev => ({...prev, contactsInfo: null}));
+                                                                        }
+                                                                    }}
+                                                                    maxLength={50}
+                                                                    className="flex-1 bg-transparent border-none text-white placeholder-slate-600 focus:outline-none focus:ring-0 text-sm py-2 px-1"
+                                                                />
+                                                            </div>
+                                                            <ErrorMessage message={errors.contactsInfo} />
+                                                        </div>
+                                                        <button type="submit" className="w-full mt-2 py-3 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/20 active:scale-95 transition-transform">Registrati</button>
+                                                    </form>
+                                                </motion.div>
+                                            )}
+
+                                            {isHostMode && (
+                                                <motion.div
+                                                    key="host-mobile"
+                                                    initial={{ opacity: 0, x: 50 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: -50 }}
+                                                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                                                >
+                                                    <form className="flex flex-col gap-3" onSubmit={handleHostSubmit}>
+                                                        <InputGroup className="!mb-0" icon={<Building2 size={15} />} placeholder="Nome Attività" type="text" name="hostName" maxLength={30} onChange={handleHostChange} errorMessage={hostErrors.hostName} />
+                                                        <div className="flex items-center justify-start gap-2 px-1 mb-1 w-full pl-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                id="isAssocMobile"
+                                                                checked={isAssociation}
+                                                                onChange={(e) => setIsAssociation(e.target.checked)}
+                                                                className="appearance-none w-4 h-4 rounded border border-slate-600 bg-slate-950 checked:bg-purple-600 checked:border-purple-600 focus:ring-0 focus:ring-offset-0 cursor-pointer relative after:content-[''] after:hidden checked:after:block after:absolute after:top-[2px] after:left-[5px] after:w-[5px] after:h-[9px] after:border-r-2 after:border-b-2 after:border-white after:rotate-45"
+                                                            />
+                                                            <label htmlFor="isAssocMobile" className="text-slate-400 text-[11px] cursor-pointer select-none mt-0.5 hover:text-white transition-colors">Sono un'associazione</label>
+                                                        </div>
+                                                        <motion.div layout className="w-full relative mb-1">
+                                                            <AnimatePresence mode='wait'>
+                                                                {isAssociation ? (
+                                                                    <motion.div key="mobile-assoc" {...inputTransition} className="w-full">
+                                                                        <InputGroup className="!mb-0" icon={<CreditCard size={15} />} placeholder="Codice Fiscale Ente" type="text" name="piva" value={hostData.piva} onChange={handleHostChange} maxLength={16} errorMessage={hostErrors.piva} />
+                                                                    </motion.div>
+                                                                ) : (
+                                                                    <motion.div key="mobile-piva" {...inputTransition} className="w-full">
+                                                                        <InputGroup className="!mb-0" icon={<Receipt size={15} />} placeholder="Partita IVA" type="text" name="piva" value={hostData.piva} onChange={handleHostChange} maxLength={11} errorMessage={hostErrors.piva} />
+                                                                    </motion.div>
+                                                                )}
+                                                            </AnimatePresence>
+                                                        </motion.div>
+                                                        <InputGroup className="!mb-0" icon={<FileCheck size={15} />} placeholder="PEC" type="email" name="pec" maxLength={40} onChange={handleHostChange} errorMessage={hostErrors.pec} />
+                                                        <div className="flex gap-2 w-full">
+                                                            <div className="w-1/2"><InputGroup className="!mb-0" icon={<Lock size={15} />} placeholder="Password" type="password" name="password" maxLength={100} onChange={handleHostChange} errorMessage={hostErrors.password} /></div>
+                                                            <div className="w-1/2"><InputGroup className="!mb-0" icon={<CheckCircle size={15} />} placeholder="Conferma" type="password" name="confirmPassword" maxLength={100} onChange={handleHostChange} errorMessage={hostErrors.confirmPassword} disabled={!isHostPasswordValid} /></div>
+                                                        </div>
+                                                        <div className="flex gap-2 w-full">
+                                                            <div className="w-1/3"><SearchableDropdown label="Provincia" icon={<MapPin size={15} />} options={Object.keys(italianPlaces).sort()} selected={hostData.province} onSelect={(val) => handleSingleSelect('province', val, true)} isGrouped={false} errorMessage={hostErrors.province} /></div>
+                                                            <div className="w-2/3"><SearchableDropdown label="Città" icon={<MapPin size={15} />} options={hostData.province ? (italianPlaces[hostData.province] || []) : []} selected={hostData.city} onSelect={(val) => handleSingleSelect('city', val, true)} isGrouped={false} disabled={!hostData.province} errorMessage={hostErrors.city} /></div>
+                                                        </div>
+                                                        <SearchableDropdown label="Università (massimo 5)" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={hostData.uniList} onSelect={handleHostMultiSelect} isGrouped={true} isMulti={true} limit={5} errorMessage={hostErrors.uniList}/>
+                                                        <button type="submit" className="w-full mt-2 py-3 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-lg shadow-purple-600/20 active:scale-95 transition-transform">Registrati</button>
+                                                    </form>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+                                </motion.div>
+
+                                {/* 3. FOOTER (LINK LOGIN) */}
+                                <motion.div layout className="shrink-0 pt-6 pb-2 text-center w-full">
+                                    <p className="text-slate-500 text-xs">
+                                        Hai già un account? <br/>
+                                        <a href="#" className={`font-bold hover:underline transition-colors duration-300 ${isHostMode ? 'text-purple-400' : 'text-younify-blue'}`}>Accedi qui</a>
+                                    </p>
+                                </motion.div>
+
+                            </div>
+                        </div>
 
                     </div>
 
-                    {/* ---- DESKTOP LAYOUT ---- */}
+                    {/* ---- DESKTOP LAYOUT (INVARIATO) ---- */}
 
                     {/* DESKTOP STUDENT FORM */}
                     <div className={`hidden md:flex w-1/2 h-full flex-col justify-center items-center p-5 transition-all duration-700 ${isHostMode ? 'opacity-0 pointer-events-none' : 'opacity-100 delay-300'}`}>
@@ -443,10 +531,38 @@ const AuthPage = () => {
                                 </div>
                                 <SearchableDropdown label="Corso di Laurea" icon={<GraduationCap size={15} />} options={CDL_DATA} selected={studentData.cdl} onSelect={(val) => handleSingleSelect('cdl', val)} isGrouped={true} isMulti={false} errorMessage={errors.cdl} />
                                 <SearchableDropdown label="Università" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={studentData.university} onSelect={(val) => handleSingleSelect('university', val)} isGrouped={true} isMulti={false} errorMessage={errors.university} />
-                                <div className="w-full bg-slate-950/50 border border-slate-700 rounded-xl flex items-center focus-within:border-younify-blue focus-within:ring-1 focus-within:ring-younify-blue transition-all group overflow-hidden py-0.5 mb-2">
-                                    <div className="pl-3 text-slate-400 group-focus-within:text-younify-blue transition-colors flex-shrink-0"><Instagram size={15} /></div>
-                                    <span className="text-slate-500 text-xs font-medium select-none ml-2 flex-shrink-0">instagram.com/</span>
-                                    <input type="text" name="contactsInfo" maxLength={50} placeholder="username" value={studentData.contactsInfo.replace('instagram.com/', '')} onChange={(e) => setStudentData({...studentData, contactsInfo: 'instagram.com/' + e.target.value})} className="flex-1 bg-transparent border-none text-white placeholder-slate-600 focus:outline-none focus:ring-0 text-sm py-2 px-1" />
+                                {/* Campo Instagram con gestione Errori */}
+                                <div className="mb-1 md:mb-2 w-full">
+                                    <div className={`w-full bg-slate-950/50 border rounded-xl flex items-center focus-within:ring-1 transition-all group overflow-hidden py-0.5
+                                       ${errors.contactsInfo
+                                        ? 'border-red-500 text-red-500 focus-within:border-red-500 focus-within:ring-red-500'
+                                        : 'border-slate-700 focus-within:border-younify-blue focus-within:ring-younify-blue'}`}>
+
+                                        <div className={`pl-3 transition-colors flex-shrink-0 ${errors.contactsInfo ? 'text-red-500' : 'text-slate-400 group-focus-within:text-younify-blue'}`}>
+                                            <Instagram size={15} />
+                                        </div>
+
+                                        <span className={`text-xs font-medium select-none ml-2 flex-shrink-0 ${errors.contactsInfo ? 'text-red-500' : 'text-slate-500'}`}>
+                                            instagram.com/
+                                        </span>
+
+                                        <input
+                                            type="text"
+                                            placeholder="username"
+                                            value={studentData.contactsInfo.replace('instagram.com/', '')}
+                                            onChange={(e) => {
+                                                const newVal = 'instagram.com/' + e.target.value;
+                                                setStudentData({...studentData, contactsInfo: newVal});
+                                                // Rimuovi errore mentre scrive
+                                                if(errors.contactsInfo && e.target.value.trim().length > 0) {
+                                                    setErrors(prev => ({...prev, contactsInfo: null}));
+                                                }
+                                            }}
+                                            maxLength={50}
+                                            className="flex-1 bg-transparent border-none text-white placeholder-slate-600 focus:outline-none focus:ring-0 text-sm py-2 px-1"
+                                        />
+                                    </div>
+                                    <ErrorMessage message={errors.contactsInfo} />
                                 </div>
                                 <button type="submit" className="mt-3 py-2.5 px-6 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg hover:shadow-younify-blue/50 transition-all hover:scale-[1.02] active:scale-95 flex-shrink-0">Registrati</button>
                             </form>
@@ -536,10 +652,10 @@ const AuthPage = () => {
 
                                 <div className="flex gap-2 w-full">
                                     <div className="w-1/3"><SearchableDropdown label="Provincia" icon={<MapPin size={15} />} options={Object.keys(italianPlaces).sort()} selected={hostData.province} onSelect={(val) => handleSingleSelect('province', val, true)} isGrouped={false} isMulti={false} errorMessage={hostErrors.province} /></div>
-                                    <div className="w-2/3"><SearchableDropdown label={hostData.province ? "Seleziona Città" : "Scegli prima la provincia"} icon={<MapPin size={15} />} options={hostData.province ? (italianPlaces[hostData.province] || []) : []} selected={hostData.city} onSelect={(val) => handleSingleSelect('city', val, true)} isGrouped={false} isMulti={false} disabled={!hostData.province} errorMessage={hostErrors.city} /></div>
+                                    <div className="w-2/3"><SearchableDropdown label="Città" icon={<MapPin size={15} />} options={hostData.province ? (italianPlaces[hostData.province] || []) : []} selected={hostData.city} onSelect={(val) => handleSingleSelect('city', val, true)} isGrouped={false} isMulti={false} disabled={!hostData.province} errorMessage={hostErrors.city} /></div>
                                 </div>
 
-                                <SearchableDropdown label="Università (massimo 5)" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={hostData.uniList} onSelect={handleHostMultiSelect} isGrouped={true} isMulti={true} limit={5} />
+                                <SearchableDropdown label="Università (massimo 5)" icon={<School size={15} />} options={UNIVERSITY_DATA} selected={hostData.uniList} onSelect={handleHostMultiSelect} isGrouped={true} isMulti={true} limit={5} errorMessage={hostErrors.uniList}/>
 
                                 <button type="submit" className="mt-3 py-2.5 px-6 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-lg hover:shadow-purple-600/50 transition-all hover:scale-[1.02] active:scale-95 flex-shrink-0">Registrati</button>
                             </form>
