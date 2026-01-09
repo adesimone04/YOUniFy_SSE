@@ -8,64 +8,55 @@ import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class EventEditService {
+
     private final EventRepository eventRepository;
     private final ImageStorageService imageStorageService;
     private final String UPLOAD_DIR = "uploads/events";
 
     @Transactional(rollbackFor = Exception.class)
-    public void edit(Long eventID, EventEditRequest eventEditRequest) throws IOException {
-        Optional<Event> opt = eventRepository.findById(eventID);
-        if (!opt.isPresent()){
-            throw new ResourceNotFoundException("Event not found");
-        }
+    public void edit(Long eventID, EventEditRequest eventEditRequest) {
 
-        Event event = opt.get();
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Host host = (Host) principal;
-        if(!event.getHost().getID().equals(host.getID())){
-            throw new ResourceNotFoundException("Host not found");
-        }
 
-        if (eventEditRequest.getName() != null && !eventEditRequest.getName().isBlank()) {
-            event.setName(eventEditRequest.getName());
-        }
+        Optional<Event> opt = eventRepository.findById(eventID);
+        if(opt.isPresent()){
 
-        if (eventEditRequest.getDescription() != null && !eventEditRequest.getDescription().isBlank()) {
-            event.setDescription(eventEditRequest.getDescription());
-        }
+            Event event = opt.get();
+            if(event.getHost().getID().equals(host.getID())){
 
-        if (eventEditRequest.getDateandtime() != null) {
-            event.setDateandtime(eventEditRequest.getDateandtime());
-        }
+                event.setName(eventEditRequest.getName());
+                event.setDescription(eventEditRequest.getDescription());
+                event.setDateAndTime(eventEditRequest.getDateAndTime());
+                event.setStreet(eventEditRequest.getStreet());
+                event.setCity(eventEditRequest.getCity());
+                event.setCAP(eventEditRequest.getCAP());
 
-        if (eventEditRequest.getStreet() != null && !eventEditRequest.getStreet().isBlank()) {
-            event.setStreet(eventEditRequest.getStreet());
-        }
+                MultipartFile file = eventEditRequest.getPoster();
+                if(file != null && !file.isEmpty()){
 
-        if (eventEditRequest.getCity() != null && !eventEditRequest.getCity().isBlank()) {
-            event.setCity(eventEditRequest.getCity());
-        }
+                    String fileName = event.getPoster();
+                    fileName = fileName.substring(fileName.lastIndexOf("/"));
+                    event.setPoster(imageStorageService.uploadImage(file, fileName, UPLOAD_DIR));
+                }
 
-        if (eventEditRequest.getCAP() != null) {
-            event.setCAP(eventEditRequest.getCAP());
+                // add notification system (SGN) for joined user when information are changed
+                eventRepository.save(event);
+            }
+            else throw new AccessDeniedException("Access is denied for this operation");
         }
-
-        if (eventEditRequest.getPoster() != null && !event.getPoster().isEmpty()) {
-            String newPosterPath = imageStorageService.uploadImage(eventEditRequest.getPoster(), "events",  UPLOAD_DIR);
-            event.setPoster(newPosterPath);
-        }
-
-        eventRepository.save(event);
+        else throw new ResourceNotFoundException("Event not found");
     }
 }
 
