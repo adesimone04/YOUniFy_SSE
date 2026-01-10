@@ -123,7 +123,7 @@ public class HostSignUpService {
     private boolean validatePassword(String password, String confirmPassword) {
 
         return password.equals(confirmPassword) &&
-                password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$");
+                password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!.]).{8,}$");
 
     }
 }
