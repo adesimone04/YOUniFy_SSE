@@ -1,6 +1,7 @@
 package it.younify.modules.sgac.model.dto.request;
 
 
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 
@@ -18,13 +19,21 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 30)
     private String hostName;
+
+    /**
+     * Reserved for university association.
+     * This field is mandatory.
+     */
+    private boolean association;
 
     /**
      * The host's VAT number (Partita IVA).
      * This field is mandatory.
      */
     @NotBlank
+    @Size(min = 11, max = 16)
     private String PIVA;
 
     /**
@@ -32,6 +41,7 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 40)
     private String PEC;
 
     /**
@@ -39,6 +49,7 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(min = 8, max = 100)
     private String password;
 
     /**
@@ -47,6 +58,7 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(min = 8, max = 100)
     private String confirmPassword;
 
     /**
@@ -54,6 +66,7 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 30)
     private String province;
 
     /**
@@ -61,6 +74,7 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 30)
     private String city;
 
     /**
@@ -68,5 +82,6 @@ public class HostSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(max = 255)
     private String uniList;
 }

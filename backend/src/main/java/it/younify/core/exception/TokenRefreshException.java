@@ -1,5 +1,7 @@
 package it.younify.core.exception;
 
+import lombok.Getter;
+
 /**
  * The {@code TokenRefreshException} is a runtime exception that is thrown when an error occurs
  * during the token refresh process.
@@ -8,9 +10,17 @@ package it.younify.core.exception;
  *
  * @see it.younify.modules.sgac.service.RefreshTokenService
  */
+@Getter
 public class TokenRefreshException extends RuntimeException {
+
+    private String internalCode;
 
     public TokenRefreshException(String message) {
         super(message);
+    }
+
+    public TokenRefreshException(String message, String internalCode) {
+        super(message);
+        this.internalCode = internalCode;
     }
 }

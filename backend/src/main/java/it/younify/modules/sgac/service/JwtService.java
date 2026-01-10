@@ -54,7 +54,7 @@ public class JwtService {
         }
         else {
 
-            throw new IllegalArgumentException("Tipo di utente non supportato per la generazione token");
+            throw new IllegalArgumentException("USER_NOT_ABILITATED_FOR_TOKEN");
         }
 
         return generateToken(extraClaims, userDetails);

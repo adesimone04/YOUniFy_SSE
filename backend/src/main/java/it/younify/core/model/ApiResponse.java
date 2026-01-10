@@ -33,6 +33,11 @@ public class ApiResponse<T> {
     private String message;
 
     /**
+     * The response's internal code.
+     */
+    private String internalCode;
+
+    /**
      * The data payload of the response.
      */
     private T data;

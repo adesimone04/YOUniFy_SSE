@@ -1,5 +1,6 @@
 package it.younify.modules.sgac.service;
 
+import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.adapter.emailsender.EmailProvider;
 import it.younify.core.utils.TwoFactorUtility;
 import it.younify.modules.sgac.model.entity.Code2FA;
@@ -8,12 +9,14 @@ import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.Code2FARepository;
 import it.younify.modules.sgac.repository.HostRepository;
 import it.younify.modules.sgac.repository.UserRepository;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * The {@code Generate2FAService} class is responsible for generating and sending two-factor authentication (2FA) codes.
@@ -41,50 +44,80 @@ public class Generate2FAService {
      * <p>
      * Note: A new code is generated and sent, and a corresponding {@link Code2FA} entity is persisted.
      *
-     * @param ID The unique identifier of the user or host account.
+     * @param ID of the user or host account.
      * @see it.younify.modules.sgac.model.entity.User
      * @see it.younify.modules.sgac.model.entity.Host
      * @see it.younify.modules.sgac.model.entity.Code2FA
      */
     @Transactional(rollbackFor = Exception.class)
-    public void send2FARequest(String ID){
+    public Instant send2FARequest(String ID) {
 
         String code2FA = TwoFactorUtility.generateCode();
         String message = "Your code 2FA is: " + code2FA;
 
         if (ID.startsWith("U")) {
 
-            User user = userRepository.findById(ID).get();
-            code2FARepository.deleteByUser(user);
-            code2FARepository.flush();
+            Optional<User> optU = userRepository.findById(ID);
 
-            code2FARepository.save(
-                        Code2FA.builder()
-                                .code(code2FA)
-                                .expiryDate((Instant.now().plusMillis(expiration2FA)))
-                                .errorCount(0)
-                                .user(user).
-                                build()
-            );
+            if(optU.isPresent()){
 
-            emailProvider.send2FAEmail(user.getEmail(), message);
+                User user = optU.get();
+                if(!user.isEnabled()){
+
+                    code2FARepository.deleteByUser(user);
+                    code2FARepository.flush();
+
+                    Instant expiry = Instant.now().plusSeconds(expiration2FA);
+
+                    code2FARepository.save(
+                            Code2FA.builder()
+                                    .code(code2FA)
+                                    .expiryDate(expiry)
+                                    .errorCount(0)
+                                    .user(user).
+                                    build()
+                    );
+
+                    emailProvider.send2FAEmail(user.getEmail(), message);
+                    return expiry;
+                }
+                throw new BadCredentialsException("The account ID is already enabled");
+            }
         }
         else{
 
-            Host host = hostRepository.findById(ID).get();
-            code2FARepository.deleteByHost(host);
-            code2FARepository.flush();
+            if(ID.startsWith("H")){
 
-            code2FARepository.save(
-                    Code2FA.builder()
-                            .code(code2FA)
-                            .expiryDate((Instant.now().plusMillis(expiration2FA)))
-                            .errorCount(0)
-                            .host(host)
-                            .build()
-            );
-            //in production switch the API for send on Host PEC
-            emailProvider.send2FAEmail("younifytester@gmail.com", message);
+                Optional<Host> optH = hostRepository.findById(ID);
+
+                if(optH.isPresent()){
+
+                    Host host = optH.get();
+                    if(!host.isEnabled()){
+
+                        code2FARepository.deleteByHost(host);
+                        code2FARepository.flush();
+
+                        Instant expiry = Instant.now().plusSeconds(expiration2FA);
+
+                        code2FARepository.save(
+                                Code2FA.builder()
+                                        .code(code2FA)
+                                        .expiryDate(expiry)
+                                        .errorCount(0)
+                                        .host(host)
+                                        .build()
+                        );
+
+                        //in production switch the API for send on Host PEC
+                        emailProvider.send2FAEmail("younifytester@gmail.com", message);
+                        return expiry;
+                    }
+                    throw new BadCredentialsException("The account ID is already enabled");
+                }
+            }
         }
+
+        throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
     }
 }

@@ -1,7 +1,10 @@
 package it.younify.modules.sgac.model.dto.response;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.Instant;
 
 /**
  * The {@code AccountSummary} class is a Data Transfer Object (DTO) that provides
@@ -15,6 +18,11 @@ import lombok.Data;
 public class AccountSummary {
 
     /**
+     * The unique identifier of the account attempting to authenticate.
+     */
+    private String ID;
+
+    /**
      * The name associated with the account (e.g., user's first name or host's name).
      */
     private String accountName;
@@ -23,4 +31,9 @@ public class AccountSummary {
      * The email address/PEC associated with the account.
      */
     private String accountEmail;
+
+    /**
+     * The expiry date of 2FA code.
+     */
+    private Instant expiryDate;
 }

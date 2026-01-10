@@ -1,6 +1,7 @@
 package it.younify.modules.sgac.model.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,5 +32,6 @@ public class Authentication2FARequest {
      * This field is mandatory.
      */
     @NotBlank
+    @Size(min = 6, max = 6)
     private String codeInserted;
 }

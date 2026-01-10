@@ -35,7 +35,14 @@ public class ApiErrorResponse {
     private String message;
 
     /**
+     * The response's internal code.
+     */
+    private String internalCode;
+
+    /**
      * The path of the request that resulted in the error.
      */
     private String path;
+
+
 }
