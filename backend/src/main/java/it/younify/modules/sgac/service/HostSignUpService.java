@@ -71,7 +71,7 @@ public class HostSignUpService {
                         .build();
             }
 
-            throw new ResourceAlreadyExistsException("This host already exists. Proceed to login");
+            throw new ResourceAlreadyExistsException("This host already exists. Proceed to login", "ALREADY_REGISTERED");
         }
         else{
 
@@ -105,13 +105,13 @@ public class HostSignUpService {
                     }
 
                     throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                            "one number, and one special symbol");
+                            "one number, and one special symbol", "PASSWORD_NOT_SAFE");
                 }
 
-                throw new BadRequestException("The PEC address " + PEC + " is not valid");
+                throw new BadRequestException("The PEC address " + PEC + " is not valid", "PEC_ADDRESS_NOT_VALID");
             }
 
-            throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA);
+            throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA, "PEC_ADDRESS_DOESNT_MATCH_VATCODE");
         }
     }
 

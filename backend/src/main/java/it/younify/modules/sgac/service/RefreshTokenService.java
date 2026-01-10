@@ -49,19 +49,19 @@ public class RefreshTokenService {
      */
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
-        if(refreshTokenRequest.getRefreshToken() == null){ throw new TokenRefreshException("Refresh token not valid"); }
+        if(refreshTokenRequest.getRefreshToken() == null){ throw new TokenRefreshException("Refresh token not valid", "WRONG_REFRESH_TOKEN"); }
 
         RefreshToken existingToken = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshTokenRequest.getRefreshToken()))
-                .orElseThrow(() -> new TokenRefreshException("Refresh Token not found"));
+                .orElseThrow(() -> new TokenRefreshException("Refresh Token not found", "TOKEN_NOT_FOUND"));
 
-        if(existingToken.isRevoked()){ throw new TokenRefreshException("Refresh token revoked or not valid"); }
+        if(existingToken.isRevoked()){ throw new TokenRefreshException("Refresh token revoked or not valid", "TOKEN_REVOKED"); }
 
         if (existingToken.getExpiryDate().isBefore(Instant.now())) {
 
             existingToken.setRevoked(true);
             refreshTokenRepository.save(existingToken);
 
-            throw new TokenRefreshException("Refresh token expired. Login requested");
+            throw new TokenRefreshException("Refresh token expired. Login requested", "TOKEN_EXPIRED");
         }
 
         String jwtToken = null;

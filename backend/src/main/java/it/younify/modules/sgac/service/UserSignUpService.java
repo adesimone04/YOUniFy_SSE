@@ -68,7 +68,7 @@ public class UserSignUpService {
                         .build();
             }
 
-            throw new ResourceAlreadyExistsException("This user already exists. Proceed to login");
+            throw new ResourceAlreadyExistsException("This user already exists. Proceed to login", "ALREADY_REGISTERED");
         }
         else {
 
@@ -100,10 +100,10 @@ public class UserSignUpService {
                 }
 
                 throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                        "one number, and one special symbol");
+                        "one number, and one special symbol", "PASSWORD_NOT_SAFE");
             }
 
-            throw new BadRequestException("The email " + email + " does not belong to any Italian university");
+            throw new BadRequestException("The email " + email + " does not belong to any Italian university", "EMAIL_NOT_VALID");
         }
     }
 
