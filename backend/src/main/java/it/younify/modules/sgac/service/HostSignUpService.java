@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -50,12 +51,14 @@ public class HostSignUpService {
      * @throws ResourceAlreadyExistsException if a host with the given PEC already exists and is enabled.
      * @throws BadRequestException if the password is invalid or the PEC does not match the "Partita IVA".
      */
+    @Transactional(rollbackFor = Exception.class)
     public AccountSummary signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
         String hostName = hostSignUpRequest.getHostName();
         String PEC = hostSignUpRequest.getPEC();
 
         Optional<Host> opt = hostRepository.findByPEC(PEC);
+
         if (opt.isPresent()) {
 
             if(!opt.get().isEnabled()){
@@ -71,7 +74,7 @@ public class HostSignUpService {
                         .build();
             }
 
-            throw new ResourceAlreadyExistsException("This host already exists. Proceed to login", "ALREADY_REGISTERED");
+            throw new ResourceAlreadyExistsException("This host already exists. Proceed to login");
         }
         else{
 

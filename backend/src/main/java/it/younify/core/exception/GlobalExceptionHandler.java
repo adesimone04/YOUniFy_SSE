@@ -4,6 +4,7 @@ import it.younify.core.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -66,7 +67,7 @@ public class GlobalExceptionHandler {
      * @param request The current HTTP request.
      * @return A {@link ResponseEntity} containing the standardized error response.
      */
-    @ExceptionHandler(TokenRefreshException.class) // (403)
+    @ExceptionHandler({TokenRefreshException.class, AccessDeniedException.class}) // (403)
     public ResponseEntity<ApiErrorResponse> handleTokenRefreshException(TokenRefreshException ex, HttpServletRequest request) {
 
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), ex.getInternalCode(), request);
@@ -96,6 +97,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceAlreadyExistsException.class) // (409)
     public ResponseEntity<ApiErrorResponse> handleConflict(ResourceAlreadyExistsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), ex.getInternalCode(), request);
+    }
+
+    /**
+     * Handles all uncaught {@link Exception} instances as a last resort.
+     * This method acts as a generic fallback for any unexpected server-side errors,
+     * preventing stack traces from being exposed to the client. It returns a standardized
+     * 500 Internal Server Error response.
+     *
+     * @param ex The exception that was thrown.
+     * @param request The current HTTP request.
+     * @return A {@link ResponseEntity} containing the standardized 500 error response.
+     */
+    @ExceptionHandler(Exception.class) // (500)
+    public ResponseEntity<ApiErrorResponse> handleInternalServerError(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),"INTERNAL_SERVER_ERROR", request);
     }
 
 

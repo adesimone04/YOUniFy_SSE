@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -30,6 +31,33 @@ public class UserSignUpService {
     private final PasswordEncoder passwordEncoder;
     private final Generate2FAService generate2FAService;
 
+    private static final List<String> DOMAINS_ACCEPTED = List.of(
+
+            "studenti.univpm.it", "univda.it", "studenti.uniba.it", "studenti.poliba.it",
+            "studenti.lum.it", "studenti.unisannio.it", "studenti.unibg.it", "studio.unibo.it",
+            "student.unibz.it", "unibz.it", "studenti.unibs.it", "studenti.unica.it",
+            "studenti.unicam.it", "studenti.unimol.it", "studenti.unicas.it", "liuc.it",
+            "studenti.liuc.it", "studium.unict.it", "studenti.unicz.it", "studenti.unich.it",
+            "studenti.uninsubria.it", "studenti.unical.it", "unikorestudent.it", "edu.unife.it",
+            "edu.unifi.it", "unifg.it", "studenti.unifg.it", "studenti.unige.it",
+            "student.univaq.it", "gssi.it", "studenti.unisalento.it", "studenti.unimc.it",
+            "studenti.unime.it", "studenti.unimi.it", "campus.unimib.it", "mail.polimi.it",
+            "studbocconi.it", "icatt.it", "studenti.iulm.it", "studenti.unisr.it",
+            "st.hunimed.eu", "studenti.unimore.it", "studenti.unina.it", "studenti.unicampania.it",
+            "studenti.unior.it", "studenti.uniparthenope.it", "studenti.unisob.na.it", "studenti.unipd.it",
+            "community.unipa.it", "studenti.unipr.it", "universitadipavia.it", "iusspavia.it",
+            "studenti.unipg.it", "unistrapg.it", "studenti.unipi.it", "sns.it",
+            "santannapisa.it", "studenti.unibas.it", "studenti.unirc.it", "unistrada.it",
+            "studenti.uniroma1.it", "students.uniroma2.eu", "stud.uniroma3.it", "studenti.uniroma4.it",
+            "studenti.luiss.it", "lumsastud.it", "unier.it", "alumni.unicampus.it",
+            "unilink.it", "unint.eu", "studenti.unisa.it", "studenti.uniss.it",
+            "student.unisi.it", "unistrasi.it", "studenti.unite.it", "studenti.unito.it",
+            "edu.unito.it", "studenti.polito.it", "studenti.unitn.it", "stud.units.it",
+            "sissa.it", "spes.uniud.it", "campus.uniurb.it", "stud.unive.it",
+            "stud.iuav.it", "studenti.univr.it", "studenti.unitus.it"
+    );
+
+
     /**
      * Registers a new user.
      * <p>
@@ -47,12 +75,14 @@ public class UserSignUpService {
      * @throws ResourceAlreadyExistsException if a user with the given email already exists and is enabled.
      * @throws BadRequestException if the password or email is invalid.
      */
+    @Transactional(rollbackFor = Exception.class)
     public AccountSummary signUp(@NotNull UserSignUpRequest userSignUpRequest) {
 
         String firstName = userSignUpRequest.getFirstName();
         String email = userSignUpRequest.getEmail();
 
         Optional<User> opt = userRepository.findByEmail(email);
+
         if(opt.isPresent()) {
 
             if(!opt.get().isEnabled()) {
@@ -110,23 +140,9 @@ public class UserSignUpService {
 
     private boolean validateEmail(String email) {
 
-        List<String> emailAccepted = List.of(
-                "@studenti.unipd.it", "@polimi.it", "@studenti.unibg.it", "@studenti.uniroma1.it",
-                "@edu.unifi.it", "@studio.unibo.it", "@studenti.unimi.it", "@stud.unive.it",
-                "@studenti.unito.it", "@studenti.unipi.it", "@studenti.unina.it", "@community.unipa.it",
-                "@studium.unict.it", "@studenti.unica.it", "@studenti.unime.it", "@stud.units.it",
-                "@spes.uniud.it", "@studenti.uniss.it", "@studenti.univr.it", "@studenti.unipr.it",
-                "@edu.unife.it", "@studenti.unige.it", "@universitadipavia.it", "@studenti.unicam.it",
-                "@unipg.it", "@uniurb.it", "@unisi.it", "@student.univaq.it", "@studenti.unisa.it",
-                "@unifg.it", "@studenti.unisalento.it", "@studenti.unical.it", "@studenti.unibas.it",
-                "@studenti.uninsubria.it", "@univda.it", "@unibz.it", "@stud.iuav.it",
-                "@studenti.polito.it", "@studenti.poliba.it", "@icatt.it", "@studenti.luiss.it",
-                "@studenti.unitelmasapienza.it", "@studbocconi.it"
-        );
-
         return email.matches("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.]+\\.it$") &&
-                emailAccepted.stream().anyMatch(email::endsWith);
-    }
+                DOMAINS_ACCEPTED.stream().anyMatch(email::endsWith);
+        }
 
     private boolean validatePassword(String password, String confirmPassword) {
 

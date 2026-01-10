@@ -91,6 +91,7 @@ public class Host implements UserDetails {
     /**
      * The host's role, which defines their permissions and defaults to HOST.
      */
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.HOST;
 
@@ -116,7 +117,7 @@ public class Host implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Spring Security vuole il prefisso "ROLE_" per convenzione
+
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
