@@ -112,6 +112,7 @@ public class ApplicationConfig {
      */
     @Bean
     public UserDetailsService userDetailsService() {
+
         return username -> {
 
             Optional<User> user = userRepository.findByEmail(username);
@@ -124,7 +125,7 @@ public class ApplicationConfig {
                 return host.get();
             }
 
-            throw new UsernameNotFoundException("No User or Host found with this email/certified email address");
+            throw new UsernameNotFoundException("No User or Host found with this email/PEC address");
         };
     }
 

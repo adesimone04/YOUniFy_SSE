@@ -50,6 +50,7 @@ public class AuthController {
 
         return ResponseEntity.ok(
                 ApiResponse.<AccountSummary>builder()
+                        .internalCode("USER_REGISTERED")
                         .message("USER_REGISTERED")
                         .data(summary)
                         .build()
@@ -125,6 +126,7 @@ public class AuthController {
                     .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                     .body(
                             ApiResponse.<AuthenticationResponse>builder()
+                                    .internalCode(response.getStatus())
                                     .message(response.getStatus())
                                     .data(response)
                                     .build()
@@ -136,6 +138,7 @@ public class AuthController {
         return ResponseEntity.ok()
                 .body(
                         ApiResponse.<AuthenticationResponse>builder()
+                                .internalCode(response.getStatus())
                                 .message(response.getStatus())
                                 .data(response)
                                 .build()

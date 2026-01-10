@@ -113,19 +113,19 @@ public class Authentication2FAService {
                     if (code2FA.getErrorCount() == 3) {
 
                         code2FARepository.delete(code2FA);
-                        throw new BadRequestException("You achieved the maximum number of attempts: 3");
+                        throw new BadRequestException("You achieved the maximum number of attempts: 3", "MAX_ATTEMPTS");
                     }
 
-                    throw new BadRequestException("The code is incorrect. Retry, number of attempts remained:" + (3 - code2FA.getErrorCount()));
+                    throw new BadRequestException("The code is incorrect. Retry, number of attempts remained:" + (3 - code2FA.getErrorCount()), "TRY_2FA_AGAIN");
                 }
             }
             else {
 
                 code2FARepository.delete(code2FA);
-                throw new BadRequestException("The 2FA code is expired");
+                throw new BadRequestException("The 2FA code is expired", "2FA_CODE_EXPIRED");
             }
         }
 
-        throw new ResourceNotFoundException("ID account not exist or 2FA code not found");
+        throw new ResourceNotFoundException("ID account not exist or 2FA code not found", "ACCOUNT_OR_2FA_NOT_FOUND");
     }
 }

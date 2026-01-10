@@ -107,10 +107,10 @@ public class LogInService {
         }
 
 
-        Optional<User> userOpt = userRepository.findByEmail(logInRequest.getEmail());
-
         String jwtToken = null;
         String refreshToken = null;
+
+        Optional<User> userOpt = userRepository.findByEmail(logInRequest.getEmail());
 
         if(userOpt.isPresent()){
 
@@ -139,7 +139,7 @@ public class LogInService {
 
             String tokenHashed = TokenHashUtility.hashToken(refreshToken);
 
-                    RefreshToken token = RefreshToken.builder()
+            RefreshToken token = RefreshToken.builder()
                     .tokenHashed(tokenHashed)
                     .revoked(false)
                     .expiryDate(Instant.now().plus(refreshExpiration, ChronoUnit.DAYS))

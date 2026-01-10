@@ -57,6 +57,7 @@ public class SessionController {
 
         return ResponseEntity.ok(
                 ApiResponse.<AccountSummary>builder()
+                        .internalCode("2FA_CONFIRMED")
                         .message("2FA_CONFIRMED")
                         .data(summary)
                         .build());
@@ -80,6 +81,7 @@ public class SessionController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Instant>builder()
+                        .internalCode("2FA_SENT")
                         .message("2FA_SENT")
                         .data(expiryDate)
                         .build());
@@ -115,6 +117,7 @@ public class SessionController {
                 .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
                 .body(
                         ApiResponse.<Void>builder()
+                                .internalCode("TOKEN_REFRESHED")
                                 .message("TOKEN_REFRESHED")
                                 .build()
                 );
@@ -155,6 +158,7 @@ public class SessionController {
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .body(
                         ApiResponse.<Void>builder()
+                                .internalCode("LOGOUT")
                                 .message("LOGOUT")
                                 .build()
                 );

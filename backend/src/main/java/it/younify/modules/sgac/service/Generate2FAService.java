@@ -118,6 +118,6 @@ public class Generate2FAService {
             }
         }
 
-        throw new ResourceNotFoundException("ID account not exist");
+        throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
     }
 }
