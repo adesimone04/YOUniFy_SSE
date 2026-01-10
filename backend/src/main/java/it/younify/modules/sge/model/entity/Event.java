@@ -15,18 +15,19 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long ID;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
-    private Instant dateandtime;
+    private Instant dateAndTime;
 
     @Column(nullable = false)
     private String street;
@@ -34,8 +35,8 @@ public class Event {
     @Column(nullable = false)
     private String city;
 
-    @Column(nullable = false)
-    private int CAP;
+    @Column(nullable = false, length = 5)
+    private String CAP;
 
     @Column(nullable = false)
     private String poster;

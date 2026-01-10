@@ -1,6 +1,5 @@
 package it.younify.modules.sge.model.entity;
 
-import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,26 +8,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "partecipation")
+@Table(name = "participation")
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Partecipation {
+public class Participation {
 
-    /**
-     * Chiave composta istanziata.
-     */
     @EmbeddedId
-    private PartecipationId id = new PartecipationId();
-
-    /**
-     * EVENTO
-     * @MapsId("eventId") dice a JPA: "Usa il valore di eventId dentro la classe PartecipationId
-     * per mappare questa relazione". Non serve @JoinColumn, lo calcola lui
-     */
+    private ParticipationId id = new ParticipationId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("eventId")

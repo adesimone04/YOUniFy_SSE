@@ -11,8 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
 
-import java.io.IOException;
 @Service
 @RequiredArgsConstructor
 public class EventPostService {
@@ -21,20 +21,19 @@ public class EventPostService {
     private final ImageStorageService imageStorageService;
     private final String UPLOAD_DIR = "uploads/events";
 
-
     @Transactional(rollbackFor = Exception.class)
-    public void post(@NotNull EventPostRequest eventPostRequest) throws IOException {
+    public void post(@NotNull EventPostRequest eventPostRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Host host = (Host) principal;
 
-        String posterPath = imageStorageService.uploadImage(eventPostRequest.getPoster(), eventPostRequest.getName(), UPLOAD_DIR);
+        String posterPath = imageStorageService.uploadImage(eventPostRequest.getPoster(), UUID.randomUUID().toString(), UPLOAD_DIR);
 
         eventRepository.save(
                 Event.builder()
                         .name(eventPostRequest.getName())
                         .description(eventPostRequest.getDescription())
-                        .dateandtime(eventPostRequest.getDateandtime())
+                        .dateAndTime(eventPostRequest.getDateAndTime())
                         .street(eventPostRequest.getStreet())
                         .city(eventPostRequest.getCity())
                         .CAP(eventPostRequest.getCAP())

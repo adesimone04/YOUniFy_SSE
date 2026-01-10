@@ -1,6 +1,5 @@
 package it.younify.modules.sge.model.dto.request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -10,6 +9,7 @@ import java.time.Instant;
 
 @Data
 public class EventPostRequest {
+
     @NotBlank
     private String name;
 
@@ -17,7 +17,7 @@ public class EventPostRequest {
     private String description;
 
     @NotNull
-    private Instant dateandtime;
+    private Instant dateAndTime;
 
     @NotBlank
     private String street;
@@ -25,9 +25,9 @@ public class EventPostRequest {
     @NotBlank
     private String city;
 
-    @NotNull
-    private int CAP;
+    @NotBlank
+    private String CAP;
 
-    @NotNull(message = "L'immagine del poster è obbligatoria")
+    @NotNull
     private MultipartFile poster;
 }

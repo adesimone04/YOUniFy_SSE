@@ -10,7 +10,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-public class PartecipationId implements Serializable {
+public class ParticipationId implements Serializable {
+
     private Long eventId;
+
     private String userId;
 }
