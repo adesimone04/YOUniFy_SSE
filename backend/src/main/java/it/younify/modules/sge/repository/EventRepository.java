@@ -11,10 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    Page<Event> findAllByOrderByDateandtimeAsc(Pageable pageable);
-    Page<Event> findAllByHostOrderByDateandtimeAsc(Host host, Pageable pageable);
-    Page<Event> findAllByCityOrderByDateandtimeAsc(String city, Pageable pageable);
-
-    @Query("SELECT p.event FROM Partecipation p WHERE p.user = :user ORDER BY p.event.dateandtime ASC")
-    Page<Event> findJoinedEventsByUser(@Param("user") User user, Pageable pageable);
+    Page<Event> findAllByOrderByDateAndTimeAsc(Pageable pageable);
+    Page<Event> findAllByHostOrderByDateAndTimeAsc(Host host, Pageable pageable);
+    Page<Event> findAllByCityOrderByDateAndTimeAsc(String city, Pageable pageable);
+    Page<Event> findDistinctByParticipationsUser(User user, Pageable pageable);
 }
