@@ -25,18 +25,24 @@ public class MinioConfig {
 
     @Bean
     public MinioClient minioClient() {
+
         MinioClient client = MinioClient.builder()
                 .endpoint(url)
                 .credentials(accessKey, secretKey)
                 .build();
 
         try {
+
             boolean found = client.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
+
                 client.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-                System.out.println("Bucket '" + bucketName + "' creato con successo.");
+                System.out.println("Bucket " + bucketName + " created successfully");
             }
-        } catch (Exception e) {
+
+        }
+        catch (Exception e){
+
             throw new ResourceNotFoundException(e.getMessage());
         }
 
