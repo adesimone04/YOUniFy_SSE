@@ -88,6 +88,9 @@ public class Host implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    /**
+     * The host's role, which defines their permissions and defaults to HOST.
+     */
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.HOST;

@@ -4,6 +4,7 @@ import it.younify.modules.sgac.adapter.PIVAlidator.PIVAlidator;
 import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.modules.sgac.model.dto.request.HostSignUpRequest;
+import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.repository.HostRepository;
 import jakarta.validation.constraints.NotNull;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,9 +52,11 @@ public class HostSignUpService {
      * @throws BadRequestException if the password is invalid or the PEC does not match the "Partita IVA".
      */
     @Transactional(rollbackFor = Exception.class)
-    public String signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
+    public AccountSummary signUp(@NotNull HostSignUpRequest hostSignUpRequest) {
 
+        String hostName = hostSignUpRequest.getHostName();
         String PEC = hostSignUpRequest.getPEC();
+
         Optional<Host> opt = hostRepository.findByPEC(PEC);
 
         if (opt.isPresent()) {
@@ -60,52 +64,69 @@ public class HostSignUpService {
             if(!opt.get().isEnabled()){
 
                 String ID = opt.get().getID();
-                generate2FAService.send2FARequest(ID);
-                return ID;
+                Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                return AccountSummary.builder()
+                        .ID(ID)
+                        .accountName(hostName)
+                        .accountEmail(PEC)
+                        .expiryDate(expiryDate)
+                        .build();
             }
 
             throw new ResourceAlreadyExistsException("This host already exists. Proceed to login");
         }
         else{
 
-            String hostName = hostSignUpRequest.getHostName();
-            String password = hostSignUpRequest.getPassword();
             String PIVA = hostSignUpRequest.getPIVA();
+            boolean association = hostSignUpRequest.isAssociation();
+            String password = hostSignUpRequest.getPassword();
             String confirmPassword = hostSignUpRequest.getConfirmPassword();
             String province = hostSignUpRequest.getProvince();
             String city = hostSignUpRequest.getCity();
             String uniList = hostSignUpRequest.getUniList();
 
-            if(validatePEC(PEC, PIVA)){
+            if(association || validatePEC(PEC, PIVA)){
 
-                if(validatePassword(password, confirmPassword)){
+                if(PEC.matches("^[a-zA-Z0-9._%+-]+@.*(pec|legal|cert|sicurezza|posta).*\\.[a-zA-Z]{2,}$")) {
 
-                    String ID = "H-" + UUID.randomUUID();
-                    password = passwordEncoder.encode(password);
-                    Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
-                    hostRepository.save(host);
+                    if(validatePassword(password, confirmPassword)){
 
-                    generate2FAService.send2FARequest(ID);
-                    return ID;
+                        String ID = "H-" + UUID.randomUUID();
+                        password = passwordEncoder.encode(password);
+                        Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
+                        hostRepository.save(host);
+
+                        Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                        return AccountSummary.builder()
+                                .ID(ID)
+                                .accountName(hostName)
+                                .accountEmail(PEC)
+                                .expiryDate(expiryDate)
+                                .build();
+                    }
+
+                    throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                            "one number, and one special symbol", "PASSWORD_NOT_SAFE");
                 }
 
-                throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                        "one number, and one special symbol");
+                throw new BadRequestException("The PEC address " + PEC + " is not valid", "PEC_ADDRESS_NOT_VALID");
             }
 
-            throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA);
+            throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA, "PEC_ADDRESS_DOESNT_MATCH_VATCODE");
         }
     }
 
 
-    private boolean validatePEC(String PEC, String PIVA){
+    private boolean validatePEC(String PEC, String PIVA) {
         return pivalidator.PIVAlidatePEC(PIVA).equals(PEC);
     }
 
     private boolean validatePassword(String password, String confirmPassword) {
 
         return password.equals(confirmPassword) &&
-                password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$");
+                password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!.]).{8,}$");
 
     }
 }

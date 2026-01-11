@@ -97,18 +97,20 @@ public class LogInService {
                 }
             }
 
-            generate2FAService.send2FARequest(ID);
+            Instant expiry = generate2FAService.send2FARequest(ID);
+
             return AuthenticationResponse.builder()
                     .status("2FA_SENT")
                     .accountID(ID)
+                    .expiryDate(expiry)
                     .build();
         }
 
 
-        Optional<User> userOpt = userRepository.findByEmail(logInRequest.getEmail());
-
         String jwtToken = null;
         String refreshToken = null;
+
+        Optional<User> userOpt = userRepository.findByEmail(logInRequest.getEmail());
 
         if(userOpt.isPresent()){
 
@@ -137,7 +139,7 @@ public class LogInService {
 
             String tokenHashed = TokenHashUtility.hashToken(refreshToken);
 
-                    RefreshToken token = RefreshToken.builder()
+            RefreshToken token = RefreshToken.builder()
                     .tokenHashed(tokenHashed)
                     .revoked(false)
                     .expiryDate(Instant.now().plus(refreshExpiration, ChronoUnit.DAYS))

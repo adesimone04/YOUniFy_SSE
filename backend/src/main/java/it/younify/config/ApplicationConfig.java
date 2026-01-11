@@ -40,6 +40,20 @@ public class ApplicationConfig {
     @Value("${application.security.admin.password}")
     private String adminPass;
 
+    /**
+     * Defines a {@link CommandLineRunner} bean to initialize a default admin user on application startup.
+     * <p>
+     * This runner ensures that a predefined administrator account is always available in the database.
+     * It checks for the existence of the admin user by email ({@code younifytester@gmail.it}) before
+     * attempting to create it, thus preventing duplicate entries on subsequent application restarts.
+     * <p>
+     * The admin user is created with a default set of information and the {@link Role#ADMIN} role,
+     * and their password is securely encoded using the provided {@link PasswordEncoder}.
+     *
+     * @param userRepository  The repository for accessing and saving user data.
+     * @param passwordEncoder The encoder used to hash the admin's password before saving.
+     * @return A {@link CommandLineRunner} instance that Spring Boot will execute after the application context is loaded.
+     */
     @Bean
     CommandLineRunner initAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
@@ -98,6 +112,7 @@ public class ApplicationConfig {
      */
     @Bean
     public UserDetailsService userDetailsService() {
+
         return username -> {
 
             Optional<User> user = userRepository.findByEmail(username);
@@ -110,7 +125,7 @@ public class ApplicationConfig {
                 return host.get();
             }
 
-            throw new UsernameNotFoundException("No User or Host found with this email/certified email address");
+            throw new UsernameNotFoundException("No User or Host found with this email/PEC address");
         };
     }
 

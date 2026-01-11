@@ -30,20 +30,33 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BadRequestException.class) // (400)
     public ResponseEntity<ApiErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getInternalCode(), request);
     }
 
     /**
-     * Handles authentication-related exceptions like {@link BadCredentialsException} and
-     * {@link UsernameNotFoundException}, returning a 401 Unauthorized response.
+     * Handles authentication-related exceptions like {@link BadCredentialsException},
+     * returning a 401 Unauthorized response.
      *
      * @param ex The exception that was thrown.
      * @param request The current HTTP request.
      * @return A {@link ResponseEntity} containing the standardized error response.
      */
-    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class}) // (401)
+    @ExceptionHandler(BadCredentialsException.class) // (401)
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(Exception ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Email o password non validi", request);
+        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), "BAD_CREDENTIALS", request);
+    }
+
+    /**
+     * Handles authentication-related exceptions like {@link UsernameNotFoundException},
+     * returning a 401 Unauthorized response.
+     *
+     * @param ex The exception that was thrown.
+     * @param request The current HTTP request.
+     * @return A {@link ResponseEntity} containing the standardized error response.
+     */
+    @ExceptionHandler(UsernameNotFoundException.class) // (401)
+    public ResponseEntity<ApiErrorResponse> handleUsernameNotFound(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), "ACCOUNT_NOT_FOUND", request);
     }
 
     /**
@@ -57,7 +70,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({TokenRefreshException.class, AccessDeniedException.class}) // (403)
     public ResponseEntity<ApiErrorResponse> handleTokenRefreshException(TokenRefreshException ex, HttpServletRequest request) {
 
-        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request);
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), ex.getInternalCode(), request);
     }
 
     /**
@@ -70,7 +83,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ResourceNotFoundException.class) // (404)
     public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), ex.getInternalCode(), request);
     }
 
     /**
@@ -83,7 +96,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ResourceAlreadyExistsException.class) // (409)
     public ResponseEntity<ApiErrorResponse> handleConflict(ResourceAlreadyExistsException ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), request);
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), ex.getInternalCode(), request);
     }
 
     /**
@@ -114,17 +127,18 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class) // (500)
     public ResponseEntity<ApiErrorResponse> handleInternalServerError(Exception ex, HttpServletRequest request) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),"INTERNAL_SERVER_ERROR", request);
     }
 
 
-    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, HttpServletRequest request) {
+    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, String internalCode, HttpServletRequest request) {
 
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.value())
                 .error(status.getReasonPhrase())
                 .message(message)
+                .internalCode(internalCode)
                 .path(request.getRequestURI())
                 .build();
 
