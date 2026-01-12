@@ -4,6 +4,7 @@ import {
     ShieldCheck, Users, Compass, Megaphone, BarChart3, Bell, Heart, Share2,
     MessageSquarePlus, Hash, HeartHandshake
 } from 'lucide-react';
+import PageTransition from '../../components/ui/PageTransition/PageTransition'
 
 // Navbar globale
 import Navbar from '../../components/layout/Navbar/Navbar';
@@ -24,6 +25,14 @@ const LandingPage = () => {
 
     useEffect(() => {
         setIsLoaded(true);
+    }, []);
+
+    // [FIX SFONDO MOBILE] - Manteniamo anche questo per l'overscroll
+    useEffect(() => {
+        document.body.style.backgroundColor = '#020617';
+        return () => {
+            document.body.style.backgroundColor = '';
+        };
     }, []);
 
     const UNIVERSITY_TAGS_1 = [
@@ -62,18 +71,20 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="relative min-h-screen w-full bg-slate-950 flex flex-col items-center overflow-x-hidden font-sans">
+        <PageTransition className="relative min-h-screen w-full bg-slate-950 flex flex-col items-center overflow-x-hidden font-sans">
             <Navbar />
 
-            {/* --- Background Layer --- */}
+            {/* --- Background Layer (Blobs) --- */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`${styles.blob} ${styles.blue}`}></div>
                 <div className={`${styles.blob} ${styles.indigo}`}></div>
-                <div className={`${styles.blob} ${styles.rose}`}></div>
-                <div className={`${styles.blob} ${styles.teal}`}></div>
+                <div className={`${styles.blob} ${styles.magenta}`}></div>
+                <div className={`${styles.blob} ${styles.crimson}`}></div>
                 <div className={`${styles.blob} ${styles.purple}`}></div>
-                <div className={`${styles.blob} ${styles.cyan}`}></div>
+                <div className={`${styles.blob} ${styles.amber}`}></div>
             </div>
+
+            <div className="fixed inset-0 z-0 pointer-events-none bg-slate-900/50 md:bg-slate-900/20 backdrop-blur-md md:backdrop-blur-none"></div>
 
             {/* --- HERO SECTION --- */}
             <section className="relative z-10 min-h-screen flex items-center justify-center text-center px-4 md:px-6 font-inter pt-20 md:pt-0">
@@ -83,7 +94,7 @@ const LandingPage = () => {
                     transition={{ duration: 1.5 }}
                     className="flex flex-col items-center"
                 >
-                    <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-white leading-none font-inter break-words max-w-full">
+                    <h1 className="text-7xl md:text-8xl font-black tracking-tighter text-white leading-none font-inter">
                         YOUni<span className="text-younify-blue drop-shadow-[0_0_20px_rgba(29,78,216,0.4)] font-inter">Fy</span>
                     </h1>
 
@@ -241,22 +252,38 @@ const LandingPage = () => {
                     </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                    {[
-                        { icon: <MessageSquarePlus size={32} />, color: "indigo", text: "Pubblica domande, idee e curiosità" },
-                        { icon: <Hash size={32} />, color: "rose", text: "Partecipa a discussioni su topic mirati" },
-                        { icon: <HeartHandshake size={32} />, color: "teal", text: "Scambia consigli e informazioni preziose con un intera community studentesca" }
-                    ].map((feature, idx) => (
-                        <div key={idx} className="p-6 md:p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-younify-blue/30 transition-all duration-300 group">
-                            <div className={`w-14 h-14 bg-${feature.color}-500/20 rounded-2xl flex items-center justify-center mb-6 text-${feature.color}-400 group-hover:scale-110 transition-transform`}>
-                                {feature.icon}
-                            </div>
-                            <p className="text-lg md:text-xl font-medium text-slate-300 group-hover:text-white font-sans leading-relaxed">
-                                {feature.text}
-                            </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Card Feature 1 */}
+                    <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-younify-blue/30 transition-all duration-300 group">
+                        <div className="w-14 h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 text-indigo-400 group-hover:scale-110 transition-transform">
+                            <MessageSquarePlus size={32} />
                         </div>
-                    ))}
+                        <p className="text-xl font-medium text-slate-300 group-hover:text-white font-sans leading-relaxed">
+                            Pubblica domande, idee e curiosità
+                        </p>
+                    </div>
+
+                    {/* Card Feature 2 */}
+                    <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-younify-blue/30 transition-all duration-300 group">
+                        <div className="w-14 h-14 bg-rose-500/20 rounded-2xl flex items-center justify-center mb-6 text-rose-400 group-hover:scale-110 transition-transform">
+                            <Hash size={32} />
+                        </div>
+                        <p className="text-xl font-medium text-slate-300 group-hover:text-white font-sans leading-relaxed">
+                            Partecipa a discussioni su topic mirati
+                        </p>
+                    </div>
+
+                    {/* Card Feature 3 */}
+                    <div className="p-8 rounded-[2rem] bg-white/5 border border-white/10 hover:bg-white/10 hover:border-younify-blue/30 transition-all duration-300 group">
+                        <div className="w-14 h-14 bg-teal-500/20 rounded-2xl flex items-center justify-center mb-6 text-teal-400 group-hover:scale-110 transition-transform">
+                            <HeartHandshake size={32} />
+                        </div>
+                        <p className="text-xl font-medium text-slate-300 group-hover:text-white font-sans leading-relaxed">
+                            Scambia consigli e informazioni preziose con un intera community studentesca
+                        </p>
+                    </div>
                 </div>
+
             </section>
 
             {/* Carosello Inferiore */}
@@ -289,7 +316,7 @@ const LandingPage = () => {
 
             <WebApp />
             <Footer />
-        </div>
+        </PageTransition>
     );
 };
 

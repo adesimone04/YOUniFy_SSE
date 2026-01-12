@@ -20,31 +20,35 @@
    e altera la durata/ritardo dell'animazione per evitare che si muovano tutti all'unisono.
 */
 
+/* --- PALETTE DEEP BRAND (Solo Blu e Viola scuri) --- */
+
+/* --- PALETTE MAGNETIC POP (Attraente e Leggibile) --- */
+
 .blue {
-    background-color: #0000ff;
+    background-color: #1d4ed8; /* Blu Reale Intenso (Brand) */
     top: -100px;
     left: -50px;
-    animation-duration: 14s; /* Durata personalizzata per variare la velocità */
+    animation-duration: 14s;
 }
 
 .indigo {
-    background-color: #a000ff;
+    background-color: #4338ca; /* Indaco Profondo */
     bottom: -50px;
     right: 10%;
-    animation-delay: -3s; /* Delay negativo: l'animazione parte già "in corso" */
+    animation-delay: -3s;
     animation-duration: 18s;
 }
 
-.rose {
-    background-color: #ff007f;
+.magenta {
+    background-color: #db2777; /* Magenta Vibrante (Attira l'occhio) */
     top: 10%;
     right: 5%;
     animation-delay: -6s;
     animation-duration: 15s;
 }
 
-.teal {
-    background-color: #00ffff;
+.crimson {
+    background-color: #e11d48; /* Rosso Cremisi (Energia pura) */
     bottom: 15%;
     left: 10%;
     animation-delay: -9s;
@@ -52,15 +56,15 @@
 }
 
 .purple {
-    background-color: #7000ff;
+    background-color: #7e22ce; /* Viola Brand Saturo */
     top: 40%;
     left: -100px;
     animation-delay: -4s;
     animation-duration: 20s;
 }
 
-.cyan {
-    background-color: #00d4ff;
+.amber {
+    background-color: #d97706; /* Ambra Dorato (Contrasto caldo col blu) */
     top: 30%;
     right: -50px;
     animation-delay: -12s;
