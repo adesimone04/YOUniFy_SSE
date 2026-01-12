@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import {
     User, ArrowRight, ArrowLeft, Mail, Lock, IdCard,
     Building2, Hash, CheckCircle, GraduationCap,
     Calendar, MapPin, School, FileCheck, ChevronDown, AlertCircle, Eye, EyeOff, Instagram, Receipt, CreditCard
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup} from 'framer-motion';
 
 //IMPORT STILI
+import authService from '../../services/authService';
+import { handleAuthResponse } from '../../utils/authHandler';
 import styles from '../LandingPage/LandingPage.module.css';
+import PageTransition from '../../components/ui/PageTransition/PageTransition'
 
 // --- IMPORT DATI REALI ---
 import rawCitiesData from '../../data/comuni.json';
@@ -86,11 +92,22 @@ const AuthPage = () => {
 
         let errorMsg = null;
 
-        // --- NUOVO: Controllo lunghezza Nome e Cognome ---
         if (name === 'firstName' || name === 'lastName') {
             // Se c'è del testo ma è inferiore a 3 caratteri
             if (value && value.trim().length < 3) {
                 errorMsg = "Minimo 3 caratteri";
+            }
+        }
+
+        if (name === 'dateOfBirth') {
+            // Recuperiamo i limiti usando le tue funzioni
+            const maxAllowed = getMaxDate(); // es. "2007-04-30"
+            const minAllowed = getMinDate(); // "1900-01-01"
+
+            if (value > maxAllowed) {
+                errorMsg = "Non hai ancora l'età per iscriverti";
+            } else if (value < minAllowed) {
+                errorMsg = "Data non valida";
             }
         }
 
@@ -109,7 +126,7 @@ const AuthPage = () => {
         setErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
     };
 
-    const handleStudentSubmit = (e) => {
+    const handleStudentSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
@@ -120,7 +137,18 @@ const AuthPage = () => {
         if (!studentData.lastName) newErrors.lastName = "Cognome richiesto";
         else if (studentData.lastName.trim().length < 3) newErrors.lastName = "Minimo 3 caratteri";
 
-        if (!studentData.dateOfBirth) newErrors.dateOfBirth = "Data di nascita richiesta";
+        if (!studentData.dateOfBirth) {
+            newErrors.dateOfBirth = "Data di nascita richiesta";
+        } else {
+            const maxAllowed = getMaxDate();
+            const minAllowed = getMinDate();
+
+            if (studentData.dateOfBirth > maxAllowed) {
+                newErrors.dateOfBirth = "Non hai ancora l'età per iscriverti";
+            } else if (studentData.dateOfBirth < minAllowed) {
+                newErrors.dateOfBirth = "Data non valida";
+            }
+        }
 
         if (!studentData.email) newErrors.email = "Email richiesta";
         else if (!validateEmail(studentData.email)) newErrors.email = "Email universitaria non valida";
@@ -143,9 +171,29 @@ const AuthPage = () => {
 
         setErrors(newErrors);
 
-        if (Object.keys(newErrors).length > 0) return;
+        if (Object.keys(newErrors).length === 0) {
+            try {
+                const response = await authService.registerStudent(studentData);
+                // Caso SUCCESSO (es. USER_REGISTERED)
+                handleAuthResponse(response.data, navigate, {
+                    email: studentData.email,
+                    name: studentData.firstName
+                });
+            } catch (error) {
+                console.error("Errore registrazione studente:", error);
+                const errorData = error.response?.data;
 
-        alert("Registrazione Studente Riuscita!");
+                if (errorData) {
+                    const code = handleAuthResponse(errorData, navigate);
+                    // Se l'handler ritorna un codice (es. PASSWORD_NOT_SAFE), usiamo il toast rosso
+                    if (code) {
+                        toast.error(errorData.message || "Registrazione fallita");
+                    }
+                } else {
+                    toast.error("Errore di connessione al server.");
+                }
+            }
+        }
     };
 
     // ==========================================
@@ -187,7 +235,7 @@ const AuthPage = () => {
         setHostErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
     };
 
-    const handleHostSubmit = (e) => {
+    const handleHostSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
@@ -221,9 +269,39 @@ const AuthPage = () => {
 
         setHostErrors(newErrors);
 
-        if (Object.keys(newErrors).length > 0) return;
+        if (Object.keys(newErrors).length === 0) {
+            try {
+                // 1. Prepariamo i dati corretti (lista -> stringa)
+                const payload = {
+                    ...hostData,
+                    isAssociation,
+                    uniList: hostData.uniList.join(','), // <--- Qui diventa una stringa "Uni1,Uni2"
+                    PIVA: hostData.piva,
+                    PEC: hostData.pec
+                };
 
-        alert("Registrazione Host Riuscita!");
+                // 2. USIAMO "payload" NELLA CHIAMATA (Prima usavi hostData)
+                const response = await authService.registerHost(payload);
+
+                // Caso SUCCESSO (es. HOST_REGISTERED)
+                handleAuthResponse(response.data, navigate, {
+                    email: hostData.pec,
+                    name: hostData.hostName
+                });
+            } catch (error) {
+                console.error("Errore registrazione host:", error);
+                const errorData = error.response?.data;
+
+                if (errorData) {
+                    const code = handleAuthResponse(errorData, navigate);
+                    if (code) {
+                        toast.error(errorData.message || "Registrazione fallita");
+                    }
+                } else {
+                    toast.error("Errore di connessione al server.");
+                }
+            }
+        }
     };
 
     // ==========================================
@@ -322,17 +400,55 @@ const AuthPage = () => {
         };
     }, []);
 
+    const getMaxDate = () => {
+        const today = new Date();
+        const currentMonth = today.getMonth(); // 0 = Gennaio, ..., 8 = Settembre
+        const currentYear = today.getFullYear();
+
+        let referenceYear;
+
+        // LOGICA DINAMICA:
+        // Se siamo da Gennaio (0) ad Agosto (7), l'anno accademico di riferimento
+        // è quello iniziato l'anno scorso (es. a inizio 2026 vale l'a.a. 2025/26).
+        if (currentMonth < 8) {
+            referenceYear = currentYear - 1;
+        } else {
+            // Da Settembre in poi, siamo nel nuovo anno accademico (es. Settembre 2026 -> a.a. 2026/27)
+            referenceYear = currentYear;
+        }
+
+        // Regola anticipatari: 18 anni compiuti entro il 30 Aprile dell'anno successivo all'immatricolazione.
+        // referenceYear è l'anno in cui è iniziato l'a.a. (es. 2025)
+        // Chi si è iscritto nel 2025 deve essere nato al massimo entro Aprile (2025 - 18 + 1) = 2008...
+        // Aspetta, semplifichiamo:
+        // Immatricolazione 2025 -> Nati 2006 (19 anni) e Nati fino ad Aprile 2007 (18 anni).
+
+        const cutoffYear = referenceYear - 18;
+
+        // Risultato per Gennaio 2026:
+        // referenceYear = 2025.
+        // cutoffYear = 2007.
+        // Ritorna: 2007-04-30.
+        // BLOCCA: Maggio-Dic 2007 e TUTTO il 2008.
+
+        return `${cutoffYear}-04-30`;
+    };
+
+    const getMinDate = () => {
+        return "1900-01-01"; // Data minima assoluta per evitare errori di battitura (anno 1200 ecc)
+    };
+
     return (
         // [FIX LAYOUT] 'fixed inset-0' blocca la viewport evitando che la barra indirizzi crei problemi
-        <div className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
+        <PageTransition className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
             {/* BACKGROUND */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`${styles.blob} ${styles.blue}`}></div>
                 <div className={`${styles.blob} ${styles.indigo}`}></div>
-                <div className={`${styles.blob} ${styles.rose}`}></div>
-                <div className={`${styles.blob} ${styles.teal}`}></div>
+                <div className={`${styles.blob} ${styles.magenta}`}></div>
+                <div className={`${styles.blob} ${styles.crimson}`}></div>
                 <div className={`${styles.blob} ${styles.purple}`}></div>
-                <div className={`${styles.blob} ${styles.cyan}`}></div>
+                <div className={`${styles.blob} ${styles.amber}`}></div>
             </div>
 
             <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6 h-full">
@@ -400,7 +516,7 @@ const AuthPage = () => {
                                                             <InputGroup className="w-1/2 !mb-0" icon={<User size={15} />} placeholder="Nome" type="text" name="firstName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.firstName} />
                                                             <InputGroup className="w-1/2 !mb-0" icon={<User size={15} />} placeholder="Cognome" type="text" name="lastName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.lastName} />
                                                         </div>
-                                                        <InputGroup className="!mb-0" icon={<Calendar size={15} />} placeholder="Data di nascita" type="date" name="dateOfBirth" value={studentData.dateOfBirth} onChange={handleStudentChange} errorMessage={errors.dateOfBirth} />
+                                                        <InputGroup className="!mb-0" icon={<Calendar size={15} />} placeholder="Data di nascita" type="date" name="dateOfBirth" max={getMaxDate()} min={getMinDate()} value={studentData.dateOfBirth} onChange={handleStudentChange} errorMessage={errors.dateOfBirth} />
                                                         <InputGroup className="!mb-0" icon={<Mail size={15} />} placeholder="Email universitaria" type="email" name="email" maxLength={40} onChange={handleStudentChange} errorMessage={errors.email} />
                                                         <div className="flex gap-2 w-full">
                                                             <div className="w-1/2"><InputGroup className="!mb-0" icon={<Lock size={15} />} placeholder="Password" type="password" name="password" maxLength={100} onChange={handleStudentChange} errorMessage={errors.password} /></div>
@@ -493,10 +609,15 @@ const AuthPage = () => {
                                 </motion.div>
 
                                 {/* 3. FOOTER (LINK LOGIN) */}
-                                <motion.div layout className="shrink-0 pt-6 pb-2 text-center w-full">
+                                <motion.div layout className="shrink-0 pt-6 pb-2 text-center w-full"
+                                            initial={{ opacity: 0, x: 50 }}  // Come inizia (trasparente e spostato a destra)
+                                            animate={{ opacity: 1, x: 0 }}   // Come diventa (visibile e centrato)
+                                            exit={{ opacity: 0, x: -50 }}    // Come esce (svanisce a sinistra)
+                                            transition={{ duration: 0.3 }}   // Velocità
+                                    >
                                     <p className="text-slate-500 text-xs">
                                         Hai già un account? <br/>
-                                        <a href="#" className={`font-bold hover:underline transition-colors duration-300 ${isHostMode ? 'text-purple-400' : 'text-younify-blue'}`}>Accedi qui</a>
+                                        <Link to="/login" className={`font-bold hover:underline transition-colors duration-300 ${isHostMode ? 'text-purple-400' : 'text-younify-blue'}`}>Accedi qui</Link>
                                     </p>
                                 </motion.div>
 
@@ -519,7 +640,7 @@ const AuthPage = () => {
                                     <InputGroup className="w-1/2" icon={<User size={15} />} placeholder="Nome" type="text" name="firstName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.firstName} />
                                     <InputGroup className="w-1/2" icon={<User size={15} />} placeholder="Cognome" type="text" name="lastName" maxLength={30} onChange={handleStudentChange} errorMessage={errors.lastName} />
                                 </div>
-                                <InputGroup icon={<Calendar size={15} />} placeholder="Data di nascita" type="date" name="dateOfBirth" onChange={handleStudentChange} errorMessage={errors.dateOfBirth} />
+                                <InputGroup icon={<Calendar size={15} />} placeholder="Data di nascita" type="date" name="dateOfBirth" max={getMaxDate()} min={getMinDate()} value={studentData.dateOfBirth} onChange={handleStudentChange} errorMessage={errors.dateOfBirth} />
                                 <InputGroup icon={<Mail size={15} />} placeholder="Email universitaria" type="email" name="email" maxLength={40} onChange={handleStudentChange} errorMessage={errors.email} />
                                 <div className="flex gap-2 w-full">
                                     <div className="w-1/2">
@@ -566,7 +687,7 @@ const AuthPage = () => {
                                 </div>
                                 <button type="submit" className="mt-3 py-2.5 px-6 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg hover:shadow-younify-blue/50 transition-all hover:scale-[1.02] active:scale-95 flex-shrink-0">Registrati</button>
                             </form>
-                            <p className="mt-3 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <a href="#" className="text-younify-blue hover:underline">Accedi qui</a></p>
+                            <p className="mt-3 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <Link to="/login" className="text-younify-blue hover:underline">Accedi qui</Link></p>
                         </div>
                     </div>
 
@@ -659,7 +780,7 @@ const AuthPage = () => {
 
                                 <button type="submit" className="mt-3 py-2.5 px-6 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-lg hover:shadow-purple-600/50 transition-all hover:scale-[1.02] active:scale-95 flex-shrink-0">Registrati</button>
                             </form>
-                            <p className="mt-2 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <a href="#" className="text-purple-400 hover:underline">Accedi qui</a></p>
+                            <p className="mt-2 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <Link to="/login" className="text-purple-400 hover:underline">Accedi qui</Link></p>
                         </div>
                     </div>
 
@@ -690,7 +811,7 @@ const AuthPage = () => {
 
                 </div>
             </div>
-        </div>
+        </PageTransition>
     );
 };
 
@@ -708,7 +829,7 @@ const ErrorMessage = ({ message }) => (
     </AnimatePresence>
 );
 
-const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, disabled, className = "", value, maxLength }) => {
+const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, disabled, className = "", value, maxLength, min, max }) => {
     const [showPassword, setShowPassword] = useState(false);
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
@@ -724,6 +845,8 @@ const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, dis
                     disabled={disabled}
                     value={value}
                     maxLength={maxLength}
+                    min={min}
+                    max={max}
                     className={`w-full h-full bg-slate-950/50 border rounded-xl pl-8 ${type === 'password' ? 'pr-10' : 'pr-3'} py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-all text-sm flex-1 appearance-none ${type === 'date' ? 'text-slate-400' : ''} 
                     ${errorMessage
                         ? 'border-red-500 focus:border-red-500 focus:ring-red-500'

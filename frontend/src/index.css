@@ -90,3 +90,81 @@
 button:focus {
     outline: none;
 }
+
+/* --- STILE TOASTIFY GLASSMORPHISM --- */
+
+/* Sovrascrive il tema scuro di default per renderlo "vetroso" */
+.Toastify__toast-theme--dark {
+    background: rgba(2, 6, 23, 0.85) !important; /* Colore Slate-950 semi-trasparente */
+    backdrop-filter: blur(12px) !important;      /* Sfocatura dello sfondo */
+    -webkit-backdrop-filter: blur(12px) !important; /* Supporto Safari */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Bordo sottile */
+    border-radius: 16px !important;              /* Arrotondamento moderno */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5) !important; /* Ombra profonda */
+    color: #fff !important;
+    font-family: 'Inter', sans-serif !important; /* Usa il tuo font */
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+/* Icone colorate (Success, Error, Warning) */
+.Toastify__toast-icon {
+    width: 20px !important;
+    margin-right: 12px !important;
+}
+
+/* Pulsante di chiusura (X) */
+.Toastify__close-button--dark {
+    color: rgba(255, 255, 255, 0.5) !important;
+    opacity: 1 !important;
+}
+.Toastify__close-button--dark:hover {
+    color: #fff !important;
+}
+
+/* Barra di progresso con gradiente Younify */
+.Toastify__progress-bar-theme--dark {
+    background: linear-gradient(to right, #4f46e5, #9333ea) !important;
+    height: 3px !important;
+}
+
+/* --- ANIMAZIONE CUSTOM: SOFT FADE --- */
+
+/* Classe per l'ENTRATA */
+.soft-enter {
+    animation-name: softIn;
+    animation-duration: 0.6s; /* Durata morbida */
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); /* Movimento naturale */
+    animation-fill-mode: both;
+}
+
+/* Classe per l'USCITA */
+.soft-exit {
+    animation-name: softOut;
+    animation-duration: 0.6s;
+    animation-timing-function: ease-in;
+    animation-fill-mode: both;
+}
+
+/* I Keyframes (i movimenti veri e propri) */
+@keyframes softIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95); /* Parte un po' più su e piccolo */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1); /* Arriva alla posizione normale */
+    }
+}
+
+@keyframes softOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95); /* Svanisce salendo leggermente */
+    }
+}
