@@ -57,7 +57,7 @@ public class ImageStorageService {
 
         if (objectName == null || objectName.isBlank()) {
 
-            throw new FileStorageException("File name is null or empty");
+            throw new FileStorageException("File is null or empty","FILE_NOT_VALID");
         }
 
         try {
@@ -80,7 +80,7 @@ public class ImageStorageService {
 
         if(fileName == null || fileName.isBlank()){
 
-           throw new FileStorageException("File name is null or empty");
+           throw new FileStorageException("File is null or empty", "FILE_NOT_VALID");
         }
 
         try{
@@ -105,7 +105,7 @@ public class ImageStorageService {
 
         if(originalFile == null || originalFile.isEmpty()){
 
-            throw new FileStorageException("File name is null or empty");
+            throw new FileStorageException("File is null or empty", "FILE_NOT_VALID");
         }
 
         return ImmutableImage.loader()

@@ -56,7 +56,7 @@ public class EventEditService {
             }
             else throw new AccessDeniedException("Access is denied for this operation");
         }
-        else throw new ResourceNotFoundException("Event not found");
+        else throw new ResourceNotFoundException("Event not found", "EVENT_NOT_FOUND");
     }
 }
 

@@ -9,7 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "event")
+@Table(
+        name = "event",
+        uniqueConstraints = {
+        @UniqueConstraint(
+            name = "event_duplicate_check",
+            columnNames = {"dateAndTime", "host_id", "name"}
+        )
+    }
+)
 
 @Builder
 @Getter
@@ -47,6 +55,7 @@ public class Event {
     @JoinColumn(name = "host_id")
     private Host host;
 
-    @OneToMany(mappedBy = "eventId")
+    @OneToMany(mappedBy = "event")
+    @Builder.Default
     private List<Participation> participations = new ArrayList<>();
 }
