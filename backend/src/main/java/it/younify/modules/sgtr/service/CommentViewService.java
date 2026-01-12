@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -39,6 +40,7 @@ public class CommentViewService {
      * @return A paginated list of {@link CommentResponse}.
      * @throws ResourceNotFoundException if the thread with the given ID does not exist.
      */
+    @Transactional(readOnly = true)
     public Page<CommentResponse> getCommentByCFU(Long threadId, Pageable pageable) {
 
         Optional<Threads> optT = threadRepository.findById(threadId);
@@ -49,7 +51,7 @@ public class CommentViewService {
             return commentRepository.findByThreadIdOrderByCFUDesc(thread, pageable).map(this::toResponse);
         }
 
-       throw new ResourceNotFoundException("Thread not found");
+       throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
 
     /**
@@ -65,13 +67,12 @@ public class CommentViewService {
         if(comment.getUser() != null){
 
             return new CommentResponse(
-
                     comment.getID(),
                     comment.getContent(),
                     comment.getCFU(),
                     comment.getPublicationDate(),
                     "",
-                    comment.getUser().getFirstName()+" "+comment.getUser().getLastName()
+                    comment.getUser().getFirstName() + " " + comment.getUser().getLastName()
             );
         }
         else{

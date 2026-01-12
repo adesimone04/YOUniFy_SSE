@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -31,6 +32,7 @@ public class ThreadViewService {
      * @param pageable The pagination information.
      * @return A paginated list of {@link ThreadResponse}.
      */
+    @Transactional(readOnly = true)
     public Page<ThreadResponse> getThreadsByDate(Pageable pageable) {
 
         return threadRepository.findAllByOrderByPublicationDateDesc(pageable).map(this::toResponse);
@@ -44,6 +46,7 @@ public class ThreadViewService {
      * @param pageable The pagination information.
      * @return A paginated list of {@link ThreadResponse}.
      */
+    @Transactional(readOnly = true)
     public Page<ThreadResponse> getThreadsByFlag(FlagCategory flag, Pageable pageable) {
         return threadRepository.findAllByFlagOrderByPublicationDateDesc(flag, pageable).map(this::toResponse);
     }
@@ -57,6 +60,7 @@ public class ThreadViewService {
      * @param pageable The pagination information.
      * @return A paginated list of {@link ThreadResponse}.
      */
+    @Transactional(readOnly = true)
     public Page<ThreadResponse> getThreadsByUniversity(String university, Pageable pageable) {
         return threadRepository.findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(university, university, pageable).map(this::toResponse);
     }

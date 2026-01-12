@@ -186,7 +186,7 @@ public class ThreadController {
      *
      * @return A {@link ResponseEntity} with a success message.
      */
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/utility/refresh-censorship")
     public ResponseEntity<ApiResponse<Void>> refreshCensorshipList(){
 
