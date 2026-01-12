@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -63,6 +64,7 @@ public class LogInService {
      * @throws BadCredentialsException if the email or password is incorrect.
      * @throws UsernameNotFoundException if the user or host is not found.
      */
+    @Transactional(readOnly = true)
     public AuthenticationResponse logIn(@NotNull LogInRequest logInRequest){
 
         try{

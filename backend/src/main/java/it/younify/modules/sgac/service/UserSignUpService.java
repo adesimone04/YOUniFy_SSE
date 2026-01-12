@@ -110,33 +110,52 @@ public class UserSignUpService {
             LocalDate dateOfBirth = userSignUpRequest.getDateOfBirth();
             String contactsInfo = userSignUpRequest.getContactsInfo();
 
-            if(validateEmail(email)) {
+            if(validateData(firstName, lastName, dateOfBirth)){
 
-                if(validatePassword(password, confirmPassword)) {
+                if(validateEmail(email)) {
 
-                    String ID = "U-" + UUID.randomUUID();
-                    password = passwordEncoder.encode(password);
-                    User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo, false);
-                    userRepository.save(user);
+                    if(validatePassword(password, confirmPassword)) {
 
-                    Instant expiryDate = generate2FAService.send2FARequest(ID);
+                        String ID = "U-" + UUID.randomUUID();
+                        password = passwordEncoder.encode(password);
+                        User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo, false);
+                        userRepository.save(user);
 
-                    return AccountSummary.builder()
-                            .ID(ID)
-                            .accountName(firstName)
-                            .accountEmail(email)
-                            .expiryDate(expiryDate)
-                            .build();
+                        Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                        return AccountSummary.builder()
+                                .ID(ID)
+                                .accountName(firstName)
+                                .accountEmail(email)
+                                .expiryDate(expiryDate)
+                                .build();
+                    }
+
+                    throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                            "one number, and one special symbol", "PASSWORD_NOT_SAFE");
                 }
 
-                throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                        "one number, and one special symbol", "PASSWORD_NOT_SAFE");
+                throw new BadRequestException("The email " + email + " does not belong to any Italian university", "EMAIL_NOT_VALID");
             }
 
-            throw new BadRequestException("The email " + email + " does not belong to any Italian university", "EMAIL_NOT_VALID");
+            throw new BadRequestException("Some data are not valid", "DATA_NOT_VALID");
         }
     }
 
+
+    private boolean validateData(String firstName, String lastName, LocalDate dateOfBirth) {
+
+        LocalDate today = LocalDate.now();
+
+        int currentMonth = today.getMonthValue();
+        int currentYear = today.getYear();
+        int academicStartYear = (currentMonth < 9) ? currentYear - 1 : currentYear;
+        int maxBirthYear = academicStartYear - 18;
+
+        LocalDate cutoffDate = LocalDate.of(maxBirthYear, 4, 30);
+
+        return (firstName.length() + lastName.length()) < 6 && dateOfBirth.isAfter(cutoffDate);
+    }
 
     private boolean validateEmail(String email) {
 

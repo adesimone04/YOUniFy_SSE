@@ -102,7 +102,7 @@ public class AuthController {
 
             ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", response.getRefreshToken())
                     .httpOnly(true)
-                    .secure(false)  //in production (with https) set on true
+                    .secure(true)
                     .path("/")
                     .maxAge(180 * 24 * 60 * 60)
                     .sameSite("Strict")
@@ -111,7 +111,7 @@ public class AuthController {
 
             ResponseCookie accessCookie = ResponseCookie.from("access_token", response.getAccessToken())
                     .httpOnly(true)
-                    .secure(false)  //in production (with https) set on true
+                    .secure(true)
                     .path("/")
                     .maxAge(15 * 60)
                     .sameSite("Strict")

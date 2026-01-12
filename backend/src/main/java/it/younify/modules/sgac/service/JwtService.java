@@ -45,7 +45,7 @@ public class JwtService {
         if (userDetails instanceof User) {
 
             extraClaims.put("accountId", ((User) userDetails).getID());
-            extraClaims.put("userType", "STUDENT");
+            extraClaims.put("userType", "USER");
         }
         else if (userDetails instanceof Host) {
 

@@ -56,8 +56,19 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/auth/logout").authenticated()
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/user/signup",
+                                "/api/auth/host/signup",
+                                "/api/auth/2FA",
+                                "/api/auth/resend/2FA"
+                        ).anonymous()
+
+                        .requestMatchers(
+                                "/api/auth/logout",
+                                "/api/auth/refresh"
+                        ).authenticated()
+
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/host/**").hasRole("HOST")
                         .requestMatchers("/api/user/**").hasRole("USER")
