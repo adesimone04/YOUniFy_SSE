@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import {
     User, ArrowRight, ArrowLeft, Mail, Lock, IdCard,
     Building2, Hash, CheckCircle, GraduationCap,
     Calendar, MapPin, School, FileCheck, ChevronDown, AlertCircle, Eye, EyeOff, Instagram, Receipt, CreditCard
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup} from 'framer-motion';
 
 //IMPORT STILI
+import authService from '../../services/authService';
+import { handleAuthResponse } from '../../utils/authHandler';
 import styles from '../LandingPage/LandingPage.module.css';
+import PageTransition from '../../components/ui/PageTransition/PageTransition'
 
 // --- IMPORT DATI REALI ---
 import rawCitiesData from '../../data/comuni.json';
@@ -109,7 +115,7 @@ const AuthPage = () => {
         setErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
     };
 
-    const handleStudentSubmit = (e) => {
+    const handleStudentSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
@@ -143,9 +149,29 @@ const AuthPage = () => {
 
         setErrors(newErrors);
 
-        if (Object.keys(newErrors).length > 0) return;
+        if (Object.keys(newErrors).length === 0) {
+            try {
+                const response = await authService.registerStudent(studentData);
+                // Caso SUCCESSO (es. USER_REGISTERED)
+                handleAuthResponse(response.data, navigate, {
+                    email: studentData.email,
+                    name: studentData.firstName
+                });
+            } catch (error) {
+                console.error("Errore registrazione studente:", error);
+                const errorData = error.response?.data;
 
-        alert("Registrazione Studente Riuscita!");
+                if (errorData) {
+                    const code = handleAuthResponse(errorData, navigate);
+                    // Se l'handler ritorna un codice (es. PASSWORD_NOT_SAFE), usiamo il toast rosso
+                    if (code) {
+                        toast.error(errorData.message || "Registrazione fallita");
+                    }
+                } else {
+                    toast.error("Errore di connessione al server.");
+                }
+            }
+        }
     };
 
     // ==========================================
@@ -187,7 +213,7 @@ const AuthPage = () => {
         setHostErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
     };
 
-    const handleHostSubmit = (e) => {
+    const handleHostSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
 
@@ -221,9 +247,39 @@ const AuthPage = () => {
 
         setHostErrors(newErrors);
 
-        if (Object.keys(newErrors).length > 0) return;
+        if (Object.keys(newErrors).length === 0) {
+            try {
+                // 1. Prepariamo i dati corretti (lista -> stringa)
+                const payload = {
+                    ...hostData,
+                    isAssociation,
+                    uniList: hostData.uniList.join(','), // <--- Qui diventa una stringa "Uni1,Uni2"
+                    PIVA: hostData.piva,
+                    PEC: hostData.pec
+                };
 
-        alert("Registrazione Host Riuscita!");
+                // 2. USIAMO "payload" NELLA CHIAMATA (Prima usavi hostData)
+                const response = await authService.registerHost(payload);
+
+                // Caso SUCCESSO (es. HOST_REGISTERED)
+                handleAuthResponse(response.data, navigate, {
+                    email: hostData.pec,
+                    name: hostData.hostName
+                });
+            } catch (error) {
+                console.error("Errore registrazione host:", error);
+                const errorData = error.response?.data;
+
+                if (errorData) {
+                    const code = handleAuthResponse(errorData, navigate);
+                    if (code) {
+                        toast.error(errorData.message || "Registrazione fallita");
+                    }
+                } else {
+                    toast.error("Errore di connessione al server.");
+                }
+            }
+        }
     };
 
     // ==========================================
@@ -324,15 +380,15 @@ const AuthPage = () => {
 
     return (
         // [FIX LAYOUT] 'fixed inset-0' blocca la viewport evitando che la barra indirizzi crei problemi
-        <div className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
+        <PageTransition className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
             {/* BACKGROUND */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`${styles.blob} ${styles.blue}`}></div>
                 <div className={`${styles.blob} ${styles.indigo}`}></div>
-                <div className={`${styles.blob} ${styles.rose}`}></div>
-                <div className={`${styles.blob} ${styles.teal}`}></div>
+                <div className={`${styles.blob} ${styles.magenta}`}></div>
+                <div className={`${styles.blob} ${styles.crimson}`}></div>
                 <div className={`${styles.blob} ${styles.purple}`}></div>
-                <div className={`${styles.blob} ${styles.cyan}`}></div>
+                <div className={`${styles.blob} ${styles.amber}`}></div>
             </div>
 
             <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6 h-full">
@@ -493,10 +549,15 @@ const AuthPage = () => {
                                 </motion.div>
 
                                 {/* 3. FOOTER (LINK LOGIN) */}
-                                <motion.div layout className="shrink-0 pt-6 pb-2 text-center w-full">
+                                <motion.div layout className="shrink-0 pt-6 pb-2 text-center w-full"
+                                            initial={{ opacity: 0, x: 50 }}  // Come inizia (trasparente e spostato a destra)
+                                            animate={{ opacity: 1, x: 0 }}   // Come diventa (visibile e centrato)
+                                            exit={{ opacity: 0, x: -50 }}    // Come esce (svanisce a sinistra)
+                                            transition={{ duration: 0.3 }}   // Velocità
+                                    >
                                     <p className="text-slate-500 text-xs">
                                         Hai già un account? <br/>
-                                        <a href="#" className={`font-bold hover:underline transition-colors duration-300 ${isHostMode ? 'text-purple-400' : 'text-younify-blue'}`}>Accedi qui</a>
+                                        <Link to="/login" className={`font-bold hover:underline transition-colors duration-300 ${isHostMode ? 'text-purple-400' : 'text-younify-blue'}`}>Accedi qui</Link>
                                     </p>
                                 </motion.div>
 
@@ -566,7 +627,7 @@ const AuthPage = () => {
                                 </div>
                                 <button type="submit" className="mt-3 py-2.5 px-6 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg hover:shadow-younify-blue/50 transition-all hover:scale-[1.02] active:scale-95 flex-shrink-0">Registrati</button>
                             </form>
-                            <p className="mt-3 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <a href="#" className="text-younify-blue hover:underline">Accedi qui</a></p>
+                            <p className="mt-3 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <Link to="/login" className="text-younify-blue hover:underline">Accedi qui</Link></p>
                         </div>
                     </div>
 
@@ -659,7 +720,7 @@ const AuthPage = () => {
 
                                 <button type="submit" className="mt-3 py-2.5 px-6 rounded-xl bg-purple-600 text-white font-bold text-sm shadow-lg hover:shadow-purple-600/50 transition-all hover:scale-[1.02] active:scale-95 flex-shrink-0">Registrati</button>
                             </form>
-                            <p className="mt-2 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <a href="#" className="text-purple-400 hover:underline">Accedi qui</a></p>
+                            <p className="mt-2 mb-2 text-slate-500 text-[12px] text-center flex-shrink-0 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">Hai già un account? <Link to="/login" className="text-purple-400 hover:underline">Accedi qui</Link></p>
                         </div>
                     </div>
 
@@ -690,7 +751,7 @@ const AuthPage = () => {
 
                 </div>
             </div>
-        </div>
+        </PageTransition>
     );
 };
 

@@ -3,13 +3,18 @@ import {
     Mail, Lock, Eye, EyeOff, AlertCircle, LogIn
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Importa useNavigate
 
 import styles from '../LandingPage/LandingPage.module.css';
+import PageTransition from '../../components/ui/PageTransition/PageTransition';
 
-// --- COMPONENTI DI SUPPORTO ---
+// IMPORTA IL SERVIZIO DI AUTENTICAZIONE
+import authService from '../../services/authService';
+import { handleAuthResponse } from '../../utils/authHandler';
 
-// Questo è lo stesso componente usato per gli errori dei campi
+
+// --- COMPONENTI DI SUPPORTO (Invariati) ---
+
 const ErrorMessage = ({ message, centered = false }) => (
     <AnimatePresence>
         {message && (
@@ -60,20 +65,20 @@ const InputGroup = ({ icon, placeholder, type, name, onChange, errorMessage, dis
                     </button>
                 )}
             </div>
-            {/* Errore specifico del campo (es. campo vuoto) */}
             <ErrorMessage message={errorMessage} />
         </div>
     );
 };
 
 const LoginPage = () => {
+    const navigate = useNavigate(); // Hook per il reindirizzamento
+
     const [loginData, setLoginData] = useState({ email: '', password: '' });
-
-    // Errori formali (campi vuoti o malformati) -> Colorano il bordo di rosso
     const [fieldErrors, setFieldErrors] = useState({ email: false, password: false });
-
-    // Errore Logico (Credenziali errate) -> NON colora il bordo, ma mostra il testo
     const [generalError, setGeneralError] = useState("");
+
+    // Stato per gestire il caricamento (disabilita bottone)
+    const [isLoading, setIsLoading] = useState(false);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -81,12 +86,9 @@ const LoginPage = () => {
         const { name, value } = e.target;
         setLoginData(prev => ({ ...prev, [name]: value }));
 
-        // Pulisce errori specifici mentre scrivi
         if (fieldErrors[name]) {
             setFieldErrors(prev => ({ ...prev, [name]: false }));
         }
-
-        // Pulisce l'errore generico appena tocchi qualcosa per riprovare
         if (generalError) {
             setGeneralError("");
         }
@@ -94,9 +96,10 @@ const LoginPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // 1. VALIDAZIONE CLIENT-SIDE
         const newFieldErrors = {};
 
-        // 1. VALIDAZIONE FORMALE
         if (!loginData.email) {
             newFieldErrors.email = "Inserisci l'email";
         } else if (!emailRegex.test(loginData.email)) {
@@ -112,34 +115,47 @@ const LoginPage = () => {
             return;
         }
 
-        // --- 2. SIMULAZIONE BACKEND ---
-        console.log("Invio dati al server...", loginData);
+        setIsLoading(true);
 
-        const MOCK_USER = {
-            email: "student@younify.it",
-            password: "Younify2024!"
-        };
+        try {
+            const responseWrapper = await authService.login(loginData);
 
-        if (loginData.email === MOCK_USER.email && loginData.password === MOCK_USER.password) {
-            alert("Login riuscito!");
-        } else {
-            // ERRORE DI SICUREZZA (Credenziali errate)
-            setGeneralError("Email o Password errati");
+            // --- QUI CAMBIA TUTTO ---
+            // Non controlliamo più manualmente lo status.
+            // Passiamo tutto all'handler che sa se mandarti alla Home o alla 2FA.
+            handleAuthResponse(responseWrapper.data, navigate, {
+                email: loginData.email
+            });
 
-            // NOTA: Ho rimosso la riga che cancellava la password.
-            // Ora la password errata rimane scritta, così se riclicchi non ti dice "Inserisci password".
+        } catch (error) {
+            console.error("Errore Login:", error);
+            const errorData = error.response?.data;
+
+            // Se l'errore ha un messaggio (es. "Credenziali errate"), lo mostriamo
+            if (errorData?.message) {
+                setGeneralError(errorData.message);
+            } else {
+                setGeneralError("Credenziali non valide o errore di connessione.");
+            }
+
+            // Opzionale: Se l'errore contiene un codice logico (es. ACCOUNT_LOCKED),
+            // l'handler potrebbe gestirlo (es. redirect).
+            // Se vuoi delegare anche gli errori critici, puoi decommentare:
+            // if (errorData?.internalCode) handleAuthResponse(errorData, navigate);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="h-dvh md:min-h-screen w-full bg-slate-950 flex flex-col font-sans overflow-hidden relative">
+        <PageTransition className="h-dvh md:min-h-screen w-full bg-slate-950 flex flex-col font-sans overflow-hidden relative">
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`${styles.blob} ${styles.blue}`}></div>
                 <div className={`${styles.blob} ${styles.indigo}`}></div>
-                <div className={`${styles.blob} ${styles.rose}`}></div>
-                <div className={`${styles.blob} ${styles.teal}`}></div>
+                <div className={`${styles.blob} ${styles.magenta}`}></div>
+                <div className={`${styles.blob} ${styles.crimson}`}></div>
                 <div className={`${styles.blob} ${styles.purple}`}></div>
-                <div className={`${styles.blob} ${styles.cyan}`}></div>
+                <div className={`${styles.blob} ${styles.amber}`}></div>
             </div>
 
             <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6">
@@ -167,7 +183,7 @@ const LoginPage = () => {
                         <div className="mt-auto">
                             <p className="text-slate-500 text-sm [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">
                                 Non hai ancora un account?{' '}
-                                <Link to="/register" className="text-white font-bold hover:underline decoration-younify-blue underline-offset-4 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">
+                                <Link to="/auth" className="text-white font-bold hover:underline decoration-younify-blue underline-offset-4 [text-shadow:_0_2px_8px_rgba(0,0,0,0.6)]">
                                     Registrati qui
                                 </Link>
                             </p>
@@ -194,16 +210,24 @@ const LoginPage = () => {
                                     </div>
 
                                     <form onSubmit={handleSubmit} noValidate>
-                                        <InputGroup icon={<Mail size={18} />} placeholder="Email / PEC" type="email" name="email" onChange={handleChange} errorMessage={fieldErrors.email} />
-                                        <InputGroup icon={<Lock size={18} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={fieldErrors.password} />
+                                        <InputGroup icon={<Mail size={18} />} placeholder="Email / PEC" type="email" name="email" onChange={handleChange} errorMessage={fieldErrors.email} disabled={isLoading} />
+                                        <InputGroup icon={<Lock size={18} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={fieldErrors.password} disabled={isLoading} />
 
-                                        {/* ERRORE GENERALE: Stesso stile degli altri, posizionato sopra il bottone */}
+                                        {/* ERRORE GENERALE */}
                                         <div className="mb-2">
                                             <ErrorMessage message={generalError} centered={true} />
                                         </div>
 
-                                        <button type="submit" className="w-full mt-2 py-3 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/25 hover:shadow-younify-blue/40 transition-all hover:scale-[1.02] active:scale-95">
-                                            Accedi
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading}
+                                            className={`w-full mt-2 py-3 rounded-xl font-bold text-sm shadow-lg transition-all 
+                                                ${isLoading
+                                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                                : 'bg-younify-blue text-white shadow-younify-blue/25 hover:shadow-younify-blue/40 hover:scale-[1.02] active:scale-95'
+                                            }`}
+                                        >
+                                            {isLoading ? "Accesso in corso..." : "Accedi"}
                                         </button>
                                     </form>
                                 </div>
@@ -224,23 +248,31 @@ const LoginPage = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} noValidate>
-                                <InputGroup icon={<Mail size={20} />} placeholder="Email / PEC" type="email" name="email" onChange={handleChange} errorMessage={fieldErrors.email} />
-                                <InputGroup icon={<Lock size={20} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={fieldErrors.password} />
+                                <InputGroup icon={<Mail size={20} />} placeholder="Email / PEC" type="email" name="email" onChange={handleChange} errorMessage={fieldErrors.email} disabled={isLoading} />
+                                <InputGroup icon={<Lock size={20} />} placeholder="Password" type="password" name="password" onChange={handleChange} errorMessage={fieldErrors.password} disabled={isLoading} />
 
                                 {/* ERRORE GENERALE (MOBILE) */}
                                 <div className="mb-2">
                                     <ErrorMessage message={generalError} centered={true} />
                                 </div>
 
-                                <button type="submit" className="w-full mt-2 py-3.5 rounded-xl bg-younify-blue text-white font-bold text-sm shadow-lg shadow-younify-blue/25 active:scale-95 transition-transform">
-                                    Accedi
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className={`w-full mt-2 py-3.5 rounded-xl font-bold text-sm shadow-lg transition-transform
+                                        ${isLoading
+                                        ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                        : 'bg-younify-blue text-white shadow-younify-blue/25 active:scale-95'
+                                    }`}
+                                >
+                                    {isLoading ? "Accesso in corso..." : "Accedi"}
                                 </button>
                             </form>
 
                             <div className="mt-12 text-center">
                                 <p className="text-slate-500 text-xs">
                                     Non hai un account? <br/>
-                                    <Link to="/register" className="text-younify-blue font-bold hover:underline ml-1">
+                                    <Link to="/auth" className="text-younify-blue font-bold hover:underline ml-1">
                                         Registrati qui
                                     </Link>
                                 </p>
@@ -250,7 +282,7 @@ const LoginPage = () => {
 
                 </div>
             </div>
-        </div>
+        </PageTransition>
     );
 };
 
