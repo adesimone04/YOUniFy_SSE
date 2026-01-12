@@ -97,6 +97,7 @@ public class User implements UserDetails {
     /**
      * The user's role, which defines their permissions and defaults to USER.
      */
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 

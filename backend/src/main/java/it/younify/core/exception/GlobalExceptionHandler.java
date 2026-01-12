@@ -2,8 +2,10 @@ package it.younify.core.exception;
 
 import it.younify.core.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -72,6 +74,22 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), ex.getInternalCode(), request);
     }
 
+
+    /**
+     * Handles {@link AccessDeniedException} when an authenticated user tries to access
+     * a resource without sufficient permissions (e.g., failing a {@code @PreAuthorize} check).
+     * This ensures the client receives a proper 403 Forbidden status instead of a generic error.
+     *
+     * @param ex The access denied exception thrown by Spring Security.
+     * @param request The current HTTP request.
+     * @return A {@link ResponseEntity} containing the standardized 403 error response.
+     */
+    @ExceptionHandler(AccessDeniedException.class) // (403)
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
+
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), "ACCESS_DENIED", request);
+    }
+
     /**
      * Handles {@link ResourceNotFoundException} and returns a 404 Not Found response.
      * This is used when a requested resource does not exist.
@@ -96,6 +114,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceAlreadyExistsException.class) // (409)
     public ResponseEntity<ApiErrorResponse> handleConflict(ResourceAlreadyExistsException ex, HttpServletRequest request) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), ex.getInternalCode(), request);
+    }
+
+    /**
+     * Handles database integrity violations, such as unique constraint checks.
+     * Returns a 409 Conflict status instead of 500, with a readable message.
+     *
+     * @param ex The DataIntegrityViolationException thrown by Spring Data/Hibernate.
+     * @param request The current HTTP request.
+     * @return A {@link ResponseEntity} containing the standardized 409 error response.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class) // (409)
+    public ResponseEntity<ApiErrorResponse> handleDatabaseViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), "DB_CONSTRAINS_VIOLATED", request);
+    }
+
+    /**
+     * Handles all uncaught {@link Exception} instances as a last resort.
+     * This method acts as a generic fallback for any unexpected server-side errors,
+     * preventing stack traces from being exposed to the client. It returns a standardized
+     * 500 Internal Server Error response.
+     *
+     * @param ex The exception that was thrown.
+     * @param request The current HTTP request.
+     * @return A {@link ResponseEntity} containing the standardized 500 error response.
+     */
+    @ExceptionHandler(Exception.class) // (500)
+    public ResponseEntity<ApiErrorResponse> handleInternalServerError(Exception ex, HttpServletRequest request) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),"INTERNAL_SERVER_ERROR", request);
     }
 
 

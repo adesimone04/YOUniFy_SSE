@@ -11,6 +11,7 @@ import it.younify.modules.sgac.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -47,6 +48,7 @@ public class RefreshTokenService {
      * @see it.younify.modules.sgac.model.entity.User
      * @see it.younify.modules.sgac.model.entity.Host
      */
+    @Transactional(rollbackFor = Exception.class)
     public AuthenticationResponse refresh(RefreshTokenRequest refreshTokenRequest){
 
         if(refreshTokenRequest.getRefreshToken() == null){ throw new TokenRefreshException("Refresh token not valid", "WRONG_REFRESH_TOKEN"); }

@@ -116,6 +116,7 @@ public class Authentication2FAService {
                         throw new BadRequestException("You achieved the maximum number of attempts: 3", "MAX_ATTEMPTS");
                     }
 
+                    code2FARepository.save(code2FA);
                     throw new BadRequestException("The code is incorrect. Retry, number of attempts remained:" + (3 - code2FA.getErrorCount()), "TRY_2FA_AGAIN");
                 }
             }
