@@ -112,7 +112,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FileStorageException.class)
     public ResponseEntity<ApiErrorResponse> handleStorageError(FileStorageException ex, HttpServletRequest request) {
 
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), ex.getInternalCode(), request);
     }
 
     /**
