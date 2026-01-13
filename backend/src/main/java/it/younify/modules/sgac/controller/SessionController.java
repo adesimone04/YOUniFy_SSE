@@ -109,7 +109,7 @@ public class SessionController {
                 .secure(true)
                 .path("/")
                 .maxAge(15 * 60)
-                .sameSite("Strict")
+                .sameSite("None")  //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                 .build();
 
 
@@ -141,7 +141,7 @@ public class SessionController {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None") //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                 .build();
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
@@ -149,7 +149,7 @@ public class SessionController {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None") //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                 .build();
 
 

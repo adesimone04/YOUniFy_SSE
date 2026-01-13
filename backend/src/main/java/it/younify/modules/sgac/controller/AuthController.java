@@ -105,7 +105,7 @@ public class AuthController {
                     .secure(true)
                     .path("/")
                     .maxAge(180 * 24 * 60 * 60)
-                    .sameSite("Strict")
+                    .sameSite("None")  //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                     .build();
 
 
@@ -114,7 +114,7 @@ public class AuthController {
                     .secure(true)
                     .path("/")
                     .maxAge(15 * 60)
-                    .sameSite("Strict")
+                    .sameSite("None")  //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                     .build();
 
 
