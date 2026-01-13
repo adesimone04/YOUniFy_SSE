@@ -105,38 +105,74 @@ public class UserSignUpService {
             String lastName = userSignUpRequest.getLastName();
             String password = userSignUpRequest.getPassword();
             String confirmPassword = userSignUpRequest.getConfirmPassword();
+            String noProfileImage = "system/nopicture.webp";
             String cdl = userSignUpRequest.getCdl();
             String university = userSignUpRequest.getUniversity();
             LocalDate dateOfBirth = userSignUpRequest.getDateOfBirth();
             String contactsInfo = userSignUpRequest.getContactsInfo();
 
-            if(validateEmail(email)) {
+            if(validateData(firstName, lastName, dateOfBirth)){
 
-                if(validatePassword(password, confirmPassword)) {
+                if(validateEmail(email)) {
 
-                    String ID = "U-" + UUID.randomUUID();
-                    password = passwordEncoder.encode(password);
-                    User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo, false);
-                    userRepository.save(user);
+                    if(validatePassword(password, confirmPassword)) {
 
-                    Instant expiryDate = generate2FAService.send2FARequest(ID);
+                        String ID = "U-" + UUID.randomUUID();
+                        password = passwordEncoder.encode(password);
 
-                    return AccountSummary.builder()
-                            .ID(ID)
-                            .accountName(firstName)
-                            .accountEmail(email)
-                            .expiryDate(expiryDate)
-                            .build();
+                        User user = User.builder()
+                                .ID(ID)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .email(email)
+                                .password(password)
+                                .profileImage(noProfileImage)
+                                .cdl(cdl)
+                                .university(university)
+                                .dateOfBirth(dateOfBirth)
+                                .contactsInfo(contactsInfo)
+                                .enabled(false)
+                                .build();
+
+                        userRepository.save(user);
+
+                        Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                        return AccountSummary.builder()
+                                .ID(ID)
+                                .accountName(firstName)
+                                .accountEmail(email)
+                                .expiryDate(expiryDate)
+                                .build();
+                    }
+
+                    throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                            "one number, and one special symbol", "PASSWORD_NOT_SAFE");
                 }
 
-                throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                        "one number, and one special symbol", "PASSWORD_NOT_SAFE");
+                throw new BadRequestException("The email " + email + " does not belong to any Italian university", "EMAIL_NOT_VALID");
             }
 
-            throw new BadRequestException("The email " + email + " does not belong to any Italian university", "EMAIL_NOT_VALID");
+            throw new BadRequestException("Some data are not valid", "DATA_NOT_VALID");
         }
     }
 
+
+    private boolean validateData(String firstName, String lastName, LocalDate dateOfBirth) {
+
+        LocalDate today = LocalDate.now();
+
+        int currentMonth = today.getMonthValue();
+        int currentYear = today.getYear();
+        int academicStartYear = (currentMonth < 9) ? currentYear - 1 : currentYear;
+        int maxBirthYear = academicStartYear - 18;
+
+        LocalDate cutoffDate = LocalDate.of(maxBirthYear, 4, 30);
+
+        return firstName.trim().length() >= 3 &&
+                lastName.trim().length() >= 3 &&
+                dateOfBirth.isBefore(cutoffDate);
+    }
 
     private boolean validateEmail(String email) {
 

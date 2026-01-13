@@ -18,18 +18,29 @@ import java.util.Optional;
 public interface Code2FARepository extends JpaRepository<Code2FA, Long> {
 
     /**
-     * Finds a 2FA code by its associated account ID.
+     * Finds a 2FA code by the unique ID of its owner, who can be either a {@link User} or a {@link Host}.
+     * This custom query is necessary because the owner is polymorphic (can be one of two different entity types).
      *
-     * @param id The account ID.
-     * @return An {@link Optional} containing the 2FA code if found, or an empty optional otherwise.
+     * @param id The unique identifier of the user or host.
+     * @return An {@link Optional} containing the 2FA code if found.
      */
-    Optional<Code2FA> findById(Long id);
-    Optional<Code2FA> findByHost(Host host);
-    Optional<Code2FA> findByUser(User user);
-
-    @Query("SELECT t FROM Code2FA t WHERE t.user.id = :id OR t.host.id = :id")
+    @Query("SELECT t FROM Code2FA t WHERE t.user.ID = :id OR t.host.ID = :id")
     Optional<Code2FA> findByOwnerId(@Param("id") String id);
 
+    /**
+     * Deletes the 2FA code associated with a specific user.
+     * This is used to clean up old codes before generating a new one.
+     *
+     * @param user The user whose 2FA code should be deleted.
+     */
     void deleteByUser(User user);
+
+
+    /**
+     * Deletes the 2FA code associated with a specific host.
+     * This is used to clean up old codes before generating a new one.
+     *
+     * @param host The host whose 2FA code should be deleted.
+     */
     void deleteByHost(Host host);
 }
