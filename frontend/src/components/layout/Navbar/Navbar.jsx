@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from "react-router-dom";
+import PageTransition from "../../ui/PageTransition/PageTransition";
+
 
 const Navbar = () => {
     const [hoveredLink, setHoveredLink] = useState(null);
@@ -17,7 +20,7 @@ const Navbar = () => {
             className="fixed top-0 left-0 w-full z-[100] px-6 py-5 flex justify-center"
         >
             {/* CONTAINER */}
-            <div className="w-full max-w-6xl grid grid-cols-3 items-center px-6 py-3 bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl relative overflow-hidden">
+            <PageTransition className="w-full max-w-6xl grid grid-cols-2 md:grid-cols-3 items-center px-6 py-3 bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl relative overflow-hidden">
 
                 {/* Layer decorativo */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none" />
@@ -57,16 +60,13 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                {/* 3. CTA */}
-                <div className="justify-self-end z-10">
-                    <a
-                        href="#"
-                        className="px-6 py-2.5 bg-white text-slate-950 rounded-full font-bold text-sm tracking-wide hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 font-sans"
-                    >
+                {/* 3. CTA (Allineato a destra) - MODIFICA QUI */}
+                <div className="z-10 flex items-center justify-self-end">
+                    <Link to="/auth" className="px-6 py-2 md:py-2.5 bg-white text-slate-950 rounded-full font-bold text-sm tracking-wide hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-all duration-300 font-sans flex items-center justify-center leading-none shadow-lg">
                         Get Started
-                    </a>
+                    </Link>
                 </div>
-            </div>
+            </PageTransition>
         </motion.nav>
     );
 };
