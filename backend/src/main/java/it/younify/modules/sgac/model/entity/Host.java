@@ -1,10 +1,7 @@
 package it.younify.modules.sgac.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "hosts")
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -94,20 +92,6 @@ public class Host implements UserDetails {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.HOST;
-
-    public Host(String ID, String hostName, String PIVA, String PEC, String password, String province, String city, String uniList, boolean enabled) {
-
-        this.ID = ID;
-        this.hostName = hostName;
-        this.PIVA = PIVA;
-        this.PEC = PEC;
-        this.password = password;
-        this.province = province;
-        this.city = city;
-        this.uniList = uniList;
-        this.enabled = enabled;
-    }
-
 
     /**
      * Returns the authorities granted to the host.

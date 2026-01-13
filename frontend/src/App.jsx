@@ -1,20 +1,54 @@
 import React from 'react';
-// Importazione del componente pagina principale (LandingPage).
-// Questo file funge da entry point visivo per la struttura della pagina.
-import LandingPage from './pages/LandingPage/LandingPage';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
-/*
- * Componente Root (App).
- * Funge da contenitore principale per l'intera applicazione React.
- * Attualmente, l'applicazione è strutturata come una "Single Page" che renderizza la LandingPage.
- */
+import { ToastContainer, cssTransition } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import AuthPage from './pages/Auth/AuthPage';
+import LoginPage from './pages/Auth/LoginPage';
+import LandingPage from './pages/LandingPage/LandingPage';
+import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
+
+const PublicRoute = () => {
+
+    const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
+    if (isLogged) { return <Navigate to="/" replace />; }
+
+    return <Outlet />;
+};
+
+
+const AnimatedRoutes = () => {
+    const location = useLocation();
+
+    return (
+        <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+
+                <Route path="/" element={<LandingPage />} />
+
+                <Route element={<PublicRoute />}>
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/2fa" element={<TwoFactorAuth />} />
+                </Route>
+            </Routes>
+        </AnimatePresence>
+    );
+};
+
+const SoftFade = cssTransition({
+    enter: "soft-enter", // Deve corrispondere al nome della classe CSS in index.css
+    exit: "soft-exit"
+});
+
 function App() {
     return (
-        // Container globale dell'applicazione.
-        // La classe "App" può essere utilizzata per stili globali o reset CSS specifici.
-        <div className="App">
-            <LandingPage />
-        </div>
+        <BrowserRouter>
+            <ToastContainer position="top-center" theme="dark" transition={SoftFade} autoClose={5000} limit={3} />
+            <AnimatedRoutes />
+        </BrowserRouter>
     );
 }
 

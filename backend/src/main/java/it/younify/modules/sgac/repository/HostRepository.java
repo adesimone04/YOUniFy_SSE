@@ -18,7 +18,7 @@ public interface HostRepository extends JpaRepository<Host, String> {
      * @param id The ID of the host.
      * @return An {@link Optional} containing the host if found, or an empty optional otherwise.
      */
-    Optional<Host> findById(String id);
+    Optional<Host> findByID(String id);
 
     /**
      * Finds a host by its certified email address (PEC).

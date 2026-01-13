@@ -106,10 +106,10 @@ public class SessionController {
 
         ResponseCookie newAccessCookie = ResponseCookie.from("access_token", response.getAccessToken())
                 .httpOnly(true)
-                .secure(false)  //in production (with https) set on true
+                .secure(true)
                 .path("/")
                 .maxAge(15 * 60)
-                .sameSite("Strict")
+                .sameSite("None")  //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                 .build();
 
 
@@ -138,18 +138,18 @@ public class SessionController {
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
-                .secure(false)  //in production (with https) set on true
+                .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None") //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                 .build();
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", "")
                 .httpOnly(true)
-                .secure(false)  //in production (with https) set on true
+                .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Strict")
+                .sameSite("None") //switch in Strict and disable CRSF if hosting on same origin backend & frontend
                 .build();
 
 
