@@ -105,6 +105,7 @@ public class UserSignUpService {
             String lastName = userSignUpRequest.getLastName();
             String password = userSignUpRequest.getPassword();
             String confirmPassword = userSignUpRequest.getConfirmPassword();
+            String noProfileImage = "system/nopicture.webp";
             String cdl = userSignUpRequest.getCdl();
             String university = userSignUpRequest.getUniversity();
             LocalDate dateOfBirth = userSignUpRequest.getDateOfBirth();
@@ -118,7 +119,21 @@ public class UserSignUpService {
 
                         String ID = "U-" + UUID.randomUUID();
                         password = passwordEncoder.encode(password);
-                        User user = new User(ID, firstName, lastName, email, password, cdl, university, dateOfBirth, contactsInfo, false);
+
+                        User user = User.builder()
+                                .ID(ID)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .email(email)
+                                .password(password)
+                                .profileImage(noProfileImage)
+                                .cdl(cdl)
+                                .university(university)
+                                .dateOfBirth(dateOfBirth)
+                                .contactsInfo(contactsInfo)
+                                .enabled(false)
+                                .build();
+
                         userRepository.save(user);
 
                         Instant expiryDate = generate2FAService.send2FARequest(ID);
@@ -154,7 +169,9 @@ public class UserSignUpService {
 
         LocalDate cutoffDate = LocalDate.of(maxBirthYear, 4, 30);
 
-        return (firstName.length() + lastName.length()) < 6 && dateOfBirth.isAfter(cutoffDate);
+        return firstName.trim().length() >= 3 &&
+                lastName.trim().length() >= 3 &&
+                dateOfBirth.isBefore(cutoffDate);
     }
 
     private boolean validateEmail(String email) {
