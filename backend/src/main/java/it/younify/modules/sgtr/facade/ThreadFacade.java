@@ -31,6 +31,7 @@ public class ThreadFacade {
     private final ThreadDeleteService threadDeleteService;
     private final ThreadVoteService threadVoteService;
     private final CensorshipService censorshipService;
+    private final TotalCFUService totalCFUService;
 
     /**
      * Creates a new thread after checking for and censoring any sensitive content.
@@ -112,6 +113,14 @@ public class ThreadFacade {
     public void refreshCensorship() {
 
         censorshipService.refresh();
+    }
+
+    /**
+     * Retrieves the total CFU score for the currently authenticated user.
+     */
+    public int getCFUTotal() {
+
+        return totalCFUService.getCFUTotal();
     }
 
 }

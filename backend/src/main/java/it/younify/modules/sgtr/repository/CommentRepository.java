@@ -7,6 +7,8 @@ import it.younify.modules.sgtr.model.entity.Threads;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
@@ -81,4 +83,26 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
      * @return A paginated list of comments.
      */
     Page<Comment> findByThreadIdOrderByPublicationDateDesc(Threads thread, Pageable pageable);
+
+    /**
+     * Calculates the total sum of CFU (votes) for all comments posted by a specific user.
+     * This query uses {@code COALESCE} to ensure it returns 0 if the user has made no comments,
+     * which is crucial for calculating a user's total reputation score.
+     *
+     * @param user The user whose comment scores are to be summed.
+     * @return The total CFU score from the user's comments.
+     */
+    @Query("SELECT COALESCE(SUM(c.CFU), 0) FROM Comment c WHERE c.user = :user_id")
+    int sumCFUByUserComment(@Param("user_id") User user);
+
+    /**
+     * Calculates the total sum of CFU (votes) for all comments posted by a specific host.
+     * This query uses {@code COALESCE} to ensure it returns 0 if the host has made no comments,
+     * which is crucial for calculating a host's total reputation score.
+     *
+     * @param host The host whose comment scores are to be summed.
+     * @return The total CFU score from the host's comments.
+     */
+    @Query("SELECT COALESCE(SUM(c.CFU), 0) FROM Comment c WHERE c.host= :host_id")
+    int sumCFUByHostComment(@Param("host_id") Host host);
 }

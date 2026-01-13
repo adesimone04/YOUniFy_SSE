@@ -8,12 +8,14 @@ import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
 import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.service.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import static org.springframework.security.authorization.AuthorityReactiveAuthor
 @RestController
 @RequestMapping("/api/thread")
 @RequiredArgsConstructor
+@Validated
 public class ThreadController {
 
     private final ThreadFacade threadFacade;
@@ -67,7 +70,7 @@ public class ThreadController {
      * @throws it.younify.core.exception.ResourceNotFoundException if the thread does not exist.
      */
     @DeleteMapping("/delete/{threadId}")
-    public ResponseEntity<ApiResponse<Void>> deleteThread(@PathVariable("threadId") Long threadId) {
+    public ResponseEntity<ApiResponse<Void>> deleteThread(@Positive @PathVariable("threadId") Long threadId) {
 
         threadFacade.deleteThread(threadId);
 
@@ -79,6 +82,19 @@ public class ThreadController {
     }
 
 
+    /**
+     * Handles a user's vote (upvote or downvote) on a specific thread.
+     * <p>
+     * This endpoint delegates the core voting logic to the {@link it.younify.modules.sgtr.facade.ThreadFacade},
+     * which manages updating the thread's score (CFU) and preventing duplicate votes.
+     * The outcome is a simple success message if the operation is completed without errors.
+     *
+     * @param threadVoteRequest The request body containing the ID of the thread and the type of vote being cast.
+     * @return A {@link ResponseEntity} containing a generic {@link ApiResponse} to confirm the action was successful.
+     * @throws it.younify.core.exception.ResourceNotFoundException if the thread specified in the request does not exist.
+     * @throws it.younify.core.exception.BadRequestException if the user attempts to vote on their own thread or if the vote request is otherwise invalid.
+     * @see it.younify.modules.sgtr.model.dto.request.ThreadVoteRequest
+     */
     @PostMapping("/react")
     public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody ThreadVoteRequest threadVoteRequest) {
 
@@ -123,7 +139,7 @@ public class ThreadController {
 
         return ResponseEntity.ok(
                 ApiResponse.<List<Map<String, String>>>builder()
-                        .message("RETRIEVE_SUCCESSFULY")
+                        .message("RETRIEVE_SUCCESSFULLY")
                         .data(
                                 Arrays.stream(FlagCategory.values())
                                 .map(flag -> Map.of(
@@ -145,7 +161,7 @@ public class ThreadController {
      * @return A {@link ResponseEntity} containing a paginated list of {@link ThreadResponse}.
      */
     @GetMapping("/flag/{flag}")
-    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByFlag(@PathVariable("flag") String flag,
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByFlag(@Positive @PathVariable("flag") String flag,
                                                                               @PageableDefault(size = 10) Pageable pageable) {
 
         Page<ThreadResponse> page = threadFacade.getThreadsByFlag(flag, pageable);
@@ -167,7 +183,7 @@ public class ThreadController {
      * @return A {@link ResponseEntity} containing a paginated list of {@link ThreadResponse}.
      */
     @GetMapping("/uni/{university}")
-    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByUniversity(@PathVariable("university") String university,
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByUniversity(@Positive @PathVariable("university") String university,
                                                                               @PageableDefault(size = 10) Pageable pageable){
 
         Page<ThreadResponse> page = threadFacade.getThreadsByUniversity(university, pageable);
@@ -198,4 +214,21 @@ public class ThreadController {
                         .build()
         );
     }
+
+    /**
+     * Retrieves the total of CFUs made by the user/host threads and comments
+     *
+     * @return A {@link ResponseEntity} containing the total CFU.
+     */
+    @GetMapping("/summary/cfu")
+    public ResponseEntity<ApiResponse<Integer>> getCFUSummary(){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Integer>builder()
+                        .data(threadFacade.getCFUTotal())
+                        .message("RETRIEVE_SUCCESSFULLY")
+                        .build()
+                );
+    }
+
 }

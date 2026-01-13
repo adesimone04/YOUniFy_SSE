@@ -7,6 +7,8 @@ import it.younify.modules.sgtr.model.entity.Threads;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
@@ -106,4 +108,30 @@ public interface ThreadRepository extends JpaRepository<Threads, Long> {
             String universityInUser,
             Pageable pageable
     );
+
+    /**
+     * Calculates the total sum of CFU (votes) for all threads posted by a specific user.
+     * <p>
+     * This query uses {@code COALESCE} to ensure it returns 0 if the user has not created any threads,
+     * which is crucial for accurately calculating a user's total reputation score.
+     *
+     * @param user The user whose thread scores are to be summed.
+     * @return The total CFU score from the user's threads.
+     */
+    @Query("SELECT COALESCE(SUM(t.CFU), 0) FROM Threads t WHERE t.user = :user")
+    int sumCFUByUserThread(@Param("user") User user);
+
+
+    /**
+     * Calculates the total sum of CFU (votes) for all threads posted by a specific host.
+     * <p>
+     * This query uses {@code COALESCE} to ensure it returns 0 if the host has not created any threads,
+     * which is crucial for accurately calculating a host's total reputation score.
+     *
+     * @param host The host whose thread scores are to be summed.
+     * @return The total CFU score from the host's threads.
+     */
+    @Query("SELECT COALESCE(SUM(t.CFU), 0) FROM Threads t WHERE t.host = :host")
+    int sumCFUByHostThread(@Param("host") Host host);
+
 }
