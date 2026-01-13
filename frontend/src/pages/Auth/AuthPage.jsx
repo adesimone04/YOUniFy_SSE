@@ -25,6 +25,7 @@ import { UNIVERSITY_DATA } from '../../data/universities';
 import { CDL_DATA } from '../../data/cdl';
 
 const AuthPage = () => {
+
     const navigate = useNavigate();
     const [isHostMode, setIsHostMode] = useState(false);
     const [isAssociation, setIsAssociation] = useState(false);
@@ -43,7 +44,11 @@ const AuthPage = () => {
                 }
             });
             Object.keys(places).forEach(prov => places[prov].sort());
-        } catch (error) { console.error("Errore comuni.json:", error); }
+        }
+        catch(error) {
+
+            console.error("Errore comuni.json:", error);
+        }
         return places;
     }, []);
 
@@ -59,7 +64,7 @@ const AuthPage = () => {
         university: '',
         contactsInfo: ''
     });
-    // Ora errors contiene stringhe (messaggi) o null
+
     const [errors, setErrors] = useState({});
 
     // --- STATO HOST ---
@@ -67,7 +72,7 @@ const AuthPage = () => {
         hostName: '', piva: '', pec: '', password: '', confirmPassword: '',
         city: '', province: '', uniList: []
     });
-    // Ora hostErrors contiene stringhe (messaggi) o null
+
     const [hostErrors, setHostErrors] = useState({});
 
     const overlayVariants = {
@@ -100,7 +105,7 @@ const AuthPage = () => {
         }
 
         if (name === 'dateOfBirth') {
-            // Recuperiamo i limiti usando le tue funzioni
+
             const maxAllowed = getMaxDate(); // es. "2007-04-30"
             const minAllowed = getMinDate(); // "1900-01-01"
 
@@ -127,6 +132,7 @@ const AuthPage = () => {
     };
 
     const handleStudentSubmit = async (e) => {
+
         e.preventDefault();
         const newErrors = {};
 
@@ -162,8 +168,6 @@ const AuthPage = () => {
         if (!studentData.cdl) newErrors.cdl = "Seleziona un corso";
         if (!studentData.university) newErrors.university = "Seleziona università";
 
-        // --- NUOVO: Controllo Instagram Obbligatorio ---
-        // Rimuoviamo il prefisso e controlliamo se rimane qualcosa
         const instaUser = studentData.contactsInfo.replace('instagram.com/', '').trim();
         if (!instaUser) {
             newErrors.contactsInfo = "Username Instagram richiesto";
@@ -172,24 +176,29 @@ const AuthPage = () => {
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
+
             try {
+
                 const response = await authService.registerStudent(studentData);
-                // Caso SUCCESSO (es. USER_REGISTERED)
+
                 handleAuthResponse(response.data, navigate, {
                     email: studentData.email,
                     name: studentData.firstName
                 });
-            } catch (error) {
-                console.error("Errore registrazione studente:", error);
+            }
+            catch (error) {
+
                 const errorData = error.response?.data;
 
                 if (errorData) {
+
                     const code = handleAuthResponse(errorData, navigate);
-                    // Se l'handler ritorna un codice (es. PASSWORD_NOT_SAFE), usiamo il toast rosso
                     if (code) {
+
                         toast.error(errorData.message || "Registrazione fallita");
                     }
-                } else {
+                }
+                else {
                     toast.error("Errore di connessione al server.");
                 }
             }
@@ -288,16 +297,19 @@ const AuthPage = () => {
                     email: hostData.pec,
                     name: hostData.hostName
                 });
-            } catch (error) {
-                console.error("Errore registrazione host:", error);
-                const errorData = error.response?.data;
+            }
+            catch (error) {
 
+                const errorData = error.response?.data;
                 if (errorData) {
+
                     const code = handleAuthResponse(errorData, navigate);
                     if (code) {
                         toast.error(errorData.message || "Registrazione fallita");
                     }
-                } else {
+                }
+                else {
+
                     toast.error("Errore di connessione al server.");
                 }
             }
@@ -335,7 +347,7 @@ const AuthPage = () => {
             }
         });
 
-        // 2. Rimuovi l'errore se presente (NUOVO)
+        // 2. Rimuovi l'errore se presente
         // Usiamo un timeout brevissimo o controlliamo lo stato precedente perché setHostData è asincrono,
         // ma per l'errore basta sapere che l'utente ha interagito.
         if (hostErrors.uniList) {
@@ -439,7 +451,7 @@ const AuthPage = () => {
     };
 
     return (
-        // [FIX LAYOUT] 'fixed inset-0' blocca la viewport evitando che la barra indirizzi crei problemi
+
         <PageTransition className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
             {/* BACKGROUND */}
             <div className="fixed inset-0 z-0 pointer-events-none">
@@ -469,8 +481,6 @@ const AuthPage = () => {
                         </div>
 
                         {/* 2. AREA DI SCROLL CON MASCHERA */}
-                        {/* La maschera CSS rende trasparente il contenuto nei primi 90px (dove sta l'header),
-                            così il testo non si vede "sotto" l'header trasparente, ma vedi i blob. */}
                         <div
                             className="w-full h-full overflow-y-auto scrollbar-hide"
                             style={{
@@ -816,7 +826,6 @@ const AuthPage = () => {
 };
 
 // --- HELPER COMPONENTS ---
-
 const ErrorMessage = ({ message }) => (
     <AnimatePresence>
         {message && (

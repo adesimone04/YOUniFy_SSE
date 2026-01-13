@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
 import { ToastContainer, cssTransition } from 'react-toastify';
@@ -10,16 +10,29 @@ import LoginPage from './pages/Auth/LoginPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
 
+const PublicRoute = () => {
+
+    const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
+    if (isLogged) { return <Navigate to="/" replace />; }
+
+    return <Outlet />;
+};
+
+
 const AnimatedRoutes = () => {
     const location = useLocation();
 
     return (
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
+
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/2fa" element={<TwoFactorAuth />} />
+
+                <Route element={<PublicRoute />}>
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/2fa" element={<TwoFactorAuth />} />
+                </Route>
             </Routes>
         </AnimatePresence>
     );

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import {
-    Mail, Lock, Eye, EyeOff, AlertCircle, LogIn
-} from 'lucide-react';
+import {Mail, Lock, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from "react-router-dom"; // Importa useNavigate
+import { toast } from 'react-toastify';
 
 import styles from '../LandingPage/LandingPage.module.css';
 import PageTransition from '../../components/ui/PageTransition/PageTransition';
@@ -13,8 +13,7 @@ import authService from '../../services/authService';
 import { handleAuthResponse } from '../../utils/authHandler';
 
 
-// --- COMPONENTI DI SUPPORTO (Invariati) ---
-
+// --- COMPONENTI DI SUPPORTO ---
 const ErrorMessage = ({ message, centered = false }) => (
     <AnimatePresence>
         {message && (
@@ -118,34 +117,40 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
+
             const responseWrapper = await authService.login(loginData);
 
-            // --- QUI CAMBIA TUTTO ---
-            // Non controlliamo più manualmente lo status.
-            // Passiamo tutto all'handler che sa se mandarti alla Home o alla 2FA.
             handleAuthResponse(responseWrapper.data, navigate, {
                 email: loginData.email
             });
 
-        } catch (error) {
-            console.error("Errore Login:", error);
-            const errorData = error.response?.data;
-
-            // Se l'errore ha un messaggio (es. "Credenziali errate"), lo mostriamo
-            if (errorData?.message) {
-                setGeneralError(errorData.message);
-            } else {
-                setGeneralError("Credenziali non valide o errore di connessione.");
-            }
-
-            // Opzionale: Se l'errore contiene un codice logico (es. ACCOUNT_LOCKED),
-            // l'handler potrebbe gestirlo (es. redirect).
-            // Se vuoi delegare anche gli errori critici, puoi decommentare:
-            // if (errorData?.internalCode) handleAuthResponse(errorData, navigate);
-        } finally {
-            setIsLoading(false);
         }
-    };
+        catch (error) {
+
+            const errorData = error.response?.data;
+            setIsLoading(false);
+
+            if (errorData) {
+
+                const resultCode = handleAuthResponse(errorData, navigate);
+
+                if(resultCode) {
+
+                    setGeneralError("Email o password errati");
+
+                    const silentErrors = ['BAD_CREDENTIALS', 'ACCOUNT_NOT_FOUND'];
+
+                    if (!silentErrors.includes(resultCode)) {
+                        toast.error(errorData.message || "Errore di accesso");
+                    }
+                }
+            } else {
+                // Se non c'è errorData, è un errore di rete o server morto -> Qui il toast serve!
+                toast.error("Impossibile contattare il server.");
+                setGeneralError("Errore di connessione.");
+            }
+        }
+    }
 
     return (
         <PageTransition className="h-dvh md:min-h-screen w-full bg-slate-950 flex flex-col font-sans overflow-hidden relative">

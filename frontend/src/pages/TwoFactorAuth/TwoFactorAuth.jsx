@@ -17,8 +17,8 @@ const TwoFactorAuth = () => {
     const userName = location.state?.name;
 
     // --- 1. UTILS ---
-
     const getDurationFromServerDate = (serverDateString) => {
+
         if (!serverDateString) return 300;
         const now = new Date();
         const end = new Date(serverDateString);
@@ -34,6 +34,7 @@ const TwoFactorAuth = () => {
     };
 
     const calculateInitialDeadline = () => {
+
         const saved = localStorage.getItem('2fa_deadline');
         if (saved) {
             const timestamp = parseInt(saved, 10);
@@ -47,7 +48,6 @@ const TwoFactorAuth = () => {
     };
 
     // --- 2. STATI ---
-
     const initialDeadline = useRef(calculateInitialDeadline()).current;
     const [deadline, setDeadline] = useState(initialDeadline);
 
@@ -61,7 +61,6 @@ const TwoFactorAuth = () => {
         return delta > 0 ? delta : 0;
     });
 
-    // NOTA: Ho rimosso attemptsCount. Ci fidiamo del Backend ora.
 
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [isTimerExpired, setIsTimerExpired] = useState(false);
@@ -70,6 +69,7 @@ const TwoFactorAuth = () => {
 
     // --- 3. TIMER ---
     useEffect(() => {
+
         if (timeLeft === 0) setIsTimerExpired(true);
 
         const intervalId = setInterval(() => {
@@ -77,10 +77,13 @@ const TwoFactorAuth = () => {
             const delta = Math.floor((deadline - now) / 1000);
 
             if (delta <= 0) {
+
                 setTimeLeft(0);
                 setIsTimerExpired(true);
                 clearInterval(intervalId);
-            } else {
+            }
+            else {
+
                 setTimeLeft(delta);
                 setIsTimerExpired(false);
             }
@@ -105,6 +108,7 @@ const TwoFactorAuth = () => {
 
     // --- INPUTS ---
     const handleChange = (index, value) => {
+
         if (isNaN(value)) return;
         const newOtp = [...otp];
         newOtp[index] = value.substring(value.length - 1);
@@ -117,6 +121,7 @@ const TwoFactorAuth = () => {
     };
 
     const handlePaste = (e) => {
+
         e.preventDefault();
         const data = e.clipboardData.getData('text').slice(0, 6).split('');
         if (data.length === 6 && data.every(char => !isNaN(char))) {
@@ -127,17 +132,18 @@ const TwoFactorAuth = () => {
 
     // --- 4. RESEND ---
     const triggerResend = async (automatic = false) => {
+
         setIsLoading(true);
+
         try {
+
             const response = await authService.resend2FACode(accountId);
             const responseData = response.data;
             const newData = responseData.data || responseData;
 
             if (!automatic) toast.success("Nuovo codice inviato!");
 
-            if (newData.accountID || newData.accountId || newData.id) {
-                setAccountId(newData.accountID || newData.accountId || newData.id);
-            }
+            setAccountId(accountId);
 
             const duration = getDurationFromServerDate(newData.expiryDate);
             const newDeadline = Date.now() + (duration * 1000);
@@ -154,16 +160,20 @@ const TwoFactorAuth = () => {
                 if (inputRefs.current[0]) inputRefs.current[0].focus();
             }, 100);
 
-        } catch (error) {
-            console.error("Errore Resend:", error);
+        }
+        catch (error) {
+
             toast.error("Errore nell'invio del nuovo codice.");
-        } finally {
+        }
+        finally {
+
             setIsLoading(false);
         }
     };
 
     // --- 5. VERIFICA ---
     const handleVerify = async (e) => {
+
         e.preventDefault();
         const code = otp.join('');
         if (code.length < 6) return;
@@ -171,20 +181,22 @@ const TwoFactorAuth = () => {
         setIsLoading(true);
 
         try {
+
             const response = await authService.verify2FA(accountId, code);
 
             localStorage.removeItem('2fa_deadline');
             localStorage.removeItem('2fa_accountId');
             handleAuthResponse(response.data, navigate);
 
-        } catch (error) {
+        }
+        catch (error) {
+
             const errorData = error.response?.data;
             if (errorData) {
+
                 const internalCode = handleAuthResponse(errorData, navigate);
 
-                // --- LOGICA BASATA SOLO SUL BACKEND ---
-                // Se il backend dice che hai finito i tentativi, blocchiamo.
-                if (['MAX_ATTEMPTS_REACHED', 'MAX_ATTEMPTS', '2FA_CODE_EXPIRED', '2FA_EXPIRED'].includes(internalCode)) {
+                if (['MAX_ATTEMPTS', '2FA_CODE_EXPIRED'].includes(internalCode)) {
 
                     toast.warning("Tentativi esauriti. Richiedi un nuovo codice.");
 
@@ -196,13 +208,14 @@ const TwoFactorAuth = () => {
                     setOtp(['', '', '', '', '', '']);
                 }
                 else if (internalCode === 'INVALID_2FA_CODE' || internalCode === 'TRY_2FA_AGAIN') {
-                    // Semplice errore codice
+
                     toast.error("Codice non valido. Riprova.");
                     setOtp(['', '', '', '', '', '']);
                     inputRefs.current[0].focus();
                 }
             }
-        } finally {
+        }
+        finally {
             setIsLoading(false);
         }
     };
