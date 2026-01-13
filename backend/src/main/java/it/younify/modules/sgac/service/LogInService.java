@@ -64,7 +64,7 @@ public class LogInService {
      * @throws BadCredentialsException if the email or password is incorrect.
      * @throws UsernameNotFoundException if the user or host is not found.
      */
-    @Transactional(readOnly = true)
+    @Transactional(rollbackFor = Exception.class)
     public AuthenticationResponse logIn(@NotNull LogInRequest logInRequest){
 
         try{

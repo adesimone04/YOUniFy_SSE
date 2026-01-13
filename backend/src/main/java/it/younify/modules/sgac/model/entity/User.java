@@ -1,10 +1,7 @@
 package it.younify.modules.sgac.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,6 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -100,23 +98,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
-
-
-    public User(String ID, String firstName, String lastName, String email, String password,
-                String cdl, String university, LocalDate dateOfBirth, String contactsInfo, boolean enabled) {
-
-        this.ID = ID;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.cdl = cdl;
-        this.university = university;
-        this.dateOfBirth = dateOfBirth;
-        this.contactsInfo = contactsInfo;
-        this.enabled = enabled;
-    }
-
 
 
     /**
