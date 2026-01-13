@@ -14,7 +14,7 @@ import java.util.List;
         uniqueConstraints = {
         @UniqueConstraint(
             name = "event_duplicate_check",
-            columnNames = {"dateAndTime", "host_id", "name"}
+            columnNames = {"date_and_time", "host_id", "name"}
         )
     }
 )

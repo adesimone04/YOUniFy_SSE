@@ -5,6 +5,8 @@ import it.younify.modules.sge.facade.EventFacade;
 import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.dto.request.EventPostRequest;
 import it.younify.modules.sge.model.dto.response.EventResponse;
+import it.younify.modules.sge.repository.EventRepository;
+import it.younify.modules.sgtr.model.entity.FlagCategory;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -57,8 +64,21 @@ public class EventController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
-                .message("EDITED_SUCCESSFULLY")
-                .build()
+                        .message("EDITED_SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping(value = "/join/{eventId}")
+    public ResponseEntity<ApiResponse<Void>> joinEvent(@PathVariable Long eventId){
+
+        eventFacade.joinEvent(eventId);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("JOINED_SUCCESSFULLY")
+                        .build()
         );
     }
 
@@ -88,12 +108,28 @@ public class EventController {
         );
     }
 
-    @PreAuthorize("hasRole('HOST')")
-    @GetMapping("/host/{hostId}")
-    public ResponseEntity<ApiResponse<Page<EventResponse>>> getEventsByHost(@PathVariable("hostId") String hostId,
-                                                                            @PageableDefault(size = 10) Pageable pageable){
+    @GetMapping("/utility/cities")
+    public ResponseEntity<ApiResponse<List<Map<String, String>>>> getCities(){
 
-            Page<EventResponse> page = eventFacade.getEventsByHost(hostId, pageable);
+        return ResponseEntity.ok(
+                ApiResponse.<List<Map<String, String>>>builder()
+                        .message("RETRIEVE_SUCCESSFULLY")
+                        .data(
+                                eventFacade.getCities().stream().map(city -> Map.of(
+                                        "value", city,
+                                        "label", city
+                                ))
+                                        .collect(Collectors.toList())
+                        )
+                        .build()
+        );
+    }
+
+    @PreAuthorize("hasRole('HOST')")
+    @GetMapping("/myevents")
+    public ResponseEntity<ApiResponse<Page<EventResponse>>> getEventsByHost(@PageableDefault(size = 10) Pageable pageable){
+
+            Page<EventResponse> page = eventFacade.getEventsByHost(pageable);
 
             return ResponseEntity.ok(
                     ApiResponse.<Page<EventResponse>>builder()

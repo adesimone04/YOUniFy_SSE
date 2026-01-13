@@ -4,19 +4,19 @@ import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.HostRepository;
+import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.dto.request.EventPostRequest;
 import it.younify.modules.sge.model.dto.response.EventResponse;
-import it.younify.modules.sge.service.EventDeleteService;
-import it.younify.modules.sge.service.EventEditService;
-import it.younify.modules.sge.service.EventPostService;
-import it.younify.modules.sge.service.EventViewService;
+import it.younify.modules.sge.repository.EventRepository;
+import it.younify.modules.sge.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -27,7 +27,9 @@ public class EventFacade {
     private final EventDeleteService eventDeleteService;
     private final EventEditService eventEditService;
     private final EventViewService eventViewService;
+    private final EventJoinService eventJoinService;
     private final HostRepository hostRepository;
+    private final EventRepository eventRepository;
 
     public void createEvent(EventPostRequest eventPostRequest){
 
@@ -44,20 +46,20 @@ public class EventFacade {
         eventEditService.edit(eventId, eventEditRequest);
     }
 
+    public void joinEvent(Long EventId){
+        eventJoinService.joinEvent(EventId);
+    }
+
     public Page<EventResponse> getEventsByDate(Pageable pageable){
 
         return eventViewService.getEventsByDate(pageable);
     }
 
-    public Page<EventResponse> getEventsByHost(String hostId, Pageable pageable){
+    public Page<EventResponse> getEventsByHost(Pageable pageable){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Optional<Host> opt = hostRepository.findById(hostId);
-        if(opt.isPresent()){
+            return eventViewService.getEventsByHost((Host) principal, pageable);
 
-            return eventViewService.getEventsByHost(opt.get(), pageable);
-        }
-
-        throw new ResourceNotFoundException("Host not found");
     }
 
     public Page<EventResponse> getEventsByCity(String city, Pageable pageable){
@@ -70,5 +72,9 @@ public class EventFacade {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return eventViewService.getEventsByJoined((User) principal, pageable);
+    }
+
+    public List<String> getCities(){
+        return eventRepository.findDistinctCities();
     }
 }

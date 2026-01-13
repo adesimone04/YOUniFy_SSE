@@ -62,8 +62,7 @@ public class EventViewService {
                     })
                     .toList();
 
-
-            return EventResponse.builder()
+        return EventResponse.builder()
                     .ID(event.getID())
                     .name(event.getName())
                     .description(event.getDescription())

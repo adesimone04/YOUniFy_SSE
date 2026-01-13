@@ -2,14 +2,12 @@ package it.younify.modules.sge.model.entity;
 
 import it.younify.modules.sgac.model.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "participation")
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +16,7 @@ import lombok.Setter;
 public class Participation {
 
     @EmbeddedId
+    @Builder.Default
     private ParticipationId id = new ParticipationId();
 
     @ManyToOne(fetch = FetchType.LAZY)
