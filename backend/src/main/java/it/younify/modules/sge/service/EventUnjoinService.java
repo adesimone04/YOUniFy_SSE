@@ -17,6 +17,13 @@ import java.time.Instant;
 import java.util.Optional;
 
 
+/**
+ * The {@code EventUnjoinService} class handles the logic for a user to leave an event they have previously joined.
+ * It includes business rules, such as preventing users from leaving an event after it has already started.
+ *
+ * @see it.younify.modules.sge.repository.ParticipationRepository
+ * @see it.younify.modules.sge.repository.EventRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class EventUnjoinService {
@@ -25,6 +32,17 @@ public class EventUnjoinService {
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
 
+    /**
+     * Allows the currently authenticated user to unjoin a specified event.
+     * <p>
+     * This method is transactional. It first verifies that the user is actually participating in the event.
+     * Crucially, it also checks if the event's start time is still in the future. A user cannot
+     * unjoin an event after it has already started.
+     *
+     * @param eventId The ID of the event to unjoin.
+     * @throws ResourceNotFoundException if the event with the given ID cannot be found.
+     * @throws BadRequestException if the user is not participating in the event or if the event has already started.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void unjoinEvent(Long eventId) {
 

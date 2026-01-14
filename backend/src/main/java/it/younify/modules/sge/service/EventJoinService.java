@@ -15,6 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * The {@code EventJoinService} class is responsible for handling a user's request to join an event.
+ * It creates a participation record linking the user to the event.
+ *
+ * @see it.younify.modules.sge.repository.EventRepository
+ * @see it.younify.modules.sge.repository.ParticipationRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class EventJoinService {
@@ -22,6 +29,17 @@ public class EventJoinService {
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
 
+    /**
+     * Allows the currently authenticated user to join a specified event.
+     * <p>
+     * This method is transactional. It first ensures the event exists. If it does, it creates a
+     * new {@link Participation} record to link the authenticated {@link User} with the {@link Event}.
+     * The underlying database constraints will prevent a user from joining the same event twice.
+     *
+     * @param eventId The ID of the event to join.
+     * @throws BadRequestException if the user already joined the event.
+     * @throws ResourceNotFoundException if the event with the given ID cannot be found.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void joinEvent(Long eventId) {
 

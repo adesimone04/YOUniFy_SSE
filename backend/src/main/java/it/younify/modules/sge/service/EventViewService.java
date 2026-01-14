@@ -16,6 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
+/**
+ * The {@code EventViewService} class provides methods for querying and retrieving event data in a client-friendly format.
+ * It fetches events based on different criteria and transforms them into {@link EventResponse} DTOs.
+ *
+ * @see it.younify.modules.sge.repository.EventRepository
+ * @see it.younify.core.service.ImageStorageService
+ */
 @Service
 @RequiredArgsConstructor
 public class EventViewService {
@@ -23,24 +30,51 @@ public class EventViewService {
     private final ImageStorageService imageStorageService;
     private final EventRepository eventRepository;
 
+    /**
+     * Retrieves a paginated list of all events, sorted by date.
+     *
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link EventResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<EventResponse> getEventsByDate(Pageable pageable){
 
         return eventRepository.findAllByOrderByDateAndTimeAsc(pageable).map(this::toResponse);
     }
 
+    /**
+     * Retrieves a paginated list of events created by a specific host.
+     *
+     * @param host The host whose events are to be retrieved.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link EventResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<EventResponse> getEventsByHost(Host host, Pageable pageable){
 
         return eventRepository.findAllByHostOrderByDateAndTimeAsc(host, pageable).map(this::toResponse);
     }
 
+    /**
+     * Retrieves a paginated list of events located in a specific city.
+     *
+     * @param city The city to filter events by.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link EventResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<EventResponse> getEventsByCity(String city, Pageable pageable){
 
         return eventRepository.findAllByCityOrderByDateAndTimeAsc(city, pageable).map(this::toResponse);
     }
 
+    /**
+     * Retrieves a paginated list of events that a specific user has joined.
+     *
+     * @param user The user whose joined events are to be retrieved.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link EventResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<EventResponse> getEventsByJoined(User user, Pageable pageable){
 
@@ -48,6 +82,15 @@ public class EventViewService {
     }
 
 
+    /**
+     * Converts an {@link Event} entity into a client-friendly {@link EventResponse} DTO.
+     * <p>
+     * This method maps the event's data and enriches it with additional information, such as
+     * generating pre-signed URLs for poster and profile images and compiling a list of participants.
+     *
+     * @param event The event entity to convert.
+     * @return The corresponding {@link EventResponse} DTO.
+     */
     private EventResponse toResponse(Event event){
 
         List<JoinedUserResponse> joinedUsers = event.getParticipations().stream()
