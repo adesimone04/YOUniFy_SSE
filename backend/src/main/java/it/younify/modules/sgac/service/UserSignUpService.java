@@ -4,6 +4,7 @@ import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.modules.sgac.model.dto.request.UserSignUpRequest;
 import it.younify.modules.sgac.model.dto.response.AccountSummary;
+import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
@@ -132,6 +133,7 @@ public class UserSignUpService {
                                 .dateOfBirth(dateOfBirth)
                                 .contactsInfo(contactsInfo)
                                 .enabled(false)
+                                .role(Role.USER)
                                 .build();
 
                         userRepository.save(user);

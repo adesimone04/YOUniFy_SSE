@@ -136,6 +136,22 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles {@link FileStorageException} instances related to file storage operations.
+     * This method intercepts specific errors occurring during file upload or retrieval processes
+     * (e.g., failures in MinIO, S3, or IO issues). It returns a standardized 500 Internal Server Error
+     * response containing the specific error message provided by the exception.
+     *
+     * @param ex The storage exception that was thrown.
+     * @param request The current HTTP request.
+     * @return A ResponseEntity containing the error details and HTTP 500 status.
+     */
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<ApiErrorResponse> handleStorageError(FileStorageException ex, HttpServletRequest request) {
+
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), ex.getInternalCode(), request);
+    }
+
+    /**
      * Handles all uncaught {@link Exception} instances as a last resort.
      * This method acts as a generic fallback for any unexpected server-side errors,
      * preventing stack traces from being exposed to the client. It returns a standardized

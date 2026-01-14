@@ -6,6 +6,7 @@ import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.modules.sgac.model.dto.request.HostSignUpRequest;
 import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.repository.HostRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -107,6 +108,7 @@ public class HostSignUpService {
                                 .city(city)
                                 .uniList(uniList)
                                 .enabled(false)
+                                .role(Role.HOST)
                                 .build();
 
                         hostRepository.save(host);
