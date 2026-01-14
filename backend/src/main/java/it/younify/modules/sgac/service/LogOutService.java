@@ -5,6 +5,7 @@ import it.younify.modules.sgac.model.entity.RefreshToken;
 import it.younify.modules.sgac.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class LogOutService {
      *
      * @param refreshToken The refresh token to invalidate.
      */
+    @Transactional(rollbackFor = Exception.class)
     public void logOut(String refreshToken) {
 
         Optional<RefreshToken> opt = refreshTokenRepository.findByTokenHashed(TokenHashUtility.hashToken(refreshToken));

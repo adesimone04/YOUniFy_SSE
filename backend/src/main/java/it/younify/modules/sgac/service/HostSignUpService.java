@@ -6,6 +6,7 @@ import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.modules.sgac.model.dto.request.HostSignUpRequest;
 import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.repository.HostRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -85,6 +86,7 @@ public class HostSignUpService {
             String province = hostSignUpRequest.getProvince();
             String city = hostSignUpRequest.getCity();
             String uniList = hostSignUpRequest.getUniList();
+            String noProfileImage = "system/nopicture.webp";
 
             if(association || validatePEC(PEC, PIVA)){
 
@@ -94,7 +96,21 @@ public class HostSignUpService {
 
                         String ID = "H-" + UUID.randomUUID();
                         password = passwordEncoder.encode(password);
-                        Host host = new Host(ID, hostName, PIVA, PEC, password, province, city, uniList, false);
+
+                        Host host = Host.builder()
+                                .ID(ID)
+                                .hostName(hostName)
+                                .PIVA(PIVA)
+                                .PEC(PEC)
+                                .password(password)
+                                .profileImage(noProfileImage)
+                                .province(province)
+                                .city(city)
+                                .uniList(uniList)
+                                .enabled(false)
+                                .role(Role.HOST)
+                                .build();
+
                         hostRepository.save(host);
 
                         Instant expiryDate = generate2FAService.send2FARequest(ID);

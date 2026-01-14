@@ -26,7 +26,7 @@ public class Code2FA {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long ID;
 
     /**
      * The 6-digit 2FA code.

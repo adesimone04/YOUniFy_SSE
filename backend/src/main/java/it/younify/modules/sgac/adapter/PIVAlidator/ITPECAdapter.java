@@ -36,7 +36,6 @@ public class ITPECAdapter implements PIVAlidator {
      *
      * @param vatCode The "Partita IVA" to validate.
      * @return The certified email address (PEC) associated with the given "Partita IVA".
-     * @throws BadRequestException if the "Partita IVA" is not found in the registry.
      * @throws ResourceNotFoundException if the API token is invalid or there is a general error during the API call.
      */
     @Override
@@ -47,25 +46,20 @@ public class ITPECAdapter implements PIVAlidator {
                 .defaultHeader("Authorization", "Bearer " + apiToken)
                 .build();
 
-        try {
-            return Objects.requireNonNull(client.get()
-                    .uri("/IT-pec/{vatCode}", vatCode)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve()
-                    .onStatus(
-                            status -> status.value() == 404,
-                            (request, response) -> new BadRequestException("Partita IVA non trovata nel registro")
-                    )
-                    .body(PecResponse.class)).getData().getFirst().getPec();
+        PecResponse response = client.get()
+                .uri("/IT-pec/{vatCode}", vatCode)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
 
-        }
-        catch (HttpClientErrorException.Unauthorized e) {
+                .onStatus(status -> status.value() == 404, (req, res) -> {
+                    throw new ResourceNotFoundException("Partita IVA non trovata nel registro PEC.", "PEC_NOT_FOUND");
+                })
+                .onStatus(status -> status.isError(), (req, res) -> {
 
-            throw new ResourceNotFoundException("Errore configurazione API: Token non valido");
-        }
-        catch (Exception e) {
+                    throw new ResourceNotFoundException("Nessuna PEC associata a questa Partita IVA.", "PEC_EMPTY_RESULT");
+                })
+                .body(PecResponse.class);
 
-            throw new ResourceNotFoundException("Impossibile verificare la Partita IVA al momento");
-        }
+        return response.getData().get(0).getPec();
     }
 }
