@@ -123,7 +123,7 @@ public class ThreadController {
 
         return ResponseEntity.ok(
                 ApiResponse.<List<Map<String, String>>>builder()
-                        .message("RETRIEVE_SUCCESSFULY")
+                        .message("RETRIEVE_SUCCESSFULLY")
                         .data(
                                 Arrays.stream(FlagCategory.values())
                                 .map(flag -> Map.of(
