@@ -1,10 +1,7 @@
 package it.younify.modules.sge.facade;
 
-import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
-import it.younify.modules.sgac.repository.HostRepository;
-import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.dto.request.EventPostRequest;
 import it.younify.modules.sge.model.dto.response.EventResponse;
@@ -17,7 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +24,7 @@ public class EventFacade {
     private final EventEditService eventEditService;
     private final EventViewService eventViewService;
     private final EventJoinService eventJoinService;
-    private final HostRepository hostRepository;
+    private final EventUnjoinService eventUnjoinService;
     private final EventRepository eventRepository;
 
     public void createEvent(EventPostRequest eventPostRequest){
@@ -46,8 +42,14 @@ public class EventFacade {
         eventEditService.edit(eventId, eventEditRequest);
     }
 
-    public void joinEvent(Long EventId){
-        eventJoinService.joinEvent(EventId);
+    public void joinEvent(Long eventId){
+
+        eventJoinService.joinEvent(eventId);
+    }
+
+    public void unjoinEvent(Long eventId){
+
+        eventUnjoinService.unjoinEvent(eventId);
     }
 
     public Page<EventResponse> getEventsByDate(Pageable pageable){
@@ -56,10 +58,10 @@ public class EventFacade {
     }
 
     public Page<EventResponse> getEventsByHost(Pageable pageable){
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            return eventViewService.getEventsByHost((Host) principal, pageable);
-
+        return eventViewService.getEventsByHost((Host) principal, pageable);
     }
 
     public Page<EventResponse> getEventsByCity(String city, Pageable pageable){
@@ -75,6 +77,7 @@ public class EventFacade {
     }
 
     public List<String> getCities(){
+
         return eventRepository.findDistinctCities();
     }
 }
