@@ -1,18 +1,19 @@
 package it.younify.modules.sgn.model.dto.request;
 
 import it.younify.modules.sgn.model.entity.Type;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Data
 public class NotificationRequest {
-    @NotNull
+
+    @NotBlank
     private String receiverId;
 
     @NotNull
     private Type type;
 
-    @NotNull
+    @NotBlank
     private String content;
 }
