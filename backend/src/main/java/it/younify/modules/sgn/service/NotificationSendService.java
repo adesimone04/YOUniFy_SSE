@@ -17,6 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+/**
+ * This service handles the business logic for sending notifications.
+ * It is responsible for creating and persisting {@link Notification} entities based on incoming requests.
+ * The service determines the sender from the security context and identifies the receiver based on the provided ID.
+ *
+ * @see Notification
+ * @see NotificationRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class NotificationSendService {
@@ -25,6 +33,19 @@ public class NotificationSendService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 
+    /**
+     * Creates and saves a new notification.
+     * This method identifies the sender from the {@link SecurityContextHolder} and the receiver from the {@code receiverId}
+     * in the {@link NotificationRequest}. It supports sending from and to both {@link User} and {@link Host} principals.
+     * The operation is transactional and will roll back in case of any error.
+     *
+     * @param notificationRequest The DTO containing the details for the notification to be sent.
+     * @throws AccessDeniedException if the authenticated principal is not a {@link User} or a {@link Host}.
+     * @throws ResourceNotFoundException if the specified receiver is not found, or if the receiver ID has an invalid format.
+     * @see NotificationRequest
+     * @see User
+     * @see Host
+     */
     @Transactional(rollbackFor = Exception.class)
     public void send(@NotNull NotificationRequest notificationRequest) {
 
