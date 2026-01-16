@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum Type {
 
     MATCH("Match"),
-    DELETED_EVENT("Evento cacellato"),
+    EVENT("Event"),
     SYSTEM("Notifica di sistema");
 
     private final String label;
