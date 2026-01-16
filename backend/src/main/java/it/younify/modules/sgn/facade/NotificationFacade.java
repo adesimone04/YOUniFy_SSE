@@ -4,6 +4,7 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgn.model.dto.request.NotificationRequest;
 import it.younify.modules.sgn.model.dto.response.NotificationResponse;
+import it.younify.modules.sgn.service.NotificationDeleteService;
 import it.younify.modules.sgn.service.NotificationSendService;
 import it.younify.modules.sgn.service.NotificationViewService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class NotificationFacade {
 
     private final NotificationViewService notificationViewService;
     private final NotificationSendService notificationSendService;
+    private final NotificationDeleteService notificationDeleteService;
 
     public void send(NotificationRequest notificationRequest) {
 
@@ -34,5 +36,10 @@ public class NotificationFacade {
         }
 
         return notificationViewService.getNotificationsHost(pageable, (Host) principal);
+    }
+
+    public void deleteMatchNotify(User receiverUser){
+
+        notificationDeleteService.deleteMatchNotify(receiverUser);
     }
 }
