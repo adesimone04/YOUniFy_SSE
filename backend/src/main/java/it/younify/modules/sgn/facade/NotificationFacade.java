@@ -15,19 +15,24 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class NotificationFacade {
+
     private final NotificationViewService notificationViewService;
     private final NotificationSendService notificationSendService;
 
     public void send(NotificationRequest notificationRequest) {
+
         notificationSendService.send(notificationRequest);
     }
 
     public Page<NotificationResponse> getNotify(Pageable pageable) {
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         if(principal instanceof User) {
-            return notificationViewService.getNotificationsUser(pageable,  (User) principal);
-        }else{
-            return notificationViewService.getNotificationsHost(pageable, (Host) principal);
+
+            return notificationViewService.getNotificationsUser(pageable, (User) principal);
         }
+
+        return notificationViewService.getNotificationsHost(pageable, (Host) principal);
     }
 }

@@ -13,6 +13,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationResponse {
+
     private Long ID;
 
     private String senderName;

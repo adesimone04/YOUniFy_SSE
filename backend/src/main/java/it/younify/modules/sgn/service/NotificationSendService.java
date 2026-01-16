@@ -10,6 +10,7 @@ import it.younify.modules.sgn.model.entity.Notification;
 import it.younify.modules.sgn.repository.NotificationRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +21,9 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class NotificationSendService {
 
-    private final NotificationRepository notificationRepository;
     private final HostRepository hostRepository;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public void send(@NotNull NotificationRequest notificationRequest) {
@@ -34,24 +35,36 @@ public class NotificationSendService {
         Host senderHost = null;
 
         if (principal instanceof User) {
+
             senderUser = (User) principal;
-        } else if (principal instanceof Host) {
-            senderHost = (Host) principal;
-        } else {
-            throw new ResourceNotFoundException("Sender type unknown", "SENDER_ERROR");
+        }
+        else {
+
+            if (principal instanceof Host) {
+
+                senderHost = (Host) principal;
+            }
+            else throw new AccessDeniedException("Access is denied for this operation");
         }
 
         User receiverUser = null;
         Host receiverHost = null;
 
         if (receiverId.startsWith("U")) {
+
             receiverUser = userRepository.findById(receiverId)
                     .orElseThrow(() -> new ResourceNotFoundException("User receiver not found", "USER_NOT_FOUND"));
-        } else if (receiverId.startsWith("H")) {
-            receiverHost = hostRepository.findById(receiverId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
-        } else {
-            throw new ResourceNotFoundException("Invalid Receiver ID format", "INVALID_ID");
+        }
+        else{
+
+            if (receiverId.startsWith("H")) {
+
+                receiverHost = hostRepository.findById(receiverId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
+            }
+            else {
+                throw new ResourceNotFoundException("Invalid Receiver ID format", "INVALID_ID");
+            }
         }
 
 
