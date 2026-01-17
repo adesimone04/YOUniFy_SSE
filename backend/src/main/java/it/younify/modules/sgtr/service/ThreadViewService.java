@@ -1,6 +1,8 @@
 package it.younify.modules.sgtr.service;
 
 
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
 import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
@@ -63,6 +65,38 @@ public class ThreadViewService {
     @Transactional(readOnly = true)
     public Page<ThreadResponse> getThreadsByUniversity(String university, Pageable pageable) {
         return threadRepository.findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(university, university, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of threads posted by a specific user.
+     * The results are ordered by publication date in descending order.
+     *
+     * @param user The user who posted the threads.
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link ThreadResponse} objects.
+     * @see User
+     * @see Page
+     */
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsPostedByUser(User user, Pageable pageable) {
+
+        return threadRepository.findByUserOrderByPublicationDateDesc(user, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of threads posted by a specific host.
+     * The results are ordered by publication date in descending order.
+     *
+     * @param host The host who posted the threads.
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link ThreadResponse} objects.
+     * @see Host
+     * @see Page
+     */
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsPostedByHost(Host host, Pageable pageable) {
+
+        return threadRepository.findByHostOrderByPublicationDateDesc(host, pageable).map(this::toResponse);
     }
 
 

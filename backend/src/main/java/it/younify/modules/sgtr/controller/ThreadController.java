@@ -203,6 +203,31 @@ public class ThreadController {
 
 
     /**
+     * Retrieves a paginated list of threads posted by the currently authenticated user.
+     * This endpoint provides a summary of the user's own contributions.
+     *
+     * @param pageable The pagination information, with a default size of 10.
+     * @return A {@link ResponseEntity} containing a paginated list of {@link ThreadResponse} objects posted by the user.
+     * @see ThreadFacade#getThreadPosted(Pageable)
+     * @see Pageable
+     * @see ThreadResponse
+     */
+    @GetMapping("/summary/posted")
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsPosted(@PageableDefault(size = 10) Pageable pageable){
+
+        Page<ThreadResponse> page = threadFacade.getThreadPosted(pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ThreadResponse>>builder()
+                        .data(page)
+                        .message("RETRIEVE_SUCCESSFULLY")
+                        .internalCode("RETRIEVE_SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+
+    /**
      * Retrieves the total of CFUs made by the user/host threads and comments
      *
      * @return A {@link ResponseEntity} containing the total CFU.

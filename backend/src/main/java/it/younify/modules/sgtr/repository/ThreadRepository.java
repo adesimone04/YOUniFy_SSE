@@ -10,8 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -27,54 +25,6 @@ public interface ThreadRepository extends JpaRepository<Threads, Long> {
      * @return An {@link Optional} containing the thread if found.
      */
     Optional<Threads> findById(Long ID);
-
-    /**
-     * Finds a thread by its flag category.
-     *
-     * @param flag The flag category to search for.
-     * @return An {@link Optional} containing a thread if found.
-     */
-    Optional<Threads> findByFlag(FlagCategory flag);
-
-    /**
-     * Finds a thread by its author.
-     *
-     * @param user The user who authored the thread.
-     * @return An {@link Optional} containing a thread if found.
-     */
-    Optional<Threads> findByUser(User user);
-
-    /**
-     * Finds a thread by its author.
-     *
-     * @param host The host who authored the thread.
-     * @return An {@link Optional} containing a thread if found.
-     */
-    Optional<Threads> findByHost(Host host);
-
-    /**
-     * Finds a thread by its exact publication date.
-     *
-     * @param publicationDate The publication date to search for.
-     * @return An {@link Optional} containing a thread if found.
-     */
-    Optional<Threads> findByPublicationDate(Instant publicationDate);
-
-    /**
-     * Finds all threads by a specific user, ordered by vote count (CFU) in ascending order.
-     *
-     * @param user The user whose threads are to be retrieved.
-     * @return A list of threads.
-     */
-    List<Threads> findAllByOrderByCFUAsc(User user);
-
-    /**
-     * Finds all threads by a specific user, ordered by vote count (CFU) in descending order.
-     *
-     * @param user The user whose threads are to be retrieved.
-     * @return A list of threads.
-     */
-    List<Threads> findAllByOrderByCFUDesc(User user);
 
     /**
      * Retrieves a paginated list of all threads, sorted by publication date in descending order.
@@ -108,6 +58,26 @@ public interface ThreadRepository extends JpaRepository<Threads, Long> {
             String universityInUser,
             Pageable pageable
     );
+
+    /**
+     * Retrieves a paginated list of threads posted by a specific host, sorted by publication date in descending order.
+     *
+     * @param host The host who posted the threads.
+     * @param pageable The pagination information.
+     * @return A paginated list of threads.
+     */
+    Page<Threads> findByHostOrderByPublicationDateDesc(Host host, Pageable pageable);
+
+    /**
+     * Retrieves a paginated list of threads posted by a specific user, sorted by publication date in descending order.
+     *
+     * @param user The user who posted the threads.
+     * @param pageable The pagination information.
+     * @return A paginated list of threads.
+     */
+    Page<Threads> findByUserOrderByPublicationDateDesc(User user, Pageable pageable);
+
+
 
     /**
      * Calculates the total sum of CFU (votes) for all threads posted by a specific user.
