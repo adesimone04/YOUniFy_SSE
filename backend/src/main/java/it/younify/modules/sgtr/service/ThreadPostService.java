@@ -33,7 +33,7 @@ public class ThreadPostService {
      * This method determines the author of the thread from the current security context
      * and persists a new {@link Threads} entity.
      *
-     * @param threadPostRequest The request containing the thread's content and hsi flag.
+     * @param threadPostRequest The request containing the thread's content and his flag.
      */
     @Transactional(rollbackFor = Exception.class)
     public void post(@NotNull ThreadPostRequest threadPostRequest) {
