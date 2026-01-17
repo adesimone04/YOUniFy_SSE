@@ -10,6 +10,7 @@ import it.younify.modules.sgn.service.NotificationViewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,8 @@ public class NotificationFacade {
      *
      * @param pageable The pagination information.
      * @return A {@link Page} of {@link NotificationResponse} objects for the authenticated principal.
+     * @throws AccessDeniedException if the authenticated principal is neither an instance of {@link User} nor {@link Host}
+     *  * (e.g., anonymous users or unrecognized principal types).
      * @see Page
      * @see NotificationResponse
      * @see User
@@ -61,8 +64,15 @@ public class NotificationFacade {
 
             return notificationViewService.getNotificationsUser(pageable, (User) principal);
         }
+        else{
 
-        return notificationViewService.getNotificationsHost(pageable, (Host) principal);
+            if(principal instanceof Host) {
+
+                return notificationViewService.getNotificationsHost(pageable, (Host) principal);
+            }
+        }
+
+        throw new AccessDeniedException("Access is denied for this operation");
     }
 
     /**

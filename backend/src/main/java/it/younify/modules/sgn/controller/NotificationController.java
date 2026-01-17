@@ -35,6 +35,7 @@ public class NotificationController {
      */
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<Void>> send(@RequestBody NotificationRequest notificationRequest) {
+
         notificationFacade.send(notificationRequest);
 
         return ResponseEntity.ok(
@@ -56,7 +57,9 @@ public class NotificationController {
      */
     @GetMapping("/view")
     public ResponseEntity<ApiResponse<Page<NotificationResponse>>> view(Pageable pageable) {
+
         Page<NotificationResponse> page = notificationFacade.getNotify(pageable);
+
         return ResponseEntity.ok(
                 ApiResponse.<Page<NotificationResponse>>builder()
                         .message("RETRIEVED_SUCCESSFULLY")

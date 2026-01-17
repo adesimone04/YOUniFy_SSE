@@ -83,9 +83,7 @@ public class NotificationSendService {
                 receiverHost = hostRepository.findById(receiverId)
                         .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
             }
-            else {
-                throw new ResourceNotFoundException("Invalid Receiver ID format", "INVALID_ID");
-            }
+            else throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
         }
 
 
