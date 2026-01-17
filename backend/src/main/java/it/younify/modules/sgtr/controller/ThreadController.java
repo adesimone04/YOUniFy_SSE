@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.springframework.security.authorization.AuthorityReactiveAuthorizationManager.hasRole;
 
 /**
  * The {@code ThreadController} class handles all HTTP requests related to threads.
@@ -55,6 +54,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("POSTED_SUCCESSFULLY")
+                        .internalCode("POSTED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -77,6 +77,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("DELETED_SUCCESSFULLY")
+                        .internalCode("DELETED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -103,6 +104,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("REACT_SUCCESSFULLY")
+                        .internalCode("REACT_SUCCESSFULLY")
                         .build()
         );
     }
@@ -122,6 +124,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .data(page)
                         .build()
         );
@@ -140,6 +143,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<List<Map<String, String>>>builder()
                         .message("RETRIEVE_SUCCESSFULLY")
+                        .internalCode("RETRIEVE_SUCCESSFULLY")
                         .data(
                                 Arrays.stream(FlagCategory.values())
                                 .map(flag -> Map.of(
@@ -169,6 +173,7 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .data(page)
                         .build()
         );
@@ -190,9 +195,28 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .data(page)
                         .build()
         );
+    }
+
+
+    /**
+     * Retrieves the total of CFUs made by the user/host threads and comments
+     *
+     * @return A {@link ResponseEntity} containing the total CFU.
+     */
+    @GetMapping("/summary/cfu")
+    public ResponseEntity<ApiResponse<Integer>> getCFUSummary(){
+
+        return ResponseEntity.ok(
+                ApiResponse.<Integer>builder()
+                        .data(threadFacade.getCFUTotal())
+                        .message("RETRIEVE_SUCCESSFULLY")
+                        .internalCode("RETRIEVE_SUCCESSFULLY")
+                        .build()
+                );
     }
 
 
@@ -211,23 +235,8 @@ public class ThreadController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("UPDATE_SUCCESSFULLY")
+                        .internalCode("UPDATE_SUCCESSFULLY")
                         .build()
         );
-    }
-
-    /**
-     * Retrieves the total of CFUs made by the user/host threads and comments
-     *
-     * @return A {@link ResponseEntity} containing the total CFU.
-     */
-    @GetMapping("/summary/cfu")
-    public ResponseEntity<ApiResponse<Integer>> getCFUSummary(){
-
-        return ResponseEntity.ok(
-                ApiResponse.<Integer>builder()
-                        .data(threadFacade.getCFUTotal())
-                        .message("RETRIEVE_SUCCESSFULLY")
-                        .build()
-                );
     }
 }

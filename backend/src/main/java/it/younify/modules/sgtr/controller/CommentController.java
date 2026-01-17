@@ -47,6 +47,7 @@ public class CommentController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("POSTED_SUCCESSFULLY")
+                        .internalCode("POSTED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -69,6 +70,7 @@ public class CommentController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("DELETED_SUCCESSFULLY")
+                        .internalCode("DELETED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -89,6 +91,7 @@ public class CommentController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("REACT_SUCCESSFULLY")
+                        .internalCode("REACT_SUCCESSFULLY")
                         .build()
         );
     }
@@ -111,6 +114,7 @@ public class CommentController {
                 ApiResponse.<Page<CommentResponse>>builder()
                         .data(page)
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .build()
         );
     }
