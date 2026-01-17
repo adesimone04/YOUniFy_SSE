@@ -77,10 +77,10 @@ public class CommentDeleteService {
 
                         commentRepository.delete(comment);
                     }
-                    else throw new AccessDeniedException("Access is denied");
+                    else throw new AccessDeniedException("Access is denied for this operation");
                 }
             }
         }
-        else throw new ResourceNotFoundException("Comment not found");
+        else throw new ResourceNotFoundException("Comment not found", "COMMENT_NOT_FOUND");
     }
 }

@@ -1,6 +1,8 @@
 package it.younify.modules.sgtr.facade;
 
 
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
 import it.younify.modules.sgtr.model.dto.request.ThreadVoteRequest;
 import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
@@ -9,6 +11,8 @@ import it.younify.modules.sgtr.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,6 +35,7 @@ public class ThreadFacade {
     private final ThreadDeleteService threadDeleteService;
     private final ThreadVoteService threadVoteService;
     private final CensorshipService censorshipService;
+    private final TotalCFUService totalCFUService;
 
     /**
      * Creates a new thread after checking for and censoring any sensitive content.
@@ -90,6 +95,7 @@ public class ThreadFacade {
     public Page<ThreadResponse> getThreadsByFlag(String flag, Pageable pageable){
 
         FlagCategory flagCategory = FlagCategory.valueOf(flag);
+
         return threadViewService.getThreadsByFlag(flagCategory, pageable);
     }
 
@@ -106,6 +112,44 @@ public class ThreadFacade {
     }
 
     /**
+     * Retrieves a paginated list of threads posted by the currently authenticated user or host.
+     * This method determines the type of the principal (User or Host) from the security context
+     * and delegates to the appropriate service method in {@link ThreadViewService}.
+     *
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link ThreadResponse} objects posted by the authenticated principal.
+     * @throws AccessDeniedException if the principal is not a recognized type (User or Host).
+     * @see ThreadViewService#getThreadsPostedByUser(User, Pageable)
+     * @see ThreadViewService#getThreadsPostedByHost(Host, Pageable)
+     */
+    public Page<ThreadResponse> getThreadPosted(Pageable pageable) {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(principal instanceof User){
+
+            return threadViewService.getThreadsPostedByUser((User) principal, pageable);
+        }
+        else{
+
+            if(principal instanceof Host){
+
+                return threadViewService.getThreadsPostedByHost((Host) principal, pageable);
+            }
+        }
+
+        throw new AccessDeniedException("Access is denied for this operation");
+    }
+
+    /**
+     * Retrieves the total CFU score for the currently authenticated user.
+     */
+    public int getCFUTotal() {
+
+        return totalCFUService.getCFUTotal();
+    }
+
+    /**
      * Triggers a refresh of the censorship word list from its source.
      * This is typically an administrative action.
      */
@@ -113,5 +157,4 @@ public class ThreadFacade {
 
         censorshipService.refresh();
     }
-
 }

@@ -117,7 +117,7 @@ public class CommentVoteService {
                     commentRepository.save(comment);
                 }
             }
-        } else throw new ResourceNotFoundException("Comment not found");
+        } else throw new ResourceNotFoundException("Comment not found", "COMMENT_NOT_FOUND");
     }
 
 

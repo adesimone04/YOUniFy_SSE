@@ -117,7 +117,7 @@ public class ThreadVoteService {
                     threadRepository.save(thread);
                 }
             }
-        } else throw new ResourceNotFoundException("Thread not found");
+        } else throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
 
 

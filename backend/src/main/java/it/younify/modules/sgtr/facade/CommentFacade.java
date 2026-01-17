@@ -1,5 +1,7 @@
 package it.younify.modules.sgtr.facade;
 
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.request.CommentPostRequest;
 import it.younify.modules.sgtr.model.dto.request.CommentVoteRequest;
 import it.younify.modules.sgtr.model.dto.response.CommentResponse;
@@ -7,6 +9,9 @@ import it.younify.modules.sgtr.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /**
@@ -82,5 +87,35 @@ public class CommentFacade {
     public Page<CommentResponse> commentView(Long threadId, Pageable pageable){
 
         return commentViewService.getCommentByCFU(threadId, pageable);
+    }
+
+    /**
+     * Retrieves a paginated list of comments posted by the currently authenticated user or host.
+     * This method determines the type of the principal (User or Host) from the security context
+     * and delegates to the appropriate service method in {@link CommentViewService}.
+     *
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link CommentResponse} objects posted by the authenticated principal.
+     * @throws AccessDeniedException if the principal is not a recognized type (User or Host).
+     * @see CommentViewService#getCommentPostedByUser(User, Pageable)
+     * @see CommentViewService#getCommentPostedByHost(Host, Pageable)
+     */
+    public Page<CommentResponse> getCommentPosted(Pageable pageable){
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(principal instanceof User) {
+
+            return commentViewService.getCommentPostedByUser((User) principal, pageable);
+        }
+        else{
+
+            if(principal instanceof Host) {
+
+                return commentViewService.getCommentPostedByHost((Host) principal, pageable);
+            }
+        }
+
+        throw new AccessDeniedException("Access is denied for this operation");
     }
 }
