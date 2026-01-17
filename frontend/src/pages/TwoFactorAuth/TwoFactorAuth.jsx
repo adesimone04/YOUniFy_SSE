@@ -19,18 +19,25 @@ const TwoFactorAuth = () => {
     // --- 1. UTILS ---
     const getDurationFromServerDate = (serverDateString) => {
 
-        if (!serverDateString) return 300;
-        const now = new Date();
-        const end = new Date(serverDateString);
-        if (isNaN(end.getTime())) return 300;
+        if (!serverDateString) {
+            return 300;
+        }
 
-        const nowSec = now.getMinutes() * 60 + now.getSeconds();
-        const endSec = end.getMinutes() * 60 + end.getSeconds();
-        let diff = endSec - nowSec;
+        const now = new Date().getTime();
+        const end = new Date(serverDateString).getTime();
 
-        if (diff < -3000) diff += 3600;
-        if (diff < 0 || diff > 300) return 300;
-        return diff;
+        if (isNaN(end)) {
+            return 300;
+        }
+
+        // 3. Calcolo differenza in secondi
+        const diffInSeconds = Math.floor((end - now) / 1000);
+
+        if (diffInSeconds <= 0 || diffInSeconds > 600) {
+            return 300;
+        }
+
+        return diffInSeconds;
     };
 
     const calculateInitialDeadline = () => {
@@ -130,6 +137,7 @@ const TwoFactorAuth = () => {
         }
     };
 
+
     // --- 4. RESEND ---
     const triggerResend = async (automatic = false) => {
 
@@ -138,14 +146,17 @@ const TwoFactorAuth = () => {
         try {
 
             const response = await authService.resend2FACode(accountId);
-            const responseData = response.data;
-            const newData = responseData.data || responseData;
+            const apiResponse = response.data;
+
+            const serverDateString = (typeof apiResponse.data === 'string')
+                ? apiResponse.data
+                : apiResponse.data?.expiryDate;
 
             if (!automatic) toast.success("Nuovo codice inviato!");
 
             setAccountId(accountId);
 
-            const duration = getDurationFromServerDate(newData.expiryDate);
+            const duration = getDurationFromServerDate(serverDateString);
             const newDeadline = Date.now() + (duration * 1000);
 
             setDeadline(newDeadline);
@@ -162,18 +173,16 @@ const TwoFactorAuth = () => {
 
         }
         catch (error) {
-
             toast.error("Errore nell'invio del nuovo codice.");
         }
         finally {
-
             setIsLoading(false);
         }
     };
 
+
     // --- 5. VERIFICA ---
     const handleVerify = async (e) => {
-
         e.preventDefault();
         const code = otp.join('');
         if (code.length < 6) return;
@@ -181,41 +190,68 @@ const TwoFactorAuth = () => {
         setIsLoading(true);
 
         try {
-
             const response = await authService.verify2FA(accountId, code);
 
+            // SUCCESSO: Pulisci storage e naviga
             localStorage.removeItem('2fa_deadline');
             localStorage.removeItem('2fa_accountId');
             handleAuthResponse(response.data, navigate);
 
-        }
-        catch (error) {
-
+        } catch (error) {
             const errorData = error.response?.data;
-            if (errorData) {
 
+            if (errorData) {
                 const internalCode = handleAuthResponse(errorData, navigate);
 
-                if (['MAX_ATTEMPTS', '2FA_CODE_EXPIRED'].includes(internalCode)) {
+                // --- CASO 1: BLOCCATO (MAX_ATTEMPTS) ---
+                // Qui il backend ti manda la data di sblocco futura
+                if (internalCode === 'MAX_ATTEMPTS') {
+                    toast.warning("Troppi tentativi. Attendi lo sblocco.");
 
-                    toast.warning("Tentativi esauriti. Richiedi un nuovo codice.");
+                    if (errorData.expiryDate) {
+                        // 1. Calcola durata blocco
+                        const duration = getDurationFromServerDate(errorData.expiryDate);
 
-                    // Kill Timer & Enable Button
+                        // 2. Imposta nuova deadline
+                        const newDeadline = Date.now() + (duration * 1000);
+                        setDeadline(newDeadline);
+                        localStorage.setItem('2fa_deadline', newDeadline.toString());
+
+                        // 3. AGGIORNA IL TIMER (Lo rende VIVO)
+                        setTimeLeft(duration);
+                        setIsTimerExpired(false); // <--- False = Il timer gira, l'utente aspetta
+
+                        // Pulisci input
+                        setOtp(['', '', '', '', '', '']);
+                    } else {
+                        // Fallback se manca la data (blocca tutto subito)
+                        setDeadline(Date.now());
+                        setTimeLeft(0);
+                        setIsTimerExpired(true);
+                        setOtp(['', '', '', '', '', '']);
+                    }
+                }
+
+                    // --- CASO 2: SCADUTO (2FA_CODE_EXPIRED) ---
+                // Qui il codice è vecchio, l'utente deve poterne chiedere un altro
+                else if (internalCode === '2FA_CODE_EXPIRED') {
+                    toast.warning("Codice scaduto. Richiedi un nuovo codice.");
+
+                    // Uccidi il timer per attivare il tasto "Invia nuovo codice"
                     setDeadline(Date.now());
-                    localStorage.removeItem('2fa_deadline');
                     setTimeLeft(0);
                     setIsTimerExpired(true);
                     setOtp(['', '', '', '', '', '']);
                 }
-                else if (internalCode === 'INVALID_2FA_CODE' || internalCode === 'TRY_2FA_AGAIN') {
 
+                // --- CASO 3: CODICE ERRATO ---
+                else if (internalCode === 'INVALID_2FA_CODE' || internalCode === 'TRY_2FA_AGAIN') {
                     toast.error("Codice non valido. Riprova.");
                     setOtp(['', '', '', '', '', '']);
                     inputRefs.current[0].focus();
                 }
             }
-        }
-        finally {
+        } finally {
             setIsLoading(false);
         }
     };

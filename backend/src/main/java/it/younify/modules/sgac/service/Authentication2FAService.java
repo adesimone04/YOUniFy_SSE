@@ -13,7 +13,6 @@ import it.younify.modules.sgac.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import it.younify.core.exception.BadRequestException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,12 +45,11 @@ public class Authentication2FAService {
      *
      * @param authentication2FARequest The request containing the account ID and the 2FA code.
      * @return An {@link AccountSummary} containing the account name and email upon successful confirmation.
-     * @throws BadCredentialsException If the account ID does not exist.
      * @throws BadRequestException If the 2FA code is expired, incorrect, or the maximum number of attempts has been reached.
      * @see it.younify.modules.sgac.model.dto.request.Authentication2FARequest
      * @see it.younify.modules.sgac.model.dto.response.AccountSummary
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = BadRequestException.class)
     public AccountSummary confirm2FA(@NotNull Authentication2FARequest authentication2FARequest) {
 
         String ID = authentication2FARequest.getID();
