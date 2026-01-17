@@ -2,6 +2,8 @@ package it.younify.modules.sgtr.service;
 
 
 import it.younify.core.exception.ResourceNotFoundException;
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.response.CommentResponse;
 import it.younify.modules.sgtr.model.entity.Comment;
 import it.younify.modules.sgtr.model.entity.Threads;
@@ -10,6 +12,7 @@ import it.younify.modules.sgtr.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +56,39 @@ public class CommentViewService {
 
        throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
+
+    /**
+     * Retrieves a paginated list of comments posted by a specific user.
+     * The results are ordered by publication date in descending order.
+     *
+     * @param user The user who posted the comments.
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link CommentResponse} objects.
+     * @see User
+     * @see Page
+     */
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> getCommentPostedByUser(User user, Pageable pageable) {
+
+        return commentRepository.findByUserOrderByPublicationDateDesc(user, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of comments posted by a specific host.
+     * The results are ordered by publication date in descending order.
+     *
+     * @param host The host who posted the comments.
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link CommentResponse} objects.
+     * @see Host
+     * @see Page
+     */
+    @Transactional(readOnly = true)
+    public Page<CommentResponse> getCommentPostedByHost(Host host, Pageable pageable) {
+
+        return commentRepository.findByHostOrderByPublicationDateDesc(host, pageable).map(this::toResponse);
+    }
+
 
     /**
      * Converts a {@link Comment} entity into a {@link CommentResponse} DTO.

@@ -29,44 +29,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Optional<Comment> findById(Long id);
 
     /**
-     * Finds a comment by its author.
-     *
-     * @param user The user who authored the comment.
-     * @return An {@link Optional} containing a comment if found.
-     */
-    Optional<Comment> findByUser(User user);
-
-    /**
-     * Finds a comment by its author.
-     *
-     * @param host The host who authored the comment.
-     * @return An {@link Optional} containing a comment if found.
-     */
-    Optional<Comment> findByHost(Host host);
-
-    /**
-     * Finds a comment by its exact publication date.
-     *
-     * @param publicationDate The publication date to search for.
-     * @return An {@link Optional} containing a comment if found.
-     */
-    Optional<Comment> findByPublicationDate(Instant publicationDate);
-
-    /**
-     * Finds all comments, ordered by vote count (CFU) in ascending order.
-     *
-     * @return A list of all comments.
-     */
-    List<Comment> findAllByOrderByCFUAsc();
-
-    /**
-     * Finds all comments, ordered by vote count (CFU) in descending order.
-     *
-     * @return A list of all comments.
-     */
-    List<Comment> findAllByOrderByCFUDesc();
-
-    /**
      * Retrieves a paginated list of comments for a specific thread, sorted by vote count (CFU) in descending order.
      *
      * @param thread The thread to retrieve comments for.
@@ -76,13 +38,23 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByThreadIdOrderByCFUDesc(Threads thread, Pageable pageable);
 
     /**
-     * Retrieves a paginated list of comments for a specific thread, sorted by publication date in descending order.
+     * Retrieves a paginated list of comments posted by a specific user, sorted by publication date in descending order.
      *
-     * @param thread The thread to retrieve comments for.
+     * @param user The user who posted the comments.
      * @param pageable The pagination information.
      * @return A paginated list of comments.
      */
-    Page<Comment> findByThreadIdOrderByPublicationDateDesc(Threads thread, Pageable pageable);
+    Page<Comment> findByUserOrderByPublicationDateDesc(User user, Pageable pageable);
+
+    /**
+     * Retrieves a paginated list of comments posted by a specific host, sorted by publication date in descending order.
+     *
+     * @param host The host who posted the comments.
+     * @param pageable The pagination information.
+     * @return A paginated list of comments.
+     */
+    Page<Comment> findByHostOrderByPublicationDateDesc(Host host, Pageable pageable);
+
 
     /**
      * Calculates the total sum of CFU (votes) for all comments posted by a specific user.

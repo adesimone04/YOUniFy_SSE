@@ -118,4 +118,29 @@ public class CommentController {
                         .build()
         );
     }
+
+
+    /**
+     * Retrieves a paginated list of comments posted by the currently authenticated user.
+     * This endpoint provides a summary of the user's own comments.
+     *
+     * @param pageable The pagination information, with a default size of 10.
+     * @return A {@link ResponseEntity} containing a paginated list of {@link CommentResponse} objects posted by the user.
+     * @see CommentFacade#getCommentPosted(Pageable)
+     * @see Pageable
+     * @see CommentResponse
+     */
+    @GetMapping("/summary/commented")
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getCommentPosted(@PageableDefault(size = 10) Pageable pageable){
+
+        Page<CommentResponse> page = commentFacade.getCommentPosted(pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<CommentResponse>>builder()
+                        .data(page)
+                        .message("RETRIEVE_SUCCESSFULLY")
+                        .internalCode("RETRIEVE_SUCCESSFULLY")
+                        .build()
+        );
+    }
 }
