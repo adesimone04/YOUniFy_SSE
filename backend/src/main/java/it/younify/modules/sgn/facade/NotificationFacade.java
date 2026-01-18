@@ -7,12 +7,14 @@ import it.younify.modules.sgn.model.dto.response.NotificationResponse;
 import it.younify.modules.sgn.service.NotificationDeleteService;
 import it.younify.modules.sgn.service.NotificationSendService;
 import it.younify.modules.sgn.service.NotificationViewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * The NotificationFacade class provides a simplified interface to the notification module's functionality.
@@ -37,7 +39,7 @@ public class NotificationFacade {
      * @param notificationRequest The request object containing the details of the notification to be sent.
      * @see NotificationRequest
      */
-    public void send(NotificationRequest notificationRequest) {
+    public void send(@Valid NotificationRequest notificationRequest) {
 
         notificationSendService.send(notificationRequest);
     }

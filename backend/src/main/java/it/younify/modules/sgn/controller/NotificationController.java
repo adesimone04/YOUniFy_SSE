@@ -7,6 +7,7 @@ import it.younify.modules.sgn.model.dto.response.NotificationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,27 +27,6 @@ public class NotificationController {
     private final NotificationFacade notificationFacade;
 
     /**
-     * Handles the HTTP POST request to send a notification.
-     * This endpoint accepts a {@link NotificationRequest} and uses the {@link NotificationFacade} to send the notification.
-     *
-     * @param notificationRequest The request body containing the notification details.
-     * @return A {@link ResponseEntity} with an {@link ApiResponse} indicating the result of the operation.
-     * @see NotificationRequest
-     */
-    @PostMapping("/send")
-    public ResponseEntity<ApiResponse<Void>> send(@RequestBody NotificationRequest notificationRequest) {
-
-        notificationFacade.send(notificationRequest);
-
-        return ResponseEntity.ok(
-                ApiResponse.<Void>builder()
-                        .message("NOTIFIED_SUCCESSFULLY")
-                        .internalCode("NOTIFIED_SUCCESSFULLY")
-                        .build()
-        );
-    }
-
-    /**
      * Handles the HTTP GET request to view notifications for the authenticated user.
      * This endpoint retrieves a paginated list of notifications using the {@link NotificationFacade}.
      *
@@ -56,7 +36,7 @@ public class NotificationController {
      * @see NotificationResponse
      */
     @GetMapping("/view")
-    public ResponseEntity<ApiResponse<Page<NotificationResponse>>> view(Pageable pageable) {
+    public ResponseEntity<ApiResponse<Page<NotificationResponse>>> view(@PageableDefault(size = 10) Pageable pageable) {
 
         Page<NotificationResponse> page = notificationFacade.getNotify(pageable);
 
