@@ -7,6 +7,7 @@ import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.UserRepository;
+import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,9 +31,11 @@ public class UserSignUpService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Generate2FAService generate2FAService;
 
-    private static final List<String> DOMAINS_ACCEPTED = List.of(
+    private final Generate2FAService generate2FAService;
+    private final UniversityValidationService universityValidationService;
+
+    private static final Set<String> DOMAINS_ACCEPTED = Set.of(
 
             "studenti.univpm.it", "univda.it", "studenti.uniba.it", "studenti.poliba.it",
             "studenti.lum.it", "studenti.unisannio.it", "studenti.unibg.it", "studio.unibo.it",
@@ -112,7 +115,7 @@ public class UserSignUpService {
             LocalDate dateOfBirth = userSignUpRequest.getDateOfBirth();
             String contactsInfo = userSignUpRequest.getContactsInfo();
 
-            if(validateData(firstName, lastName, dateOfBirth)){
+            if(validateData(university, cdl, dateOfBirth)){
 
                 if(validateEmail(email)) {
 
@@ -160,7 +163,7 @@ public class UserSignUpService {
     }
 
 
-    private boolean validateData(String firstName, String lastName, LocalDate dateOfBirth) {
+    private boolean validateData(String university, String cdl, LocalDate dateOfBirth) {
 
         LocalDate today = LocalDate.now();
 
@@ -171,15 +174,14 @@ public class UserSignUpService {
 
         LocalDate cutoffDate = LocalDate.of(maxBirthYear, 4, 30);
 
-        return firstName.trim().length() >= 3 &&
-                lastName.trim().length() >= 3 &&
+        return universityValidationService.isValidUniversity(university) &&
                 dateOfBirth.isBefore(cutoffDate);
     }
 
     private boolean validateEmail(String email) {
 
         return email.matches("^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.]+\\.it$") &&
-                DOMAINS_ACCEPTED.stream().anyMatch(email::endsWith);
+                DOMAINS_ACCEPTED.contains(email.substring(email.indexOf("@") + 1).toLowerCase());
         }
 
     private boolean validatePassword(String password, String confirmPassword) {

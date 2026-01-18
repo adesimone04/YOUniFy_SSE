@@ -8,6 +8,8 @@ import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.repository.HostRepository;
+import it.younify.modules.sgac.service.validator.GeoValidationService;
+import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,8 +35,10 @@ public class HostSignUpService {
     private final HostRepository hostRepository;
     private final PasswordEncoder passwordEncoder;
     private final PIVAlidator pivalidator;
+
     private final Generate2FAService generate2FAService;
     private final GeoValidationService geoValidationService;
+    private final UniversityValidationService universityValidationService;
 
     /**
      * Registers a new host.
@@ -142,7 +146,8 @@ public class HostSignUpService {
 
     private boolean validateData(String province, String city, String uniList) {
 
-        return geoValidationService.validateGeo(province, city);
+        return geoValidationService.validateGeo(province, city) &&
+                universityValidationService.isValidUniversity(uniList);
 
     }
 

@@ -1,4 +1,4 @@
-package it.younify.modules.sgac.service;
+package it.younify.modules.sgac.service.validator;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
