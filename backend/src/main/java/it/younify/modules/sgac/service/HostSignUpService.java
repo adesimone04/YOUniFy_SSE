@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -93,7 +95,8 @@ public class HostSignUpService {
             String uniList = hostSignUpRequest.getUniList();
             String noProfileImage = "system/nopicture.webp";
 
-            if (validateData(province, city, uniList)) {
+            List<String> universities = Arrays.asList(uniList.split(","));
+            if (validateData(province, city, universities)) {
 
                 if (association || validatePEC(PEC, PIVA)) {
 
@@ -144,10 +147,11 @@ public class HostSignUpService {
         }
     }
 
-    private boolean validateData(String province, String city, String uniList) {
+
+    private boolean validateData(String province, String city, List<String> universities) {
 
         return geoValidationService.validateGeo(province, city) &&
-                universityValidationService.isValidUniversity(uniList);
+                universityValidationService.isValidUniversity(universities);
 
     }
 

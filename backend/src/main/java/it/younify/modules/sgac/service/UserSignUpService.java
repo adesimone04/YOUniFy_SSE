@@ -7,6 +7,7 @@ import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.UserRepository;
+import it.younify.modules.sgac.service.validator.CdlValidationService;
 import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class UserSignUpService {
     private final PasswordEncoder passwordEncoder;
 
     private final Generate2FAService generate2FAService;
+    private final CdlValidationService cdlValidationService;
     private final UniversityValidationService universityValidationService;
 
     private static final Set<String> DOMAINS_ACCEPTED = Set.of(
@@ -175,6 +177,7 @@ public class UserSignUpService {
         LocalDate cutoffDate = LocalDate.of(maxBirthYear, 4, 30);
 
         return universityValidationService.isValidUniversity(university) &&
+                cdlValidationService.isValidCdl(cdl) &&
                 dateOfBirth.isBefore(cutoffDate);
     }
 
