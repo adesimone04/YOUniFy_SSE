@@ -7,6 +7,7 @@ import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
 import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +36,7 @@ public class ThreadViewService {
      * @return A paginated list of {@link ThreadResponse}.
      */
     @Transactional(readOnly = true)
-    public Page<ThreadResponse> getThreadsByDate(Pageable pageable) {
+    public Page<ThreadResponse> getThreadsByDate(@NonNull Pageable pageable) {
 
         return threadRepository.findAllByOrderByPublicationDateDesc(pageable).map(this::toResponse);
     }
@@ -49,7 +50,7 @@ public class ThreadViewService {
      * @return A paginated list of {@link ThreadResponse}.
      */
     @Transactional(readOnly = true)
-    public Page<ThreadResponse> getThreadsByFlag(FlagCategory flag, Pageable pageable) {
+    public Page<ThreadResponse> getThreadsByFlag(@NonNull FlagCategory flag, @NonNull Pageable pageable) {
         return threadRepository.findAllByFlagOrderByPublicationDateDesc(flag, pageable).map(this::toResponse);
     }
 
@@ -63,7 +64,7 @@ public class ThreadViewService {
      * @return A paginated list of {@link ThreadResponse}.
      */
     @Transactional(readOnly = true)
-    public Page<ThreadResponse> getThreadsByUniversity(String university, Pageable pageable) {
+    public Page<ThreadResponse> getThreadsByUniversity(@NonNull String university, @NonNull Pageable pageable) {
         return threadRepository.findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(university, university, pageable).map(this::toResponse);
     }
 
@@ -78,7 +79,7 @@ public class ThreadViewService {
      * @see Page
      */
     @Transactional(readOnly = true)
-    public Page<ThreadResponse> getThreadsPostedByUser(User user, Pageable pageable) {
+    public Page<ThreadResponse> getThreadsPostedByUser(@NonNull User user, @NonNull Pageable pageable) {
 
         return threadRepository.findByUserOrderByPublicationDateDesc(user, pageable).map(this::toResponse);
     }
@@ -94,7 +95,7 @@ public class ThreadViewService {
      * @see Page
      */
     @Transactional(readOnly = true)
-    public Page<ThreadResponse> getThreadsPostedByHost(Host host, Pageable pageable) {
+    public Page<ThreadResponse> getThreadsPostedByHost(@NonNull Host host, @NonNull Pageable pageable) {
 
         return threadRepository.findByHostOrderByPublicationDateDesc(host, pageable).map(this::toResponse);
     }
