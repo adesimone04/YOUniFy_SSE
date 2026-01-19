@@ -56,6 +56,7 @@ public class EventPostRequest {
      * The postal code (CAP) of the event's location.
      */
     @NotBlank
+    @Size(max = 5)
     private String CAP;
 
     /**

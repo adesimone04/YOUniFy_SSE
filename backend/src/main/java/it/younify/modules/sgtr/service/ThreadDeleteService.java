@@ -79,10 +79,10 @@ public class ThreadDeleteService {
 
                         threadRepository.delete(thread);
                     }
-                    else throw new AccessDeniedException("Access is denied");
+                    else throw new AccessDeniedException("Access is denied for this operation");
                 }
             }
         }
-        else throw new ResourceNotFoundException("Thread not found");
+        else throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
 }

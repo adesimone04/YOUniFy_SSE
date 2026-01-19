@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BadRequestException.class) // (400)
     public ResponseEntity<ApiErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
+
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), ex.getInternalCode(), request);
     }
 
@@ -44,6 +45,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BadCredentialsException.class) // (401)
     public ResponseEntity<ApiErrorResponse> handleBadCredentials(Exception ex, HttpServletRequest request) {
+
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), "BAD_CREDENTIALS", request);
     }
 
@@ -57,6 +59,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UsernameNotFoundException.class) // (401)
     public ResponseEntity<ApiErrorResponse> handleUsernameNotFound(Exception ex, HttpServletRequest request) {
+
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), "ACCOUNT_NOT_FOUND", request);
     }
 
@@ -100,6 +103,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ResourceNotFoundException.class) // (404)
     public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), ex.getInternalCode(), request);
     }
 
@@ -113,6 +117,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ResourceAlreadyExistsException.class) // (409)
     public ResponseEntity<ApiErrorResponse> handleConflict(ResourceAlreadyExistsException ex, HttpServletRequest request) {
+
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), ex.getInternalCode(), request);
     }
 
@@ -158,6 +163,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class) // (500)
     public ResponseEntity<ApiErrorResponse> handleInternalServerError(Exception ex, HttpServletRequest request) {
+
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(),"INTERNAL_SERVER_ERROR", request);
     }
 
