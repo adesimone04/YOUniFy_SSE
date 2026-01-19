@@ -3,9 +3,12 @@ package it.younify.modules.sgu.model.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
+/**
+ * Represents the request body for confirming a university change using a two-factor authentication (2FA) code.
+ * This DTO is used to securely transfer the 2FA code and the new university details from the client to the server.
+ */
 @Data
-public class Confirm2FAUniversity {
+public class Confirm2FAUniversityRequest {
 
     /**
      * The unique identifier of the account attempting to authenticate.

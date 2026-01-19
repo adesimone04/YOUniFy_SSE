@@ -5,6 +5,10 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+/**
+ * Represents the response body for viewing a user's profile.
+ * This DTO is used to transfer a subset of a user's details from the server to the client for display.
+ */
 @Data
 @Builder
 public class UserProfileViewResponse {

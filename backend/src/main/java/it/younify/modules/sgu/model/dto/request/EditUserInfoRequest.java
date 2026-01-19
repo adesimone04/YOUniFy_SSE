@@ -7,6 +7,10 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+/**
+ * Represents the request body for editing a user's profile information.
+ * This DTO is used to transfer updated user details from the client to the server.
+ */
 @Data
 public class EditUserInfoRequest {
 
@@ -39,6 +43,4 @@ public class EditUserInfoRequest {
     @NotBlank
     @Size(max = 50)
     private String contactsInfo;
-
-
 }

@@ -4,6 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Represents the request body for editing a host's profile information.
+ * This DTO is used to transfer updated host details from the client to the server.
+ */
 @Data
 public class EditHostInfoRequest {
 
