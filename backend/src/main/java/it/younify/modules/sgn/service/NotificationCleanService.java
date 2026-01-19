@@ -19,6 +19,7 @@ public class NotificationCleanService {
     private final NotificationRepository notificationRepository;
 
     public NotificationCleanService(NotificationRepository notificationRepository) {
+
         this.notificationRepository = notificationRepository;
     }
 
@@ -33,8 +34,8 @@ public class NotificationCleanService {
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void cleanNotifications() {
-        Instant daysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
 
+        Instant daysAgo = Instant.now().minus(30, ChronoUnit.DAYS);
         notificationRepository.deleteAllByDateBefore(daysAgo);
     }
 }

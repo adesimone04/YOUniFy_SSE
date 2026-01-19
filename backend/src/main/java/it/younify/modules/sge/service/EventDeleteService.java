@@ -65,22 +65,11 @@ public class EventDeleteService {
             if(event.getHost().getID().equals(host.getID()) || SecurityUtils.isAdmin()){
 
                 if (event.getPoster() != null) {
+
                     imageStorageService.deleteImage(event.getPoster());
                 }
 
-                List<Participation> participationList = event.getParticipations();
-
-                participationList.parallelStream().forEach(p -> {
-                    
-                    NotificationRequest notificationRequest = NotificationRequest.builder()
-                            .receiverId(p.getUser().getID())
-                            .type(Type.EVENT)
-                            .content(((Host) principal).getHostName() +  " ha cancellato l'evento " + event.getName() + "!")
-                            .build();
-
-                    notificationFacade.send(notificationRequest);
-                });
-
+                //add notify system for joined user
                 eventRepository.delete(event);
             }
             else throw new AccessDeniedException("Access is denied for this operation");

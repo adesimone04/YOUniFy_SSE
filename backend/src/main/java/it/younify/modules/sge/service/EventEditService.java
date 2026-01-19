@@ -84,20 +84,7 @@ public class EventEditService {
                     event.setPoster(imageStorageService.uploadImage(file, fileName, UPLOAD_DIR));
                 }
 
-                List<Participation> participationList = event.getParticipations();
-
-                participationList.parallelStream().forEach(p -> {
-                    
-                    NotificationRequest notificationRequest =
-                            NotificationRequest.builder()
-                                    .receiverId(p.getUser().getID())
-                                    .type(Type.EVENT)
-                                    .content(((Host) principal).getHostName() +  " ha modificato l'evento " + event.getName())
-                                    .build();
-                    
-                    notificationFacade.send(notificationRequest);
-                });
-
+                //add notify system for joined user
                 eventRepository.save(event);
             }
             else throw new AccessDeniedException("Access is denied for this operation");
