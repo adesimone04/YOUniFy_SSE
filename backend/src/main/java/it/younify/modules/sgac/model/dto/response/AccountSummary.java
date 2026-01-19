@@ -36,4 +36,14 @@ public class AccountSummary {
      * The expiry date of 2FA code.
      */
     private Instant expiryDate;
+
+    /**
+     * The user's university.
+     */
+    private String university;
+
+    /**
+     * The user's course of study (Corso di Laurea).
+     */
+    private String cdl;
 }
