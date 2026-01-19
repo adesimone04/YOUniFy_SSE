@@ -11,6 +11,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * This service handles the business logic for changing a user's or host's password.
+ * It validates the new password and updates the account in the database.
+ *
+ * @see ChangePassRequest
+ * @see UserRepository
+ * @see HostRepository
+ * @see PasswordEncoder
+ */
 @Service
 @RequiredArgsConstructor
 public class ChangePasswordService {
@@ -19,6 +28,14 @@ public class ChangePasswordService {
     private final HostRepository hostRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Changes the password for the currently authenticated user or host.
+     * This method validates that the new password and its confirmation match, and that the new password meets the required complexity.
+     * It also prevents changing the password to the same one.
+     *
+     * @param changePassRequest The DTO containing the new password and its confirmation.
+     * @throws BadRequestException if the passwords do not match, do not meet complexity requirements, or are the same as the current password.
+     */
     public void changePassword(ChangePassRequest changePassRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

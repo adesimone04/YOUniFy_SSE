@@ -6,9 +6,23 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+/**
+ * This service handles the business logic for viewing a user's profile information.
+ * It retrieves the data for the currently authenticated user and maps it to a response DTO.
+ *
+ * @see UserProfileViewResponse
+ * @see User
+ */
 @Service
 public class UserProfileViewService {
 
+    /**
+     * Retrieves the profile information for the currently authenticated user.
+     * This method ensures that the principal is a {@link User} before proceeding.
+     *
+     * @return A {@link UserProfileViewResponse} containing the user's profile information.
+     * @throws AccessDeniedException if the authenticated principal is not a {@link User}.
+     */
     public UserProfileViewResponse userProfileView() {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();

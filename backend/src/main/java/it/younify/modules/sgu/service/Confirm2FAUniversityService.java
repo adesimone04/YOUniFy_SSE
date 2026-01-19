@@ -9,7 +9,7 @@ import it.younify.modules.sgac.repository.Code2FARepository;
 import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sgac.service.validator.EmailValidationService;
 import it.younify.modules.sgac.service.validator.UniversityValidationService;
-import it.younify.modules.sgu.model.dto.request.Confirm2FAUniversity;
+import it.younify.modules.sgu.model.dto.request.Confirm2FAUniversityRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * This service handles the business logic for confirming a university change using a two-factor authentication (2FA) code.
+ * It validates the 2FA code, updates the user's university and email, and handles error cases such as incorrect or expired codes.
+ *
+ * @see Confirm2FAUniversityRequest
+ * @see Code2FARepository
+ * @see UserRepository
+ * @see EmailProvider
+ * @see EmailValidationService
+ * @see UniversityValidationService
+ */
 @Service
 @RequiredArgsConstructor
 public class Confirm2FAUniversityService {
@@ -30,13 +41,23 @@ public class Confirm2FAUniversityService {
     private final EmailValidationService emailValidationService;
     private final UniversityValidationService universityValidationService;
 
+    /**
+     * Confirms a university change with a 2FA code for the currently authenticated user.
+     * This method validates the 2FA code, checks for expiration, and manages retry attempts.
+     * If the code is correct, it updates the user's email and university, sends a confirmation email, and deletes the 2FA code.
+     * The operation is transactional, but rolls back only for critical exceptions, not for {@link BadRequestException} which is used for flow control.
+     *
+     * @param confirm2FAUniversityRequest The DTO containing the 2FA code and new university details.
+     * @throws BadRequestException if the 2FA code is incorrect, expired, or if the maximum number of attempts is reached. Also thrown for invalid data.
+     * @throws ResourceNotFoundException if the 2FA code or user account is not found.
+     */
     @Transactional(rollbackFor = Exception.class, noRollbackFor = BadRequestException.class)
-    public void confirm2FA(Confirm2FAUniversity confirm2FAUniversity){
+    public void confirm2FA(Confirm2FAUniversityRequest confirm2FAUniversityRequest){
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = (User) principal;
 
-        String ID = confirm2FAUniversity.getID();
+        String ID = confirm2FAUniversityRequest.getID();
         if(ID.equals(user.getID())) {
 
             Optional<Code2FA> opt2FA = code2FARepository.findByOwnerId(ID);
@@ -45,13 +66,13 @@ public class Confirm2FAUniversityService {
                 Code2FA code2FA = opt2FA.get();
                 if (code2FA.getExpiryDate().isAfter(Instant.now())) {
 
-                    String inserted2FA = confirm2FAUniversity.getCodeInserted();
+                    String inserted2FA = confirm2FAUniversityRequest.getCodeInserted();
                     String generated2FA = code2FA.getCode();
 
                     if (generated2FA.equals(inserted2FA)) {
 
-                        String university = confirm2FAUniversity.getUniversity();
-                        String email = confirm2FAUniversity.getEmail();
+                        String university = confirm2FAUniversityRequest.getUniversity();
+                        String email = confirm2FAUniversityRequest.getEmail();
 
                         if(emailValidationService.validateEmail(email) &&
                                 universityValidationService.isValidUniversity(university)){

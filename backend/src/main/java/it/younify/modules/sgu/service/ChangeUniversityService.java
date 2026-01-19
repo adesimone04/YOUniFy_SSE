@@ -19,6 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+/**
+ * This service handles the business logic for changing a user's university and course of study.
+ * It validates the new data and, if necessary, initiates a two-factor authentication (2FA) process.
+ *
+ * @see EditUniversityRequest
+ * @see UserRepository
+ * @see Code2FARepository
+ * @see EmailProvider
+ * @see CdlValidationService
+ * @see UniversityValidationService
+ * @see EmailValidationService
+ */
 @Service
 @RequiredArgsConstructor
 public class ChangeUniversityService {
@@ -34,6 +46,17 @@ public class ChangeUniversityService {
     @Value("${application.security.2fa.expiration}")
     private int expiration2FA;
 
+    /**
+     * Changes the university and/or course of study for a given user.
+     * If the email or university is being changed, a 2FA code is sent to the new email address to verify the change.
+     * If only the course of study is changed, the update is applied directly.
+     * The operation is transactional and will roll back in case of any error.
+     *
+     * @param editUniversityRequest The DTO containing the new university, course of study, and email.
+     * @param user The user entity to be updated.
+     * @return An {@link AccountSummary} containing details for the 2FA process if initiated, or an empty summary if the update is direct.
+     * @throws BadRequestException if the provided email, university, or course of study data is not valid.
+     */
     @Transactional(rollbackFor = Exception.class)
     public AccountSummary changeUniversity(EditUniversityRequest editUniversityRequest, User user){
 

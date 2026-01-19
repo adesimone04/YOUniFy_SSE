@@ -13,6 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This service handles the business logic for editing a host's profile information.
+ * It validates the provided data and updates the host's record in the database.
+ *
+ * @see EditHostInfoRequest
+ * @see HostRepository
+ * @see GeoValidationService
+ * @see UniversityValidationService
+ */
 @Service
 @RequiredArgsConstructor
 public class EditHostInfoService {
@@ -22,6 +31,15 @@ public class EditHostInfoService {
     private final GeoValidationService geoValidationService;
     private final UniversityValidationService universityValidationService;
 
+    /**
+     * Edits the profile of a given host with the information from the request.
+     * This method validates the geographical and university data before saving the changes.
+     * The operation is transactional and will roll back in case of any error.
+     *
+     * @param editHostInfoRequest The DTO containing the new profile information.
+     * @param host The host entity to be updated.
+     * @throws BadRequestException if the provided geographical or university data is not valid.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void editHostProfile(EditHostInfoRequest editHostInfoRequest, Host host){
 
