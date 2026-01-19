@@ -5,20 +5,15 @@ import it.younify.core.service.ImageStorageService;
 import it.younify.core.utils.SecurityUtils;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sge.model.entity.Event;
-import it.younify.modules.sge.model.entity.Participation;
 import it.younify.modules.sge.repository.EventRepository;
-import it.younify.modules.sge.repository.ParticipationRepository;
 import it.younify.modules.sgn.facade.NotificationFacade;
-import it.younify.modules.sgn.model.dto.request.NotificationRequest;
-import it.younify.modules.sgn.model.entity.Type;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.NonNull;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,7 +31,6 @@ public class EventDeleteService {
 
     private final EventRepository eventRepository;
     private final ImageStorageService imageStorageService;
-    private final NotificationFacade notificationFacade;
 
     /**
      * Deletes an event, its associated poster image, and notifies all participants.
@@ -53,7 +47,7 @@ public class EventDeleteService {
      * @throws AccessDeniedException if the authenticated user is not the host of the event or an admin.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void delete(@NotNull Long eventId) {
+    public void delete(@NonNull Long eventId) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Host host = (Host) principal;

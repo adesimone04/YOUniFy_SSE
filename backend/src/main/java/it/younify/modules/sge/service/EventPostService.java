@@ -6,7 +6,8 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sge.model.dto.request.EventPostRequest;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
-import jakarta.validation.constraints.NotNull;
+import it.younify.modules.sgtr.service.CensorshipService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ public class EventPostService {
 
     private final EventRepository eventRepository;
     private final ImageStorageService imageStorageService;
+    private final CensorshipService censorshipService;
+
     private final String UPLOAD_DIR = "uploads/events";
 
     /**
@@ -41,7 +44,7 @@ public class EventPostService {
      * @throws ResourceAlreadyExistsException if an identical event from the same host already exists.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void post(@NotNull EventPostRequest eventPostRequest) {
+    public void post(@NonNull EventPostRequest eventPostRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Host host = (Host) principal;
@@ -51,10 +54,20 @@ public class EventPostService {
 
             String posterPath = imageStorageService.uploadImage(eventPostRequest.getPoster(), UUID.randomUUID().toString(), UPLOAD_DIR);
 
+            String name = eventPostRequest.getName();
+            String description =eventPostRequest.getDescription();
+
+            if(censorshipService.containsSensitiveContent(name) ||
+                    censorshipService.containsSensitiveContent(description)){
+
+                name = censorshipService.censorText(name);
+                description = censorshipService.censorText(description);
+            }
+
             eventRepository.save(
                     Event.builder()
-                            .name(eventPostRequest.getName())
-                            .description(eventPostRequest.getDescription())
+                            .name(name)
+                            .description(description)
                             .dateAndTime(eventPostRequest.getDateAndTime())
                             .street(eventPostRequest.getStreet())
                             .city(eventPostRequest.getCity())

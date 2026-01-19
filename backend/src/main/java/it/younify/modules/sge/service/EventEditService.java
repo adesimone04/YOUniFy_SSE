@@ -6,20 +6,17 @@ import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.entity.Event;
-import it.younify.modules.sge.model.entity.Participation;
 import it.younify.modules.sge.repository.EventRepository;
-import it.younify.modules.sge.repository.ParticipationRepository;
 import it.younify.modules.sgn.facade.NotificationFacade;
-import it.younify.modules.sgn.model.dto.request.NotificationRequest;
-import it.younify.modules.sgn.model.entity.Type;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -38,8 +35,6 @@ public class EventEditService {
     private final EventRepository eventRepository;
     private final ImageStorageService imageStorageService;
     private final String UPLOAD_DIR = "uploads/events";
-    private final NotificationFacade notificationFacade;
-    private final ParticipationRepository participationRepository;
 
     /**
      * Edits an existing event with the provided data and notifies all participants of the changes.
@@ -58,7 +53,7 @@ public class EventEditService {
      * @throws AccessDeniedException if the authenticated user is not the host of the event.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void edit(Long eventID, EventEditRequest eventEditRequest) {
+    public void edit(@NonNull Long eventID, @NonNull EventEditRequest eventEditRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Host host = (Host) principal;

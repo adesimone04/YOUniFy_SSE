@@ -34,7 +34,7 @@ public class EventEditRequest {
      * The updated date and time when the event takes place.
      */
     @NotNull
-    @Future(message = "La data deve essere strettamente nel futuro")
+    @Future
     private Instant dateAndTime;
 
     /**
@@ -55,6 +55,7 @@ public class EventEditRequest {
      * The updated postal code (CAP) of the event's location.
      */
     @NotBlank
+    @Size(max = 5)
     private String CAP;
 
     /**

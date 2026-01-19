@@ -35,7 +35,7 @@ public class EventPostRequest {
      * The date and time when the event takes place.
      */
     @NotNull
-    @Future(message = "La data deve essere strettamente nel futuro")
+    @Future
     private Instant dateAndTime;
 
     /**
