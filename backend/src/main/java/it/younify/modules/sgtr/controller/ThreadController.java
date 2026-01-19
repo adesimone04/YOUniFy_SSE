@@ -97,7 +97,7 @@ public class ThreadController {
      * @see it.younify.modules.sgtr.model.dto.request.ThreadVoteRequest
      */
     @PostMapping("/react")
-    public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody ThreadVoteRequest threadVoteRequest) {
+    public ResponseEntity<ApiResponse<Void>> reactCFU(@Valid @RequestBody ThreadVoteRequest threadVoteRequest) {
 
         threadFacade.voteThread(threadVoteRequest);
 
