@@ -8,7 +8,7 @@ import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sgn.model.dto.request.NotificationRequest;
 import it.younify.modules.sgn.model.entity.Notification;
 import it.younify.modules.sgn.repository.NotificationRepository;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,7 +47,7 @@ public class NotificationSendService {
      * @see Host
      */
     @Transactional(rollbackFor = Exception.class)
-    public void send(@NotNull NotificationRequest notificationRequest) {
+    public void send(@NonNull NotificationRequest notificationRequest) {
 
         String receiverId = notificationRequest.getReceiverId();
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
