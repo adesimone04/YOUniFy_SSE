@@ -8,7 +8,6 @@ import it.younify.modules.sgac.model.entity.Code2FA;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.Code2FARepository;
 import it.younify.modules.sgac.repository.UserRepository;
-import it.younify.modules.sgac.service.Generate2FAService;
 import it.younify.modules.sgac.service.validator.CdlValidationService;
 import it.younify.modules.sgac.service.validator.EmailValidationService;
 import it.younify.modules.sgac.service.validator.UniversityValidationService;

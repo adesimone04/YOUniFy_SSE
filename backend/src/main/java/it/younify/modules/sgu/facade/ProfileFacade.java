@@ -4,6 +4,8 @@ import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgu.model.dto.request.*;
+import it.younify.modules.sgu.model.dto.response.HostProfileViewResponse;
+import it.younify.modules.sgu.model.dto.response.UserProfileViewResponse;
 import it.younify.modules.sgu.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +22,9 @@ public class ProfileFacade {
     private final ChangeUniversityService changeUniversityService;
     private final Confirm2FAUniversityService confirm2FAUniversityService;
     private final ChangePasswordService changePasswordService;
+
+    private final UserProfileViewService userProfileViewService;
+    private final HostProfileViewService hostProfileViewService;
 
 
     public void editUserInfoProfile(EditUserInfoRequest editUserInfoRequest) {
@@ -67,6 +72,18 @@ public class ProfileFacade {
     public void changePassword(ChangePassRequest changePassRequest){
 
         changePasswordService.changePassword(changePassRequest);
+    }
+
+
+    public UserProfileViewResponse UserProfileView(){
+
+        return userProfileViewService.userProfileView();
+    }
+
+
+    public HostProfileViewResponse HostProfileView(){
+
+        return hostProfileViewService.hostProfileView();
     }
 
 }

@@ -4,6 +4,8 @@ import it.younify.core.model.ApiResponse;
 import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgu.facade.ProfileFacade;
 import it.younify.modules.sgu.model.dto.request.*;
+import it.younify.modules.sgu.model.dto.response.HostProfileViewResponse;
+import it.younify.modules.sgu.model.dto.response.UserProfileViewResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -99,6 +101,36 @@ public class ProfileController {
                 ApiResponse.<Void>builder()
                         .internalCode("CHANGE_SUCCESSFULLY")
                         .message("CHANGE_SUCCESSFULLY")
+                        .build());
+    }
+
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/user")
+    public ResponseEntity<ApiResponse<UserProfileViewResponse>> myUserProfile() {
+
+        UserProfileViewResponse user = profileFacade.UserProfileView();
+
+        return ResponseEntity.ok(
+                ApiResponse.<UserProfileViewResponse>builder()
+                        .data(user)
+                        .internalCode("VIEW_SUCCESSFULLY")
+                        .message("VIEW_SUCCESSFULLY")
+                        .build());
+    }
+
+
+    @PreAuthorize("hasRole('HOST')")
+    @GetMapping("/host")
+    public ResponseEntity<ApiResponse<HostProfileViewResponse>> myHostProfile() {
+
+        HostProfileViewResponse host = profileFacade.HostProfileView();
+
+        return ResponseEntity.ok(
+                ApiResponse.<HostProfileViewResponse>builder()
+                        .data(host)
+                        .internalCode("VIEW_SUCCESSFULLY")
+                        .message("VIEW_SUCCESSFULLY")
                         .build());
     }
 }
