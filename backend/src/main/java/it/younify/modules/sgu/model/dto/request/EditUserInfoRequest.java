@@ -14,7 +14,8 @@ public class EditUserInfoRequest {
      * The user's first name.
      * This field is mandatory.
      */
-    @Size(max = 30)
+    @NotBlank
+    @Size(min = 3, max = 30)
     private String firstName;
 
     /**
@@ -22,7 +23,7 @@ public class EditUserInfoRequest {
      * This field is mandatory.
      */
     @NotBlank
-    @Size(max = 30)
+    @Size(min = 3, max = 30)
     private String lastName;
 
     /**

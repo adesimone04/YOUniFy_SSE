@@ -24,7 +24,7 @@ public class EditUserInfoService {
         LocalDate dateOfBirth = editUserInfoRequest.getDateOfBirth();
         String contactsInfo = editUserInfoRequest.getContactsInfo();
 
-        if(validateData(firstName, lastName, dateOfBirth)){
+        if(validateData(dateOfBirth)){
 
             user.setFirstName(firstName);
             user.setLastName(lastName);
@@ -37,7 +37,7 @@ public class EditUserInfoService {
     }
 
 
-    private boolean validateData(String firstName, String lastName, LocalDate dateOfBirth) {
+    private boolean validateData(LocalDate dateOfBirth) {
 
         LocalDate today = LocalDate.now();
 
@@ -48,8 +48,6 @@ public class EditUserInfoService {
 
         LocalDate cutoffDate = LocalDate.of(maxBirthYear, 4, 30);
 
-        return firstName.trim().length() >= 3 &&
-                lastName.trim().length() >= 3 &&
-                dateOfBirth.isBefore(cutoffDate);
+        return dateOfBirth.isBefore(cutoffDate);
     }
 }
