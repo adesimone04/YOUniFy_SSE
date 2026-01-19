@@ -3,10 +3,7 @@ package it.younify.modules.sgu.controller;
 import it.younify.core.model.ApiResponse;
 import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgu.facade.ProfileFacade;
-import it.younify.modules.sgu.model.dto.request.Confirm2FAUniversity;
-import it.younify.modules.sgu.model.dto.request.EditHostInfoRequest;
-import it.younify.modules.sgu.model.dto.request.EditUniversityRequest;
-import it.younify.modules.sgu.model.dto.request.EditUserInfoRequest;
+import it.younify.modules.sgu.model.dto.request.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -62,8 +59,8 @@ public class ProfileController {
             return ResponseEntity.ok(
                     ApiResponse.<AccountSummary>builder()
                             .data(account)
-                            .message("EDIT_SUCCESSFULLY")
-                            .internalCode("EDIT_SUCCESSFULLY")
+                            .message("CHANGE_SUCCESSFULLY")
+                            .internalCode("CHANGE_SUCCESSFULLY")
                             .build()
             );
         }
@@ -92,19 +89,16 @@ public class ProfileController {
     }
 
 
+    @PreAuthorize("hasAnyRole('USER', 'HOST')")
+    @PutMapping("/change/password")
+    public ResponseEntity<ApiResponse<Void>> confirm2FAUniversity(@Valid @RequestBody ChangePassRequest changePassRequest) {
 
+        profileFacade.changePassword(changePassRequest);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .internalCode("CHANGE_SUCCESSFULLY")
+                        .message("CHANGE_SUCCESSFULLY")
+                        .build());
+    }
 }
