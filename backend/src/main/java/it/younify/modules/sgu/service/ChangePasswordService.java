@@ -6,6 +6,7 @@ import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.HostRepository;
 import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sgu.model.dto.request.ChangePassRequest;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,7 +37,7 @@ public class ChangePasswordService {
      * @param changePassRequest The DTO containing the new password and its confirmation.
      * @throws BadRequestException if the passwords do not match, do not meet complexity requirements, or are the same as the current password.
      */
-    public void changePassword(ChangePassRequest changePassRequest) {
+    public void changePassword(@NonNull ChangePassRequest changePassRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
