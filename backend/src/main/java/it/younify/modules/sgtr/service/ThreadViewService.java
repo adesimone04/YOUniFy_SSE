@@ -65,7 +65,23 @@ public class ThreadViewService {
      */
     @Transactional(readOnly = true)
     public Page<ThreadResponse> getThreadsByUniversity(@NonNull String university, @NonNull Pageable pageable) {
+
         return threadRepository.findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(university, university, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of threads filtered by a specific university and flag category,
+     * sorted by publication date in descending order.
+     *
+     * @param university The university to filter by.
+     * @param flag The flag category to filter by.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link ThreadResponse}.
+     */
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsByUniversityAndFlag(@NonNull String university, @NonNull FlagCategory flag, @NonNull Pageable pageable) {
+
+        return threadRepository.findByUniversityAndFlag(university, flag, pageable).map(this::toResponse);
     }
 
     /**
