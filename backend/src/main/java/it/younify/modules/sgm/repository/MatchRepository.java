@@ -23,5 +23,7 @@ public interface MatchRepository extends JpaRepository<Match, Long> {
             Pageable pageable
     );
 
+    @Query("SELECT COUNT(m) FROM Match m WHERE (m.receiver = :user OR m.sender = :user) AND m.status = :status")
+    Integer countMatches(@Param("user") User user, @Param("status") Status status);
 
 }

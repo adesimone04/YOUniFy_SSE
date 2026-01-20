@@ -30,6 +30,8 @@ public class MatchFacade {
     private final MatchDeleteService matchDeleteService;
     private final MatchCardViewService matchCardViewService;
 
+    private final TotalMatchedService totalMatchedService;
+
     private final UniversityValidationService universityValidationService;
     private final CdlValidationService cdlValidationService;
 
@@ -70,7 +72,6 @@ public class MatchFacade {
         return matchCardViewService.getMatchCards(user.getUniversity(), pageable);
     }
 
-
     public Page<MatchCardResponse> getMatchCardsByUni(String university, Pageable pageable){
 
         if(universityValidationService.isValidUniversity(university)){
@@ -80,7 +81,6 @@ public class MatchFacade {
         else throw new BadRequestException("The university is not valid", "UNIVERSITY_NOT_VALID");
     }
 
-
     public Page<MatchCardResponse> getMatchCardsByUniAndCdl(String university, String cdl, Pageable pageable){
 
         if(cdlValidationService.isValidCdl(cdl) && universityValidationService.isValidUniversity(university)){
@@ -89,7 +89,6 @@ public class MatchFacade {
         }
         else throw new BadRequestException("The university or cdl is not valid", "UNIVERSITY_OR_CDL_NOT_VALID");
     }
-
 
     public Page<MatchPendingResponse> getSentMatches(Pageable pageable){
 
@@ -111,5 +110,12 @@ public class MatchFacade {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return matchViewService.getSuccessMatch((User) principal, pageable);
+    }
+
+    public Integer getTotalMatched(){
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return totalMatchedService.getTotalMatched((User) principal);
     }
 }

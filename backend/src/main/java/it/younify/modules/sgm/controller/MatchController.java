@@ -168,4 +168,20 @@ public class MatchController {
                         .build()
         );
     }
+
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/totalMatched")
+    public ResponseEntity<ApiResponse<Integer>> getTotalMatched() {
+
+        Integer totalMatched = matchFacade.getTotalMatched();
+
+        return ResponseEntity.ok(
+                ApiResponse.<Integer>builder()
+                        .message("RETRIEVED_SUCCESSFULLY")
+                        .internalCode("RETRIEVED_SUCCESSFULLY")
+                        .data(totalMatched)
+                        .build()
+        );
+    }
 }
