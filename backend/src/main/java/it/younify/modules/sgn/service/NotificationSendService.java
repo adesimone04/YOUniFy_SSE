@@ -8,7 +8,7 @@ import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sgn.model.dto.request.NotificationRequest;
 import it.younify.modules.sgn.model.entity.Notification;
 import it.younify.modules.sgn.repository.NotificationRepository;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,7 +47,7 @@ public class NotificationSendService {
      * @see Host
      */
     @Transactional(rollbackFor = Exception.class)
-    public void send(@NotNull NotificationRequest notificationRequest) {
+    public void send(@NonNull NotificationRequest notificationRequest) {
 
         String receiverId = notificationRequest.getReceiverId();
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -83,7 +83,7 @@ public class NotificationSendService {
                 receiverHost = hostRepository.findById(receiverId)
                         .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
             }
-            else throw new ResourceNotFoundException("Invalid Receiver ID format", "INVALID_ID");
+            else throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
         }
 
 
@@ -101,7 +101,7 @@ public class NotificationSendService {
     }
 
 
-    public void sendReminderEvent(@NotNull NotificationRequest notificationRequest, Host senderHost) {
+    public void sendReminderEvent(@NonNull NotificationRequest notificationRequest, Host senderHost) {
 
         String receiverId = notificationRequest.getReceiverId();
 
@@ -122,7 +122,7 @@ public class NotificationSendService {
                 receiverHost = hostRepository.findById(receiverId)
                         .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
             }
-            else throw new ResourceNotFoundException("Invalid Receiver ID format", "INVALID_ID");
+            else throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
         }
 
 

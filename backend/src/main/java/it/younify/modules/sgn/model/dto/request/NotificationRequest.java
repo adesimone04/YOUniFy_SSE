@@ -32,4 +32,5 @@ public class NotificationRequest {
      */
     @NotBlank
     private String content;
+
 }
