@@ -12,6 +12,7 @@ import it.younify.modules.sgac.service.validator.CdlValidationService;
 import it.younify.modules.sgac.service.validator.EmailValidationService;
 import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import it.younify.modules.sgu.model.dto.request.EditUniversityRequest;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class ChangeUniversityService {
      * @throws BadRequestException if the provided email, university, or course of study data is not valid.
      */
     @Transactional(rollbackFor = Exception.class)
-    public AccountSummary changeUniversity(EditUniversityRequest editUniversityRequest, User user){
+    public AccountSummary changeUniversity(@NonNull EditUniversityRequest editUniversityRequest, @NonNull User user){
 
         String email  = editUniversityRequest.getEmail();
         String university =  editUniversityRequest.getUniversity();

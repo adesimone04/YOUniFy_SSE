@@ -50,11 +50,7 @@ public class ProfileFacade {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (principal instanceof User) {
-
-            editUserInfoService.editUserProfile(editUserInfoRequest, (User) principal);
-        }
-        else throw new AccessDeniedException("Access id denied for this operation");
+        editUserInfoService.editUserProfile(editUserInfoRequest, (User) principal);
     }
 
 
@@ -68,11 +64,7 @@ public class ProfileFacade {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(principal instanceof Host) {
-
-            editHostInfoService.editHostProfile(editHostInfoRequest, (Host) principal);
-        }
-        else throw new AccessDeniedException("Access id denied for this operation");
+        editHostInfoService.editHostProfile(editHostInfoRequest, (Host) principal);
     }
 
 
@@ -87,11 +79,7 @@ public class ProfileFacade {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(principal instanceof User) {
-
-            return changeUniversityService.changeUniversity(editUniversityRequest, (User) principal);
-        }
-        else throw new AccessDeniedException("Access id denied for this operation");
+        return changeUniversityService.changeUniversity(editUniversityRequest, (User) principal);
     }
 
 
