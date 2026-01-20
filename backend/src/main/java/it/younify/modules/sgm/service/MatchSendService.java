@@ -17,6 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * This service handles the business logic for sending match requests between users.
+ * It creates a new match record and sends a notification to the receiver.
+ *
+ * @see MatchRequest
+ * @see Match
+ * @see MatchRepository
+ * @see NotificationFacade
+ */
 @Service
 @RequiredArgsConstructor
 public class MatchSendService {
@@ -25,6 +34,15 @@ public class MatchSendService {
     private final NotificationFacade notificationFacade;
     private final MatchRepository matchRepository;
 
+    /**
+     * Sends a match request from the currently authenticated user to a specified receiver.
+     * This method creates a new {@link Match} entity with {@link Status#PENDING} and saves it.
+     * A notification is then sent to the receiver to inform them of the new match request.
+     * The operation is transactional and will roll back in case of any error.
+     *
+     * @param matchRequest The DTO containing the ID of the user to whom the match request is being sent.
+     * @throws ResourceNotFoundException if the receiver user specified in the request does not exist.
+     */
     @Transactional(rollbackFor = Exception.class)
     public void send(MatchRequest matchRequest) {
 

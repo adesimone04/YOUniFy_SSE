@@ -19,6 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.Period;
 
+/**
+ * This service handles the business logic for viewing different types of matches for a user.
+ * It provides methods to retrieve sent, received, and accepted matches.
+ *
+ * @see MatchRepository
+ * @see ImageStorageService
+ * @see UserRepository
+ */
 @Service
 @RequiredArgsConstructor
 public class MatchViewService {
@@ -27,18 +35,39 @@ public class MatchViewService {
     private final ImageStorageService imageStorageService;
     private final UserRepository userRepository;
 
+    /**
+     * Retrieves a paginated list of pending match requests sent by the specified user.
+     *
+     * @param user The user who sent the match requests.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link MatchPendingResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<MatchPendingResponse> getSentPendingMatches(@NonNull User user, @NonNull Pageable pageable){
 
         return matchRepository.findAllBySenderAndStatus(user, Status.PENDING, pageable).map(this::toResponse);
     }
 
+    /**
+     * Retrieves a paginated list of pending match requests received by the specified user.
+     *
+     * @param user The user who received the match requests.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link MatchPendingResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<MatchPendingResponse> getReceivedPendingMatches(@NonNull User user, @NonNull Pageable pageable){
 
         return matchRepository.findAllByReceiverAndStatus(user, Status.PENDING, pageable).map(this::toResponse);
     }
 
+    /**
+     * Retrieves a paginated list of accepted matches for the specified user, where the user can be either the sender or the receiver.
+     *
+     * @param user The user for whom to retrieve accepted matches.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link MatchAcceptedResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<MatchAcceptedResponse> getSuccessMatch(@NonNull User user, @NonNull Pageable pageable){
 

@@ -15,6 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.Period;
 
+/**
+ * This service provides functionality to retrieve user profiles for display as "match cards" in the matching feature.
+ * It allows filtering by university and course of study.
+ *
+ * @see UserRepository
+ * @see ImageStorageService
+ */
 @Service
 @RequiredArgsConstructor
 public class MatchCardViewService {
@@ -22,6 +29,13 @@ public class MatchCardViewService {
     private final ImageStorageService imageStorageService;
     private final UserRepository userRepository;
 
+    /**
+     * Retrieves a paginated list of match cards for users from a specific university, excluding the currently authenticated user.
+     *
+     * @param university The university to filter by.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link MatchCardResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<MatchCardResponse> getMatchCards(@NonNull String university, @NonNull Pageable pageable) {
 
@@ -31,6 +45,14 @@ public class MatchCardViewService {
         return userRepository.findAllByUniversity(university, user.getID() ,pageable).map(this::toResponse);
     }
 
+    /**
+     * Retrieves a paginated list of match cards for users from a specific university and course of study, excluding the currently authenticated user.
+     *
+     * @param university The university to filter by.
+     * @param cdl The course of study to filter by.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link MatchCardResponse} objects.
+     */
     @Transactional(readOnly = true)
     public Page<MatchCardResponse> getMatchCardsByUniAndCdl(@NonNull String university, @NonNull String cdl, @NonNull Pageable pageable) {
 
