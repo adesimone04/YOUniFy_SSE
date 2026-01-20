@@ -9,10 +9,10 @@ import it.younify.modules.sgtr.model.entity.Comment;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.CommentRepository;
 import it.younify.modules.sgtr.repository.ThreadRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +44,7 @@ public class CommentViewService {
      * @throws ResourceNotFoundException if the thread with the given ID does not exist.
      */
     @Transactional(readOnly = true)
-    public Page<CommentResponse> getCommentByCFU(Long threadId, Pageable pageable) {
+    public Page<CommentResponse> getCommentByCFU(@NonNull Long threadId, Pageable pageable) {
 
         Optional<Threads> optT = threadRepository.findById(threadId);
 
@@ -68,7 +68,7 @@ public class CommentViewService {
      * @see Page
      */
     @Transactional(readOnly = true)
-    public Page<CommentResponse> getCommentPostedByUser(User user, Pageable pageable) {
+    public Page<CommentResponse> getCommentPostedByUser(@NonNull User user, @NonNull Pageable pageable) {
 
         return commentRepository.findByUserOrderByPublicationDateDesc(user, pageable).map(this::toResponse);
     }
@@ -84,7 +84,7 @@ public class CommentViewService {
      * @see Page
      */
     @Transactional(readOnly = true)
-    public Page<CommentResponse> getCommentPostedByHost(Host host, Pageable pageable) {
+    public Page<CommentResponse> getCommentPostedByHost(@NonNull Host host, @NonNull Pageable pageable) {
 
         return commentRepository.findByHostOrderByPublicationDateDesc(host, pageable).map(this::toResponse);
     }

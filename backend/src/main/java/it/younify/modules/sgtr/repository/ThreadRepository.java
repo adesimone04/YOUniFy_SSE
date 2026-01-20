@@ -78,6 +78,26 @@ public interface ThreadRepository extends JpaRepository<Threads, Long> {
     Page<Threads> findByUserOrderByPublicationDateDesc(User user, Pageable pageable);
 
 
+    /**
+     * Retrieves a paginated list of threads filtered by both a specific university and a flag category.
+     * This method performs a case-insensitive search across both user and host authors for the university.
+     *
+     * @param university The university to filter by.
+     * @param flag The flag category to filter by.
+     * @param pageable The pagination information.
+     * @return A paginated list of threads.
+     */
+    @Query("SELECT t FROM Threads t WHERE t.flag = :flag " +
+                  "AND (LOWER(t.host.uniList) LIKE LOWER(CONCAT('%', :university, '%')) " +
+                  "OR LOWER(t.user.university) = LOWER(:university)) " +
+                  "ORDER BY t.publicationDate DESC")
+    Page<Threads> findByUniversityAndFlag(
+
+            @Param("university") String university,
+            @Param("flag") FlagCategory flag,
+            Pageable pageable
+    );
+
 
     /**
      * Calculates the total sum of CFU (votes) for all threads posted by a specific user.

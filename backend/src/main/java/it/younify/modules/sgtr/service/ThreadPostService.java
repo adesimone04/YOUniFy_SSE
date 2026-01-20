@@ -6,7 +6,7 @@ import it.younify.modules.sgtr.model.dto.request.ThreadPostRequest;
 import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +36,7 @@ public class ThreadPostService {
      * @param threadPostRequest The request containing the thread's content and his flag.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void post(@NotNull ThreadPostRequest threadPostRequest) {
+    public void post(@NonNull ThreadPostRequest threadPostRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         FlagCategory flag = FlagCategory.valueOf(threadPostRequest.getFlag());

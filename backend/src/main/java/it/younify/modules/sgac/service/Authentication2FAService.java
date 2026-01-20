@@ -51,7 +51,7 @@ public class Authentication2FAService {
      * @see it.younify.modules.sgac.model.dto.request.Authentication2FARequest
      * @see it.younify.modules.sgac.model.dto.response.AccountSummary
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, noRollbackFor = BadRequestException.class)
     public AccountSummary confirm2FA(@NotNull Authentication2FARequest authentication2FARequest) {
 
         String ID = authentication2FARequest.getID();
