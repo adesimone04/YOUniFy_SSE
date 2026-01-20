@@ -8,6 +8,8 @@ import it.younify.modules.sgac.model.dto.response.AccountSummary;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.Role;
 import it.younify.modules.sgac.repository.HostRepository;
+import it.younify.modules.sgac.service.validator.GeoValidationService;
+import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,7 +37,10 @@ public class HostSignUpService {
     private final HostRepository hostRepository;
     private final PasswordEncoder passwordEncoder;
     private final PIVAlidator pivalidator;
+
     private final Generate2FAService generate2FAService;
+    private final GeoValidationService geoValidationService;
+    private final UniversityValidationService universityValidationService;
 
     /**
      * Registers a new host.
@@ -77,7 +84,7 @@ public class HostSignUpService {
 
             throw new ResourceAlreadyExistsException("This host already exists. Proceed to login");
         }
-        else{
+        else {
 
             String PIVA = hostSignUpRequest.getPIVA();
             boolean association = hostSignUpRequest.isAssociation();
@@ -88,54 +95,68 @@ public class HostSignUpService {
             String uniList = hostSignUpRequest.getUniList();
             String noProfileImage = "system/nopicture.webp";
 
-            if(association || validatePEC(PEC, PIVA)){
+            List<String> universities = Arrays.asList(uniList.split(","));
+            if (validateData(province, city, universities)) {
 
-                if(PEC.matches("^[a-zA-Z0-9._%+-]+@.*(pec|legal|cert|sicurezza|posta).*\\.[a-zA-Z]{2,}$")) {
+                if (association || validatePEC(PEC, PIVA)) {
 
-                    if(validatePassword(password, confirmPassword)){
+                    if (PEC.matches("^[a-zA-Z0-9._%+-]+@.*(pec|legal|cert|sicurezza|posta).*\\.[a-zA-Z]{2,}$")) {
 
-                        String ID = "H-" + UUID.randomUUID();
-                        password = passwordEncoder.encode(password);
+                        if (validatePassword(password, confirmPassword)) {
 
-                        Host host = Host.builder()
-                                .ID(ID)
-                                .hostName(hostName)
-                                .PIVA(PIVA)
-                                .PEC(PEC)
-                                .password(password)
-                                .profileImage(noProfileImage)
-                                .province(province)
-                                .city(city)
-                                .uniList(uniList)
-                                .enabled(false)
-                                .role(Role.HOST)
-                                .build();
+                            String ID = "H-" + UUID.randomUUID();
+                            password = passwordEncoder.encode(password);
 
-                        hostRepository.save(host);
+                            Host host = Host.builder()
+                                    .ID(ID)
+                                    .hostName(hostName)
+                                    .PIVA(PIVA)
+                                    .PEC(PEC)
+                                    .password(password)
+                                    .profileImage(noProfileImage)
+                                    .province(province)
+                                    .city(city)
+                                    .uniList(uniList)
+                                    .enabled(false)
+                                    .role(Role.HOST)
+                                    .build();
 
-                        Instant expiryDate = generate2FAService.send2FARequest(ID);
+                            hostRepository.save(host);
 
-                        return AccountSummary.builder()
-                                .ID(ID)
-                                .accountName(hostName)
-                                .accountEmail(PEC)
-                                .expiryDate(expiryDate)
-                                .build();
+                            Instant expiryDate = generate2FAService.send2FARequest(ID);
+
+                            return AccountSummary.builder()
+                                    .ID(ID)
+                                    .accountName(hostName)
+                                    .accountEmail(PEC)
+                                    .expiryDate(expiryDate)
+                                    .build();
+                        }
+
+                        throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
+                                "one number, and one special symbol", "PASSWORD_NOT_SAFE");
                     }
 
-                    throw new BadRequestException("The password must contain at least 8 characters, one uppercase letter, " +
-                            "one number, and one special symbol", "PASSWORD_NOT_SAFE");
+                    throw new BadRequestException("The PEC address " + PEC + " is not valid", "PEC_ADDRESS_NOT_VALID");
                 }
 
-                throw new BadRequestException("The PEC address " + PEC + " is not valid", "PEC_ADDRESS_NOT_VALID");
+                throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA, "PEC_ADDRESS_DOESNT_MATCH_VATCODE");
             }
 
-            throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA, "PEC_ADDRESS_DOESNT_MATCH_VATCODE");
+            throw new BadRequestException("Some data are not valid", "DATA_NOT_VALID");
         }
     }
 
 
+    private boolean validateData(String province, String city, List<String> universities) {
+
+        return geoValidationService.validateGeo(province, city) &&
+                universityValidationService.isValidUniversity(universities);
+
+    }
+
     private boolean validatePEC(String PEC, String PIVA) {
+
         return pivalidator.PIVAlidatePEC(PIVA).equals(PEC);
     }
 

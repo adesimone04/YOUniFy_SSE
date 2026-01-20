@@ -2,8 +2,6 @@ package it.younify.modules.sgm.model.entity;
 
 import it.younify.modules.sgac.model.entity.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -15,6 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Match {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ID;
@@ -27,7 +26,7 @@ public class Match {
     @JoinColumn(name = "receiver_id")
     private User receiver;
 
-    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 }

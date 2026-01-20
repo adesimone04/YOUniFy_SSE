@@ -3,12 +3,12 @@ package it.younify.modules.sgm.service;
 import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.UserRepository;
-import it.younify.modules.sgm.model.dto.Response.MatchAcceptedResponse;
-import it.younify.modules.sgm.model.dto.Response.MatchPendingResponse;
-import it.younify.modules.sgm.model.dto.Response.MatchcardResponse;
+import it.younify.modules.sgm.model.dto.response.MatchAcceptedResponse;
+import it.younify.modules.sgm.model.dto.response.MatchPendingResponse;
 import it.younify.modules.sgm.model.entity.Match;
 import it.younify.modules.sgm.model.entity.Status;
 import it.younify.modules.sgm.repository.MatchRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,33 +22,43 @@ import java.time.Period;
 @Service
 @RequiredArgsConstructor
 public class MatchViewService {
+
     private final MatchRepository matchRepository;
     private final ImageStorageService imageStorageService;
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public Page<MatchPendingResponse> getSentPendingMatches(User user, Pageable pageable){
-        return matchRepository.findAllBySenderAndStatus(user, Status.PENDING,pageable).map(this::toResponse);
+    public Page<MatchPendingResponse> getSentPendingMatches(@NonNull User user, @NonNull Pageable pageable){
+
+        return matchRepository.findAllBySenderAndStatus(user, Status.PENDING, pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<MatchPendingResponse> getReceivedPendingMatches(User user, Pageable pageable){
-        return matchRepository.findAllByReceiverAndStatus(user, Status.PENDING,pageable).map(this::toResponse);
+    public Page<MatchPendingResponse> getReceivedPendingMatches(@NonNull User user, @NonNull Pageable pageable){
+
+        return matchRepository.findAllByReceiverAndStatus(user, Status.PENDING, pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public Page<MatchAcceptedResponse> getSuccessMatch(User user, Pageable pageable){
-        return matchRepository.findAllByReceiverOrSenderAndStatus(user, user, Status.PENDING,pageable).map(this::toResponseSuccess);
+    public Page<MatchAcceptedResponse> getSuccessMatch(@NonNull User user, @NonNull Pageable pageable){
+
+        return matchRepository.findAllByReceiverAndStatusOrSenderAndStatus(user, user, Status.ACCEPTED, pageable).map(this::toResponseSuccess);
     }
+
 
     private MatchPendingResponse toResponse(Match match) {
-        User sender = match.getSender();
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User me =  (User) principal;
+        User me = (User) principal;
+
+        User sender = match.getSender();
 
         if(me.getID().equals(sender.getID())){
+
             User receiver = userRepository.findById(match.getReceiver().getID()).get();
+
             return new MatchPendingResponse(
+
                     match.getID(),
                     receiver.getFirstName() + " " + receiver.getLastName(),
                     imageStorageService.getPresignedUrl(receiver.getProfileImage()),
@@ -56,28 +66,32 @@ public class MatchViewService {
                     receiver.getUniversity(),
                     receiver.getCdl(),
                     match.getStatus()
-
-            );
-        }else{
-            return new MatchPendingResponse(
-                    match.getID(),
-                    sender.getFirstName() + " " + sender.getLastName(),
-                    imageStorageService.getPresignedUrl(sender.getProfileImage()),
-                    Period.between(sender.getDateOfBirth(), LocalDate.now()).getYears(),
-                    sender.getUniversity(),
-                    sender.getCdl(),
-                    Status.WAITING
             );
         }
+
+        return new MatchPendingResponse(
+
+                match.getID(),
+                sender.getFirstName() + " " + sender.getLastName(),
+                imageStorageService.getPresignedUrl(sender.getProfileImage()),
+                Period.between(sender.getDateOfBirth(), LocalDate.now()).getYears(),
+                sender.getUniversity(),
+                sender.getCdl(),
+                Status.WAITING
+        );
     }
 
     private MatchAcceptedResponse toResponseSuccess(Match match) {
-        User sender = match.getSender();
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User me =  (User) principal;
 
+        User sender = match.getSender();
+
         if(me.getID().equals(sender.getID())){
+
             User receiver = userRepository.findById(match.getReceiver().getID()).get();
+
             return new MatchAcceptedResponse(
                     match.getID(),
                     receiver.getFirstName() + " " + receiver.getLastName(),
@@ -88,17 +102,17 @@ public class MatchViewService {
                     receiver.getContactsInfo(),
                     match.getStatus()
             );
-        }else{
-            return new MatchAcceptedResponse(
-                    match.getID(),
-                    sender.getFirstName() + " " + sender.getLastName(),
-                    imageStorageService.getPresignedUrl(sender.getProfileImage()),
-                    Period.between(sender.getDateOfBirth(), LocalDate.now()).getYears(),
-                    sender.getUniversity(),
-                    sender.getCdl(),
-                    sender.getContactsInfo(),
-                    match.getStatus()
-            );
         }
+
+        return new MatchAcceptedResponse(
+                match.getID(),
+                sender.getFirstName() + " " + sender.getLastName(),
+                imageStorageService.getPresignedUrl(sender.getProfileImage()),
+                Period.between(sender.getDateOfBirth(), LocalDate.now()).getYears(),
+                sender.getUniversity(),
+                sender.getCdl(),
+                sender.getContactsInfo(),
+                match.getStatus()
+        );
     }
 }

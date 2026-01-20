@@ -1,16 +1,17 @@
 package it.younify.modules.sgm.facade;
 
+import it.younify.core.exception.BadRequestException;
 import it.younify.modules.sgac.model.entity.User;
-import it.younify.modules.sgm.model.dto.Request.MatchReactionRequest;
-import it.younify.modules.sgm.model.dto.Request.MatchRequest;
-import it.younify.modules.sgm.model.dto.Response.MatchAcceptedResponse;
-import it.younify.modules.sgm.model.dto.Response.MatchPendingResponse;
-import it.younify.modules.sgm.model.dto.Response.MatchcardResponse;
+import it.younify.modules.sgac.service.validator.CdlValidationService;
+import it.younify.modules.sgac.service.validator.UniversityValidationService;
+import it.younify.modules.sgm.model.dto.request.MatchReactionRequest;
+import it.younify.modules.sgm.model.dto.request.MatchRequest;
+import it.younify.modules.sgm.model.dto.response.MatchAcceptedResponse;
+import it.younify.modules.sgm.model.dto.response.MatchPendingResponse;
+import it.younify.modules.sgm.model.dto.response.MatchCardResponse;
 import it.younify.modules.sgm.model.entity.Match;
 import it.younify.modules.sgm.repository.MatchRepository;
-import it.younify.modules.sgm.service.MatchService;
-import it.younify.modules.sgm.service.MatchViewService;
-import it.younify.modules.sgm.service.MatchcardViewService;
+import it.younify.modules.sgm.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,61 +23,93 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class MatchFacade {
-    private final MatchcardViewService matchcardViewService;
-    private final MatchService matchService;
+
+    private final MatchSendService matchSendService;
     private final MatchViewService matchViewService;
+    private final MatchReactService matchReactService;
+    private final MatchDeleteService matchDeleteService;
+    private final MatchCardViewService matchCardViewService;
+
+    private final UniversityValidationService universityValidationService;
+    private final CdlValidationService cdlValidationService;
+
     private final MatchRepository matchRepository;
 
+
     public void send(MatchRequest matchRequest) {
-        matchService.send(matchRequest);
+
+        matchSendService.send(matchRequest);
     }
 
     public void react(MatchReactionRequest matchReactionRequest) {
-        matchService.react(matchReactionRequest);
+
+        matchReactService.react(matchReactionRequest);
     }
 
     public void delete(Long matchId) {
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = (User) principal;
+
         Optional<Match> opt = matchRepository.findById(matchId);
         if (opt.isPresent()) {
+
             Match match = opt.get();
             if(match.getSender().getID().equals(user.getID())){
-                matchService.deleteMatch(match);
+
+                matchDeleteService.deleteMatch(match);
             }
         }
     }
 
-    public Page<MatchcardResponse> getMatchcards(Pageable pageable){
+    public Page<MatchCardResponse> getMatchCards(Pageable pageable){
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = (User) principal;
-        String university = user.getUniversity();
-        return matchcardViewService.getMatchcards(university, pageable);
+
+        return matchCardViewService.getMatchCards(user.getUniversity(), pageable);
     }
 
-    public Page<MatchcardResponse> getMatchcardsByUni(String university, Pageable pageable){
-        return matchcardViewService.getMatchcards(university, pageable);
+
+    public Page<MatchCardResponse> getMatchCardsByUni(String university, Pageable pageable){
+
+        if(universityValidationService.isValidUniversity(university)){
+
+            return matchCardViewService.getMatchCards(university, pageable);
+        }
+        else throw new BadRequestException("The university is not valid", "UNIVERSITY_NOT_VALID");
     }
 
-    public Page<MatchcardResponse> getMatchcardsByUniAndCdl(String university, String cdl, Pageable pageable){
-        return matchcardViewService.getMatchcardsByCdl(university, cdl, pageable);
+
+    public Page<MatchCardResponse> getMatchCardsByUniAndCdl(String university, String cdl, Pageable pageable){
+
+        if(cdlValidationService.isValidCdl(cdl) && universityValidationService.isValidUniversity(university)){
+
+            return matchCardViewService.getMatchCardsByUniAndCdl(university, cdl, pageable);
+        }
+        else throw new BadRequestException("The university or cdl is not valid", "UNIVERSITY_OR_CDL_NOT_VALID");
     }
+
 
     public Page<MatchPendingResponse> getSentMatches(Pageable pageable){
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = (User) principal;
-        return matchViewService.getSentPendingMatches(user, pageable);
+
+        return matchViewService.getSentPendingMatches((User) principal, pageable);
     }
 
+
     public Page<MatchPendingResponse> getReceivedMatches(Pageable pageable){
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = (User) principal;
-        return matchViewService.getReceivedPendingMatches(user, pageable);
+
+        return matchViewService.getReceivedPendingMatches((User) principal, pageable);
     }
 
     public Page<MatchAcceptedResponse> getAcceptedMatches(Pageable pageable){
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = (User) principal;
-        return matchViewService.getSuccessMatch(user, pageable);
+
+        return matchViewService.getSuccessMatch((User) principal, pageable);
     }
 }
