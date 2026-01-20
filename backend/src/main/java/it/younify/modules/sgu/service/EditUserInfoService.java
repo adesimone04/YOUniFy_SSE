@@ -4,6 +4,7 @@ import it.younify.core.exception.BadRequestException;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sgu.model.dto.request.EditUserInfoRequest;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,7 @@ public class EditUserInfoService {
      * @throws BadRequestException if the provided date of birth is not valid.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void editUserProfile(EditUserInfoRequest editUserInfoRequest, User user) {
+    public void editUserProfile(@NonNull EditUserInfoRequest editUserInfoRequest, User user) {
 
         String firstName = editUserInfoRequest.getFirstName();
         String lastName = editUserInfoRequest.getLastName();

@@ -109,14 +109,17 @@ public class LogInService {
         }
 
 
+        String accountID = null;
+
         String jwtToken = null;
         String refreshToken = null;
 
         Optional<User> userOpt = userRepository.findByEmail(logInRequest.getEmail());
-
         if(userOpt.isPresent()){
 
             User user =  userOpt.get();
+            accountID = user.getID();
+
             jwtToken = jwtService.generateToken(user);
             refreshToken = UUID.randomUUID().toString();
 
@@ -136,6 +139,8 @@ public class LogInService {
             Host host = hostRepository.findByPEC(logInRequest.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("Email or password incorrect"));
 
+            accountID = host.getID();
+
             jwtToken = jwtService.generateToken(host);
             refreshToken = UUID.randomUUID().toString();
 
@@ -153,6 +158,7 @@ public class LogInService {
 
 
         return AuthenticationResponse.builder()
+                .accountID(accountID)
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .status("LOGIN")
