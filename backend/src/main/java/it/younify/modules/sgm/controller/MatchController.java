@@ -18,6 +18,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * The {@code MatchController} class provides RESTful endpoints for managing user matches.
+ * It handles HTTP requests for sending, reacting to, deleting, and viewing matches,
+ * as well as retrieving match cards and statistics. This controller delegates the business logic
+ * to the {@link MatchFacade}.
+ *
+ * @see MatchFacade
+ * @see ApiResponse
+ */
 @RestController
 @RequestMapping("/api/match")
 @RequiredArgsConstructor
@@ -26,6 +35,13 @@ public class MatchController {
 
     private final MatchFacade matchFacade;
 
+    /**
+     * Handles the HTTP POST request to send a match request.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param matchRequest The request body containing the receiver's ID.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} indicating the result of the operation.
+     */
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/send")
     public ResponseEntity<ApiResponse<Void>> send(@Valid @RequestBody MatchRequest matchRequest) {
@@ -41,6 +57,13 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP POST request to react to a match request.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param matchReactionRequest The request body containing the match ID and the reaction status.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} indicating the result of the operation.
+     */
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/react")
     public ResponseEntity<ApiResponse<Void>> react(@Valid @RequestBody MatchReactionRequest matchReactionRequest) {
@@ -56,6 +79,13 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP DELETE request to delete a match.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param matchId The ID of the match to delete.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} indicating the result of the operation.
+     */
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/notAnymore/{matchId}")
     public ResponseEntity<ApiResponse<Void>> delete(@Positive @PathVariable("matchId") Long matchId) {
@@ -71,6 +101,13 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve a paginated list of match cards.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing a paginated list of {@link MatchCardResponse} objects.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping()
     public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCards(@PageableDefault(size = 10) Pageable pageable){
@@ -87,6 +124,14 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve a paginated list of match cards filtered by university.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param university The university to filter by.
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing a paginated list of {@link MatchCardResponse} objects.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{university}")
     public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCardsByUni(@Positive @PathVariable("university") String university,
@@ -104,6 +149,15 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve a paginated list of match cards filtered by university and course of study.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param university The university to filter by.
+     * @param cdl The course of study to filter by.
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing a paginated list of {@link MatchCardResponse} objects.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{university}/{cdl}")
     public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCardsByUniAndCdl(@Positive @PathVariable("university") String university,
@@ -122,6 +176,13 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve a paginated list of sent pending matches.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing a paginated list of {@link MatchPendingResponse} objects.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/sent")
     public ResponseEntity<ApiResponse<Page<MatchPendingResponse>>> getSentPendingMatched(@PageableDefault(size = 10) Pageable pageable) {
@@ -138,6 +199,13 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve a paginated list of received pending matches.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing a paginated list of {@link MatchPendingResponse} objects.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/received")
     public ResponseEntity<ApiResponse<Page<MatchPendingResponse>>> getReceivedPendingMatches(@PageableDefault(size = 10) Pageable pageable) {
@@ -154,6 +222,13 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve a paginated list of accepted matches.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing a paginated list of {@link MatchAcceptedResponse} objects.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/accepted")
     public ResponseEntity<ApiResponse<Page<MatchAcceptedResponse>>> getAcceptedMatches(@PageableDefault(size = 10) Pageable pageable) {
@@ -170,6 +245,12 @@ public class MatchController {
     }
 
 
+    /**
+     * Handles the HTTP GET request to retrieve the total number of accepted matches for the authenticated user.
+     * This endpoint is restricted to users with the 'USER' role.
+     *
+     * @return A {@link ResponseEntity} with an {@link ApiResponse} containing the total number of accepted matches.
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/totalMatched")
     public ResponseEntity<ApiResponse<Integer>> getTotalMatched() {
