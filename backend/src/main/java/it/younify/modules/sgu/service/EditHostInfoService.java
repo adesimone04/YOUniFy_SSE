@@ -6,6 +6,7 @@ import it.younify.modules.sgac.repository.HostRepository;
 import it.younify.modules.sgac.service.validator.GeoValidationService;
 import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import it.younify.modules.sgu.model.dto.request.EditHostInfoRequest;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,7 @@ public class EditHostInfoService {
      * @throws BadRequestException if the provided geographical or university data is not valid.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void editHostProfile(EditHostInfoRequest editHostInfoRequest, Host host){
+    public void editHostProfile(@NonNull EditHostInfoRequest editHostInfoRequest, Host host){
 
         String hostName = editHostInfoRequest.getHostName();
         String province =  editHostInfoRequest.getProvince();

@@ -1,7 +1,9 @@
 package it.younify.modules.sge.model.dto.request;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
@@ -18,36 +20,42 @@ public class EventEditRequest {
      * The updated name or title of the event.
      */
     @NotBlank
+    @Size(max = 100)
     private String name;
 
     /**
      * The updated detailed description of the event.
      */
     @NotBlank
+    @Size(max = 200)
     private String description;
 
     /**
      * The updated date and time when the event takes place.
      */
     @NotNull
+    @Future
     private Instant dateAndTime;
 
     /**
      * The updated street address where the event is located.
      */
     @NotBlank
+    @Size(max = 60)
     private String street;
 
     /**
      * The updated city where the event is located.
      */
     @NotBlank
+    @Size(max = 30)
     private String city;
 
     /**
      * The updated postal code (CAP) of the event's location.
      */
     @NotBlank
+    @Size(max = 5)
     private String CAP;
 
     /**

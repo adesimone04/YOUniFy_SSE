@@ -7,6 +7,8 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
+import it.younify.modules.sgn.facade.NotificationFacade;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,10 +20,12 @@ import java.util.Optional;
 
 /**
  * The {@code EventEditService} class is responsible for handling the modification of existing events.
- * It ensures that only the event's original host can edit it and manages the optional replacement of the event poster.
+ * It ensures that only the event's original host can edit it, manages the optional replacement of the event poster,
+ * and notifies all participants about the changes.
  *
- * @see it.younify.modules.sge.repository.EventRepository
- * @see it.younify.core.service.ImageStorageService
+ * @see EventRepository
+ * @see ImageStorageService
+ * @see NotificationFacade
  */
 @Service
 @RequiredArgsConstructor
@@ -32,12 +36,15 @@ public class EventEditService {
     private final String UPLOAD_DIR = "uploads/events";
 
     /**
-     * Edits an existing event with the provided data.
+     * Edits an existing event with the provided data and notifies all participants of the changes.
      * <p>
-     * This method is transactional. It first verifies that the event exists and that the currently
-     * authenticated principal is the host who created the event. If authorized, it updates the event's
-     * details. If a new poster image is provided, it replaces the old one using the same file name to
-     * avoid storing orphaned images.
+     * This method is transactional and performs several key operations:
+     * 1. Verifies that the event exists.
+     * 2. Ensures the currently authenticated principal is the event's host.
+     * 3. Updates the event's details (name, description, date, location).
+     * 4. If a new poster image is provided, it replaces the old one.
+     * 5. Sends a notification to all registered participants about the event modification.
+     * 6. Saves the updated event record to the database.
      *
      * @param eventID The ID of the event to edit.
      * @param eventEditRequest The DTO containing the updated event data.
@@ -45,7 +52,7 @@ public class EventEditService {
      * @throws AccessDeniedException if the authenticated user is not the host of the event.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void edit(Long eventID, EventEditRequest eventEditRequest) {
+    public void edit(@NonNull Long eventID, @NonNull EventEditRequest eventEditRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Host host = (Host) principal;
@@ -71,7 +78,7 @@ public class EventEditService {
                     event.setPoster(imageStorageService.uploadImage(file, fileName, UPLOAD_DIR));
                 }
 
-                // add notification system (SGN) for joined user when information are changed
+                //add notify system for joined user
                 eventRepository.save(event);
             }
             else throw new AccessDeniedException("Access is denied for this operation");

@@ -6,6 +6,7 @@ import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
 import it.younify.modules.sge.repository.ParticipationRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class EventJoinService {
      * @throws ResourceNotFoundException if the event with the given ID cannot be found.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void joinEvent(Long eventId) {
+    public void joinEvent(@NonNull Long eventId) {
 
         Optional<Event> optE = eventRepository.findById(eventId);
         if (optE.isPresent()) {

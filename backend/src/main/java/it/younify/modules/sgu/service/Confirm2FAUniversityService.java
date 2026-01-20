@@ -10,6 +10,7 @@ import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sgac.service.validator.EmailValidationService;
 import it.younify.modules.sgac.service.validator.UniversityValidationService;
 import it.younify.modules.sgu.model.dto.request.Confirm2FAUniversityRequest;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ public class Confirm2FAUniversityService {
      * @throws ResourceNotFoundException if the 2FA code or user account is not found.
      */
     @Transactional(rollbackFor = Exception.class, noRollbackFor = BadRequestException.class)
-    public void confirm2FA(Confirm2FAUniversityRequest confirm2FAUniversityRequest){
+    public void confirm2FA(@NonNull Confirm2FAUniversityRequest confirm2FAUniversityRequest){
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = (User) principal;

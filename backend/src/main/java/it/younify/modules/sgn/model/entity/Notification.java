@@ -71,6 +71,7 @@ public class Notification {
      * @see it.younify.modules.sgn.model.entity.Type
      */
     @Column(nullable = false, length = 18)
+    @Enumerated(EnumType.STRING)
     private Type type;
 
     /**

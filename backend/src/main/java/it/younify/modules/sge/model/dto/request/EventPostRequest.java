@@ -1,7 +1,9 @@
 package it.younify.modules.sge.model.dto.request;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,36 +21,42 @@ public class EventPostRequest {
      * The name or title of the event.
      */
     @NotBlank
+    @Size(max = 100)
     private String name;
 
     /**
      * A detailed description of the event.
      */
     @NotBlank
+    @Size(max = 200)
     private String description;
 
     /**
      * The date and time when the event takes place.
      */
     @NotNull
+    @Future
     private Instant dateAndTime;
 
     /**
      * The street address where the event is located.
      */
     @NotBlank
+    @Size(max = 60)
     private String street;
 
     /**
      * The city where the event is located.
      */
     @NotBlank
+    @Size(max = 30)
     private String city;
 
     /**
      * The postal code (CAP) of the event's location.
      */
     @NotBlank
+    @Size(max = 5)
     private String CAP;
 
     /**
