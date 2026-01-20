@@ -97,7 +97,7 @@ public class ThreadController {
      * @see it.younify.modules.sgtr.model.dto.request.ThreadVoteRequest
      */
     @PostMapping("/react")
-    public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody ThreadVoteRequest threadVoteRequest) {
+    public ResponseEntity<ApiResponse<Void>> reactCFU(@Valid @RequestBody ThreadVoteRequest threadVoteRequest) {
 
         threadFacade.voteThread(threadVoteRequest);
 
@@ -192,6 +192,30 @@ public class ThreadController {
                                                                               @PageableDefault(size = 10) Pageable pageable){
 
         Page<ThreadResponse> page = threadFacade.getThreadsByUniversity(university, pageable);
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ThreadResponse>>builder()
+                        .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
+                        .data(page)
+                        .build()
+        );
+    }
+
+    /**
+     * Retrieves a paginated list of threads filtered by both a specific university and a flag category.
+     *
+     * @param university The university to filter by.
+     * @param flag The flag category to filter by.
+     * @param pageable The pagination information.
+     * @return A {@link ResponseEntity} containing a paginated list of {@link ThreadResponse}.
+     */
+    @GetMapping("/{university}/{flag}")
+    public ResponseEntity<ApiResponse<Page<ThreadResponse>>> getThreadsByUniversityAndFlag(@Positive @PathVariable("university") String university,
+                                                                              @Positive @PathVariable("flag") String flag,
+                                                                              @PageableDefault(size = 10) Pageable pageable) {
+
+        Page<ThreadResponse> page = threadFacade.getThreadsByUniversityAndFlag(university, flag, pageable);
+
         return ResponseEntity.ok(
                 ApiResponse.<Page<ThreadResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")

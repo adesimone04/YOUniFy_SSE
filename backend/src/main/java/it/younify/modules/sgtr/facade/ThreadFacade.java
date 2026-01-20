@@ -111,6 +111,22 @@ public class ThreadFacade {
         return threadViewService.getThreadsByUniversity(university, pageable);
     }
 
+
+    /**
+     * Retrieves a paginated list of threads filtered by a specific university and flag category.
+     *
+     * @param university The name of the university.
+     * @param flag The string representation of the flag category.
+     * @param pageable The pagination information.
+     * @return A paginated list of threads matching the university and flag.
+     */
+    public Page<ThreadResponse> getThreadsByUniversityAndFlag(String university, String flag, Pageable pageable){
+
+        FlagCategory flagCategory = FlagCategory.valueOf(flag);
+
+        return threadViewService.getThreadsByUniversityAndFlag(university, flagCategory, pageable);
+    }
+
     /**
      * Retrieves a paginated list of threads posted by the currently authenticated user or host.
      * This method determines the type of the principal (User or Host) from the security context
@@ -137,7 +153,6 @@ public class ThreadFacade {
                 return threadViewService.getThreadsPostedByHost((Host) principal, pageable);
             }
         }
-
         throw new AccessDeniedException("Access is denied for this operation");
     }
 

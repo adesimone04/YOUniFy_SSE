@@ -9,6 +9,7 @@ import it.younify.modules.sgtr.model.entity.CommentVote;
 import it.younify.modules.sgtr.model.entity.VoteType;
 import it.younify.modules.sgtr.repository.CommentRepository;
 import it.younify.modules.sgtr.repository.CommentVoteRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class CommentVoteService {
      * @throws ResourceNotFoundException if the specified comment does not exist.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void vote(CommentVoteRequest commentVoteRequest){
+    public void vote(@NonNull CommentVoteRequest commentVoteRequest){
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         VoteType accountVoteType = commentVoteRequest.getVoteType();
