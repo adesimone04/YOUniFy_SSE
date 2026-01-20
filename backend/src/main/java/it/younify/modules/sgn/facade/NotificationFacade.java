@@ -44,6 +44,20 @@ public class NotificationFacade {
         notificationSendService.send(notificationRequest);
     }
 
+
+    /**
+     * Sends a reminder notification for an event.
+     * This method delegates the sending logic to the {@link NotificationSendService}.
+     *
+     * @param notificationRequest The request object containing the details of the notification to be sent.
+     * @param host The host of the event.
+     * @see NotificationSendService#sendReminderEvent(NotificationRequest, Host)
+     */
+    public void sendEventReminder(NotificationRequest notificationRequest, Host host) {
+
+        notificationSendService.sendReminderEvent(notificationRequest, host);
+    }
+
     /**
      * Retrieves a paginated list of notifications for the currently authenticated user or host.
      * This method determines the type of the principal (User or Host) and delegates the retrieval logic

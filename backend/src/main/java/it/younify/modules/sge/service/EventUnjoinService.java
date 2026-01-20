@@ -3,11 +3,11 @@ package it.younify.modules.sge.service;
 import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.modules.sgac.model.entity.User;
-import it.younify.modules.sgac.repository.UserRepository;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.model.entity.Participation;
 import it.younify.modules.sge.repository.EventRepository;
 import it.younify.modules.sge.repository.ParticipationRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EventUnjoinService {
 
-    private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ParticipationRepository participationRepository;
 
@@ -44,7 +43,7 @@ public class EventUnjoinService {
      * @throws BadRequestException if the user is not participating in the event or if the event has already started.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void unjoinEvent(Long eventId) {
+    public void unjoinEvent(@NonNull Long eventId) {
 
         Optional<Event> optE = eventRepository.findById(eventId);
         if (optE.isPresent()) {

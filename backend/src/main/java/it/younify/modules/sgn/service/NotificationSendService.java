@@ -99,4 +99,43 @@ public class NotificationSendService {
 
         notificationRepository.save(notification);
     }
+
+
+    public void sendReminderEvent(@NonNull NotificationRequest notificationRequest, Host senderHost) {
+
+        String receiverId = notificationRequest.getReceiverId();
+
+        User senderUser = null;
+
+        User receiverUser = null;
+        Host receiverHost = null;
+
+        if (receiverId.startsWith("U")) {
+
+            receiverUser = userRepository.findById(receiverId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User receiver not found", "USER_NOT_FOUND"));
+        }
+        else{
+
+            if (receiverId.startsWith("H")) {
+
+                receiverHost = hostRepository.findById(receiverId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
+            }
+            else throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
+        }
+
+
+        Notification notification = Notification.builder()
+                .senderUser(senderUser)
+                .senderHost(senderHost)
+                .receiverUser(receiverUser)
+                .receiverHost(receiverHost)
+                .type(notificationRequest.getType())
+                .content(notificationRequest.getContent())
+                .date(Instant.now())
+                .build();
+
+        notificationRepository.save(notification);
+    }
 }

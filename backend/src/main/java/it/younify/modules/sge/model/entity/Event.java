@@ -17,6 +17,9 @@ import java.util.List;
 @Entity
 @Table(
         name = "event",
+        indexes = {
+                @Index(name = "idx_event_date", columnList = "date_and_time")
+        },
         uniqueConstraints = {
         @UniqueConstraint(
             name = "event_duplicate_check",
