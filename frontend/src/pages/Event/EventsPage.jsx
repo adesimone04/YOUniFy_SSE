@@ -1,539 +1,537 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, X, MapPin, Calendar, Image as ImageIcon, AlignLeft, Type, ChevronDown, Check, Users, UserPlus, Upload, Trash2 } from 'lucide-react';
+import {
+    Plus, X, Calendar, MapPin, Sparkles, ArrowRight, ShieldAlert,
+    Image as ImageIcon, Upload, Users, Clock, AlertCircle,
+    ChevronRight, ChevronLeft, CalendarPlus
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Import Componenti
+// Componenti
 import AppNavbar from '../../components/layout/Navbar/AppNavbar';
 import EventCard from '../../components/ui/EventCard/EventCard';
-import styles from '../LandingPage/LandingPage.module.css';
+import EventFilterBar from '../../components/ui/EventFilterBar/EventFilterBar';
 
-// --- COMPONENTE CUSTOM DROPDOWN ---
-const CustomDropdown = ({ options, value, onChange, icon: Icon, placeholder }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
+// Dati Comuni
+import comuniDataRaw from '../../data/comuni.json';
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+// --- DATI INIZIALI (MOCK) ---
+const INITIAL_EVENTS_DATA = [
+    {
+        id: 1,
+        title: "Welcome Party",
+        city: "Milano",
+        date: "2023-10-22T22:00",
+        location: "Club Haus 80's",
+        organizer: "ESN Milano",
+        description: "La festa di benvenuto ufficiale. Ingresso libero per tutti gli studenti. Preparati per una notte indimenticabile con musica, drink e tanto divertimento.",
+        image: "https://images.unsplash.com/photo-1541532713592-79a0317b6b77?auto=format&fit=crop&w=800&q=80",
+        participantsCount: 142,
+        isJoined: false,
+        participantsList: [
+            { name: "Mario Rossi", avatar: "https://i.pravatar.cc/150?u=1" },
+            { name: "Luca Bianchi", avatar: "https://i.pravatar.cc/150?u=2" },
+            { name: "Giulia Verdi", avatar: "https://i.pravatar.cc/150?u=3" },
+            { name: "Sofia Neri", avatar: "https://i.pravatar.cc/150?u=4" },
+            { name: "Marco Gialli", avatar: "https://i.pravatar.cc/150?u=5" },
+        ]
+    },
+    {
+        id: 2,
+        title: "AI & Future Workshop",
+        city: "Roma",
+        date: "2023-10-26T14:30",
+        location: "Sapienza - Aula Magna",
+        organizer: "Data Science Lab",
+        description: "Workshop sull'AI con ospiti internazionali e sessioni di networking. Scopri le ultime novità sul machine learning.",
+        image: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&w=800&q=80",
+        participantsCount: 56,
+        isJoined: false,
+        participantsList: [
+            { name: "Anna Blu", avatar: "https://i.pravatar.cc/150?u=6" },
+            { name: "Paolo Viola", avatar: "https://i.pravatar.cc/150?u=7" },
+        ]
+    },
+];
 
-    return (
-        <div className="relative w-full" ref={dropdownRef}>
-            <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className={`w-full flex items-center justify-between bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-3.5 text-sm font-medium transition-all shadow-lg group hover:border-younify-blue/50 ${isOpen ? 'border-younify-blue ring-1 ring-younify-blue/50' : ''}`}
-            >
-                <div className="flex items-center gap-3 overflow-hidden">
-                    {Icon && <Icon size={18} className="text-slate-400 group-hover:text-younify-blue transition-colors shrink-0" />}
-                    <span className={`truncate ${value === placeholder ? 'text-slate-400' : 'text-white'}`}>
-                        {value}
-                    </span>
+// --- HERO TITLE ---
+const HeroTitle = () => (
+    <div className="relative z-10 pt-4 pb-2 flex flex-col items-center text-center px-4">
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="relative"
+        >
+            <div className="absolute -inset-x-20 -inset-y-10 bg-younify-blue/20 blur-[100px] rounded-full opacity-50 pointer-events-none" />
+            <h1 className="text-5xl md:text-8xl font-black tracking-tight mb-6 relative z-10 flex flex-col md:block items-center">
+                <div className="flex items-center justify-center gap-0">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">YOUni</span>
+                    <span className="text-younify-blue drop-shadow-[0_0_20px_rgba(29,78,216,0.5)]">Fy</span>
                 </div>
-                <ChevronDown size={16} className={`text-slate-500 transition-transform duration-300 ${isOpen ? 'rotate-180 text-younify-blue' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 w-full bg-slate-900 border border-white/10 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
-                    >
-                        {options.map((option, idx) => (
-                            <div
-                                key={idx}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onChange(option);
-                                    setIsOpen(false);
-                                }}
-                                className={`px-4 py-3 text-sm cursor-pointer flex items-center justify-between transition-colors
-                                    ${value === option ? 'bg-younify-blue/10 text-younify-blue' : 'text-slate-300 hover:bg-white/5 hover:text-white'}
-                                `}
-                            >
-                                <span className="truncate">{option}</span>
-                                {value === option && <Check size={14} />}
-                            </div>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-};
-
-// --- HELPER: Genera partecipanti mock ---
-const generateParticipants = (count) => {
-    const names = ["Marco", "Giulia", "Luca", "Sara", "Davide", "Elena", "Francesco", "Chiara", "Alessandro", "Martina", "Matteo", "Sofia"];
-    const surnames = ["Rossi", "Bianchi", "Ferrari", "Esposito", "Ricci", "Rizzo", "Gallo", "Costa", "Fontana", "Conti"];
-
-    return Array.from({ length: count }, (_, i) => {
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        const randomSurname = surnames[Math.floor(Math.random() * surnames.length)];
-        const isMatch = Math.random() < 0.3;
-
-        return {
-            id: i,
-            name: `${randomName} ${randomSurname}`,
-            isMatch: isMatch,
-            avatar: randomName.charAt(0)
-        };
-    });
-};
+                <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 pl-2 pr-6 pb-2 inline-block">Events</span>
+            </h1>
+        </motion.div>
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.8 }} className="text-slate-400 text-base md:text-xl max-w-xl leading-relaxed font-medium">
+            Unisciti agli eventi più esclusivi della tua città. <br className="hidden md:block"/> Connettiti, impara e divertiti.
+        </motion.p>
+    </div>
+);
 
 const EventsPage = () => {
+    // --- STATI ---
+    //SE NEL LOGIN SALVI IL BOOLEANO 'isHost' deve funzionare così:
+    const isHost = localStorage.getItem('isHost') === 'true';
 
-    const CITIES = ["Tutte le Città", "Milano", "Roma", "Napoli", "Torino", "Bologna", "Firenze", "Padova", "Bari"];
+    const [events, setEvents] = useState(INITIAL_EVENTS_DATA);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCity, setSelectedCity] = useState("");
 
-    const INITIAL_EVENTS = [
-        {
-            id: 1,
-            title: "Erasmus Welcome Party",
-            city: "Milano",
-            category: "Party",
-            date: "Venerdì, 22 Ott • 22:00",
-            location: "Club Haus 80's",
-            organizer: "ESN Milano",
-            description: "La festa di benvenuto ufficiale per tutti gli studenti Erasmus! Ingresso libero con tessera ESN.",
-            image: "https://images.unsplash.com/photo-1541532713592-79a0317b6b77?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-            participantsCount: 142,
-            participantsList: generateParticipants(142),
-            isJoined: false
-        },
-        {
-            id: 2,
-            title: "Workshop: AI & Future",
-            city: "Milano",
-            category: "Workshop",
-            date: "Martedì, 26 Ott • 14:30",
-            location: "Politecnico, Aula Magna",
-            organizer: "PoliMi Data Science",
-            description: "Un pomeriggio dedicato all'intelligenza artificiale con ospiti da Google e Microsoft.",
-            image: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-            participantsCount: 56,
-            participantsList: generateParticipants(56),
-            isJoined: false
-        },
-        {
-            id: 3,
-            title: "Aperitivo Ingegneria",
-            city: "Roma",
-            category: "Sociale",
-            date: "Giovedì, 28 Ott • 18:00",
-            location: "Bar Bianco",
-            organizer: "Rappresentanti Studenti",
-            description: "Birra, spritz e networking per scaricare la tensione post-esami.",
-            image: "https://images.unsplash.com/photo-1561025700-1c4b82d46e3d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-            participantsCount: 89,
-            participantsList: generateParticipants(89),
-            isJoined: true
-        },
-    ];
-
-    const [events, setEvents] = useState(INITIAL_EVENTS);
     const [detailEvent, setDetailEvent] = useState(null);
-    const [participantsEvent, setParticipantsEvent] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [activeCity, setActiveCity] = useState("Tutte le Città");
+    const [showParticipantsPanel, setShowParticipantsPanel] = useState(false);
 
+    // Stato FAB & Navbar
+    const [showFab, setShowFab] = useState(false);
+    const filterBarRef = useRef(null);
+
+    // --- FORM CREAZIONE ---
     const [newEvent, setNewEvent] = useState({
-        title: "",
-        city: "Milano",
-        date: "",
-        time: "",
-        location: "",
-        description: "",
-        image: "" // Qui salveremo l'URL generato dal blob
+        name: '', description: '', dateAndTime: '', street: '', city: '', CAP: '', poster: null
     });
-
-    // Stato per gestire errori nel caricamento file
+    const [formErrors, setFormErrors] = useState({});
+    const [previewImage, setPreviewImage] = useState(null);
     const [fileError, setFileError] = useState("");
+    const fileInputRef = useRef(null);
 
-    const filteredEvents = events.filter(event => {
-        return activeCity === "Tutte le Città" || event.city === activeCity;
-    });
+    const comuniList = Array.isArray(comuniDataRaw) ? comuniDataRaw : (comuniDataRaw?.default || []);
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
 
-    // --- HANDLER UPLOAD IMMAGINE ---
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Observer per FAB
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setShowFab(!entry.isIntersecting && isHost);
+            },
+            { threshold: 0 }
+        );
+
+        if (filterBarRef.current) {
+            observer.observe(filterBarRef.current);
+        }
+
+        return () => {
+            if (filterBarRef.current) observer.unobserve(filterBarRef.current);
+        };
+    }, [isHost]);
+
+    // DEFINIZIONE FAB
+    const fabButton = (
+        <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="w-14 h-14 bg-younify-blue text-white rounded-full shadow-lg flex items-center justify-center border border-white/20 active:scale-90 transition-transform"
+        >
+            <CalendarPlus size={24} strokeWidth={2.5} />
+        </button>
+    );
+
+    // Date Logic
+    const getMinDateTime = () => {
+        const now = new Date();
+        now.setHours(now.getHours() + 1);
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Fix Timezone
+        return now.toISOString().slice(0, 16);
+    };
+    const [minDateTime, setMinDateTime] = useState(getMinDateTime());
+
+    useEffect(() => {
+        if (isCreateModalOpen) {
+            setMinDateTime(getMinDateTime());
+            setFormErrors({});
+            if (!newEvent.dateAndTime) setNewEvent(prev => ({ ...prev, dateAndTime: getMinDateTime() }));
+        }
+    }, [isCreateModalOpen]);
+
+    useEffect(() => {
+        if (!detailEvent) setShowParticipantsPanel(false);
+    }, [detailEvent]);
+
+    const getInputStyle = (fieldName) => {
+        const hasError = !!formErrors[fieldName];
+        return `block w-full min-w-0 bg-white/5 rounded-xl px-3 md:px-4 py-1.5 md:py-3.5 text-sm md:text-base text-white placeholder:text-slate-500 focus:outline-none focus:bg-white/10 transition-all font-medium border ${hasError ? 'border-rose-500 focus:border-rose-500' : 'border-white/10 focus:border-younify-blue/50'}`;
+    };
+
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
-        setFileError(""); // Reset errori
-
-        if (!file) return;
-
-        // 1. Validazione Estensione
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            setFileError("Formato non valido. Usa JPG, PNG o WEBP.");
-            return;
+        if (file) {
+            setFormErrors(prev => ({ ...prev, poster: null }));
+            if (file.size > 10 * 1024 * 1024) return setFileError("Il file supera i 10MB");
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+            if (!allowedTypes.includes(file.type)) return setFileError("Formato non valido. Usa JPG, PNG o WEBP.");
+            setFileError("");
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+                setNewEvent({ ...newEvent, poster: file, image: reader.result });
+            };
+            reader.readAsDataURL(file);
         }
-
-        // 2. Validazione Dimensione (10MB)
-        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-        if (file.size > maxSize) {
-            setFileError("Il file è troppo grande. Max 10MB.");
-            return;
-        }
-
-        // 3. Creazione Preview URL
-        const previewUrl = URL.createObjectURL(file);
-        setNewEvent(prev => ({ ...prev, image: previewUrl }));
     };
 
     const handleRemoveImage = (e) => {
-        e.stopPropagation(); // Evita di riaprire il file picker
-        setNewEvent(prev => ({ ...prev, image: "" }));
+        e.stopPropagation(); // Fondamentale: impedisce che si riapra la finestra di selezione file
+        setPreviewImage(null);
+        setNewEvent({ ...newEvent, poster: null });
+        if (fileInputRef.current) fileInputRef.current.value = ""; // Resetta l'input file
     };
 
-    const handleJoinEvent = (eventId) => {
-        setEvents(prev => prev.map(ev => {
-            if (ev.id === eventId) {
-                const newJoined = !ev.isJoined;
-                return {
-                    ...ev,
-                    isJoined: newJoined,
-                    participantsCount: newJoined ? ev.participantsCount + 1 : ev.participantsCount - 1
-                };
-            }
-            return ev;
-        }));
-        if (detailEvent && detailEvent.id === eventId) {
-            setDetailEvent(prev => ({
-                ...prev,
-                isJoined: !prev.isJoined,
-                participantsCount: !prev.isJoined ? prev.participantsCount + 1 : prev.participantsCount - 1
-            }));
-        }
-    };
-
-    const handleCreateEvent = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const formattedDate = newEvent.date
-            ? `${new Date(newEvent.date).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'short' })} • ${newEvent.time}`
-            : "Data da definire";
+        const errors = {};
+        if (!newEvent.poster && !previewImage) errors.poster = "La locandina è obbligatoria.";
+        if (newEvent.dateAndTime < minDateTime) errors.dateAndTime = "La data deve essere futura (min. 1 ora).";
+        if (!newEvent.name.trim()) errors.name = "Il titolo è obbligatorio.";
+        else if (newEvent.name.length > 100) errors.name = "Massimo 100 caratteri.";
+        if (!newEvent.description.trim()) errors.description = "La descrizione è obbligatoria.";
+        else if (newEvent.description.length > 200) errors.description = "Massimo 200 caratteri.";
+        if (!newEvent.city.trim()) errors.city = "La città è obbligatoria.";
+        else if (newEvent.city.length > 30) errors.city = "Massimo 30 caratteri.";
+        if (!newEvent.street.trim()) errors.street = "L'indirizzo è obbligatorio.";
+        else if (newEvent.street.length > 60) errors.street = "Massimo 60 caratteri.";
+        if (!newEvent.CAP.trim()) errors.CAP = "Il CAP è obbligatorio.";
+        else if (newEvent.CAP.length !== 5) errors.CAP = "Il CAP deve essere di 5 cifre.";
+
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            return;
+        }
 
         const eventToAdd = {
-            id: Date.now(),
-            title: newEvent.title || "Nuovo Evento",
+            id: events.length + 1,
+            title: newEvent.name,
             city: newEvent.city,
-            category: "Generale",
-            date: formattedDate,
-            location: newEvent.location || "Online",
-            organizer: "Tu",
-            description: newEvent.description || "Nessuna descrizione.",
-            // Fallback immagine se l'utente non ne carica una
-            image: newEvent.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80",
-            participantsCount: 1,
-            participantsList: generateParticipants(1),
-            isJoined: true
+            date: newEvent.dateAndTime,
+            location: newEvent.street,
+            description: newEvent.description,
+            image: previewImage,
+            participantsCount: 0,
+            isJoined: false,
+            avatars: [],
+            participantsList: []
         };
-
         setEvents([eventToAdd, ...events]);
-        setNewEvent({ title: "", city: "Milano", date: "", time: "", location: "", description: "", image: "" });
         setIsCreateModalOpen(false);
+        setNewEvent({ name: '', description: '', dateAndTime: '', street: '', city: '', CAP: '', poster: null });
+        setPreviewImage(null);
+        setFormErrors({});
     };
 
-    const handleUserClick = (user) => {
-        console.log("Apro card utente:", user.name);
+    const handleInputChange = (field, value) => {
+        setNewEvent(prev => ({ ...prev, [field]: value }));
+        if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: null }));
     };
+
+    const handleJoinToggle = (eventId) => {
+        if (isHost) return;
+        const updateEvent = (ev) => {
+            const newStatus = !ev.isJoined;
+            return {
+                ...ev,
+                isJoined: newStatus,
+                participantsCount: newStatus ? ev.participantsCount + 1 : ev.participantsCount - 1
+            };
+        };
+        setEvents(events.map(ev => ev.id === eventId ? updateEvent(ev) : ev));
+        if (detailEvent?.id === eventId) setDetailEvent(updateEvent(detailEvent));
+    };
+
+    const toggleRole = () => {
+        localStorage.setItem('user_role', isHost ? 'student' : 'host');
+        window.location.reload();
+    };
+
+    const filteredEvents = events.filter(ev => {
+        const matchSearch = ev.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchCity = selectedCity === "" || ev.city.toLowerCase() === selectedCity.toLowerCase();
+        return matchSearch && matchCity;
+    });
 
     return (
-        <div className="relative min-h-screen w-full bg-slate-950 font-sans pb-40 text-slate-200 overflow-hidden">
+        <div className="fixed inset-0 w-full h-full font-sans text-slate-200 selection:bg-younify-blue/30 selection:text-white overflow-hidden bg-slate-900/60 backdrop-blur-md lg:bg-transparent lg:backdrop-blur-none">
 
-            <AppNavbar />
-
-            {/* Sfondo Blob */}
-            <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
-                <div className={`${styles.blob} ${styles.blue}`}></div>
-                <div className={`${styles.blob} ${styles.purple}`}></div>
+            <div className="relative z-50">
+                <AppNavbar shouldShrink={showFab} mobileAction={isHost ? fabButton : null} />
             </div>
 
-            <div className="relative z-10 max-w-4xl mx-auto px-4 pt-10">
-
-                {/* HEADER */}
-                <div className="flex flex-col gap-1 mb-8 text-center md:text-left">
-                    <h1 className="text-4xl md:text-5xl font-black text-white font-inter tracking-tighter">
-                        YOUni<span className="text-younify-blue">Fy</span> Events
-                    </h1>
-                </div>
-
-                {/* FILTRO + TASTO CREA */}
-                <div className="flex gap-3 mb-8 items-stretch z-20 relative">
-                    <div className="flex-1">
-                        <CustomDropdown options={CITIES} value={activeCity} onChange={setActiveCity} icon={MapPin} placeholder="Seleziona Città" />
+            <div className="absolute inset-0 overflow-y-auto z-10 scroll-smooth [&::-webkit-scrollbar]:hidden">
+                <div className="pt-12 px-4 lg:pl-32">
+                    <HeroTitle />
+                    <div className="max-w-4xl mx-auto mt-20 md:mt-40 mb-16 relative z-50">
+                        {/* Ref per IntersectionObserver */}
+                        <EventFilterBar
+                            ref={filterBarRef}
+                            searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+                            selectedCity={selectedCity} setSelectedCity={setSelectedCity}
+                            onActionClick={() => setIsCreateModalOpen(true)} showAction={isHost}
+                        />
                     </div>
-                    <button onClick={() => setIsCreateModalOpen(true)} className="bg-white text-slate-950 px-5 rounded-2xl font-bold shadow-lg hover:bg-slate-200 hover:scale-105 transition-all flex items-center justify-center shrink-0 active:scale-95 group">
-                        <Plus size={24} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300"/>
-                    </button>
                 </div>
 
-                {/* --- LISTA EVENTI HORIZONTAL SCROLL --- */}
-                <div className="relative -mx-4 px-4">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 pb-40 lg:pl-32">
                     {filteredEvents.length > 0 ? (
-                        <div className="flex gap-6 overflow-x-auto pb-8 pt-2 px-2 snap-x snap-mandatory scrollbar-hide">
-                            {filteredEvents.map(event => (
-                                <EventCard
-                                    key={event.id}
-                                    event={event}
-                                    onClick={(ev) => setDetailEvent(ev)}
-                                />
+                        <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8 md:space-y-0">
+                            {filteredEvents.map((event) => (
+                                <div key={event.id} onClick={() => setDetailEvent(event)} className="break-inside-avoid">
+                                    <EventCard event={event} onClick={() => setDetailEvent(event)} />
+                                </div>
                             ))}
-                            <div className="w-2 shrink-0" />
                         </div>
                     ) : (
-                        <div className="text-center py-20 bg-white/5 rounded-[2rem] border border-white/5 border-dashed backdrop-blur-sm mx-2">
-                            <p className="text-slate-400 font-medium">Nessun evento in questa città.</p>
+                        <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+                            <Sparkles size={48} className="mb-4 opacity-50" />
+                            <p className="text-xl font-medium">Nessun evento trovato.</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* --- MODALE 1: DETTAGLIO EVENTO --- */}
+            {/* --- MODALE DETTAGLIO + LISTA PARTECIPANTI --- */}
             <AnimatePresence>
                 {detailEvent && (
-                    <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center sm:px-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setDetailEvent(null)} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
-
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4">
                         <motion.div
-                            initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="relative w-full max-w-lg bg-slate-900 border-t border-x border-white/10 rounded-t-[2.5rem] md:rounded-[2.5rem] md:border-b shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-                        >
-                            <div className="relative h-64 shrink-0">
-                                <img src={detailEvent.image} className="w-full h-full object-cover" alt="Cover" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
-                                <button onClick={() => setDetailEvent(null)} className="absolute top-4 right-4 p-2 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-colors">
-                                    <X size={20} />
-                                </button>
-                                <div className="absolute bottom-4 left-6">
-                                    <span className="px-3 py-1 bg-younify-blue text-white text-xs font-bold rounded-full mb-2 inline-block shadow-lg shadow-blue-900/40">
-                                        {detailEvent.category} • {detailEvent.city}
-                                    </span>
-                                    <h2 className="text-3xl font-black text-white leading-tight">{detailEvent.title}</h2>
-                                </div>
-                            </div>
-
-                            <div className="p-6 overflow-y-auto">
-                                <div className="flex flex-col gap-4 text-sm text-slate-300 mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <Calendar className="text-slate-400" size={18} />
-                                        <span className="font-medium text-white">{detailEvent.date}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <MapPin className="text-slate-400" size={18} />
-                                        <span>{detailEvent.location}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <Users className="text-slate-400" size={18} />
-                                        <span>Organizzato da <span className="text-white">{detailEvent.organizer}</span></span>
-                                    </div>
-                                </div>
-
-                                <h3 className="text-white font-bold mb-2 flex items-center gap-2"><AlignLeft size={16}/> Descrizione</h3>
-                                <p className="text-slate-400 leading-relaxed mb-8 text-sm">
-                                    {detailEvent.description}
-                                </p>
-                            </div>
-
-                            <div className="p-4 border-t border-white/5 bg-slate-900/50 backdrop-blur-md flex gap-3 mt-auto">
-                                <button
-                                    onClick={() => setParticipantsEvent(detailEvent)}
-                                    className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm border border-white/5 transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <Users size={18} /> Lista ({detailEvent.participantsCount})
-                                </button>
-                                <button
-                                    onClick={() => handleJoinEvent(detailEvent.id)}
-                                    className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg
-                                        ${detailEvent.isJoined
-                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50'
-                                        : 'bg-younify-blue text-white hover:bg-blue-600 shadow-blue-900/20'
-                                    }
-                                    `}
-                                >
-                                    {detailEvent.isJoined ? <><Check size={18} /> Partecipi</> : <><UserPlus size={18} /> Aderisci</>}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* --- MODALE 2: LISTA PARTECIPANTI --- */}
-            <AnimatePresence>
-                {participantsEvent && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center px-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setParticipantsEvent(null)} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-sm bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[70vh]"
-                        >
-                            <div className="flex justify-between items-center p-5 border-b border-white/5 bg-slate-900/95 backdrop-blur z-10">
-                                <h2 className="text-lg font-bold text-white">Partecipanti</h2>
-                                <button onClick={() => setParticipantsEvent(null)} className="p-2 rounded-full hover:bg-white/10"><X size={20} /></button>
-                            </div>
-
-                            <div className="overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-
-                                {/* MATCH */}
-                                <div>
-                                    <h3 className="text-xs font-bold text-younify-blue uppercase tracking-wider mb-3 ml-1">I tuoi Match</h3>
-                                    <div className="space-y-2">
-                                        {participantsEvent.participantsList.filter(u => u.isMatch).map((person, idx) => (
-                                            <motion.div
-                                                key={`match-${person.id}`} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}
-                                                onClick={() => handleUserClick(person)}
-                                                className="flex items-center gap-3 p-3 rounded-xl bg-younify-blue/10 border border-younify-blue/30 hover:bg-younify-blue/20 cursor-pointer transition-colors"
-                                            >
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-younify-blue to-purple-500 p-[2px]">
-                                                    <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-sm">
-                                                        {person.avatar}
-                                                    </div>
-                                                </div>
-                                                <span className="text-white font-bold text-sm block">{person.name}</span>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* ALTRI */}
-                                <div>
-                                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 ml-1">Tutti gli altri</h3>
-                                    <div className="space-y-2">
-                                        {participantsEvent.participantsList.filter(u => !u.isMatch).map((person, idx) => (
-                                            <motion.div
-                                                key={`other-${person.id}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                                onClick={() => handleUserClick(person)}
-                                                className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5"
-                                            >
-                                                <div className="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 font-bold text-xs border border-white/5">
-                                                    {person.avatar}
-                                                </div>
-                                                <span className="text-slate-300 font-medium text-sm">{person.name}</span>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* --- MODALE CREA EVENTO --- */}
-            <AnimatePresence>
-                {isCreateModalOpen && (
-                    <div className="fixed inset-0 z-[120] flex items-center justify-center px-4 overflow-hidden">
-
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setIsCreateModalOpen(false)}
-                            className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+                            onClick={() => setDetailEvent(null)} className="absolute inset-0 bg-black/60 backdrop-blur-md"
                         />
 
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 40 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 40 }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="relative w-full max-w-lg bg-slate-900 border border-white/10 rounded-[2rem] p-6 md:p-8 shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto scrollbar-hide"
-                        >
-                            <div className="flex justify-between items-center mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-black text-white">Crea Evento</h2>
-                                    <p className="text-slate-400 text-xs mt-1">Organizza qualcosa di epico</p>
+                        <div className="relative z-10 flex flex-col md:flex-row items-end md:items-start justify-end md:justify-center w-full h-full md:h-auto md:max-h-[90vh] pointer-events-none">
+                            {/* CARD PRINCIPALE */}
+                            <motion.div
+                                layout
+                                initial={{ opacity: 0, y: "100%" }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: "100%" }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="w-full md:w-[600px] h-auto max-h-[92vh] md:max-h-[90vh] bg-[#0F131F] border-t md:border border-white/10 rounded-t-[2.5rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col pointer-events-auto"
+                            >
+                                <div className="relative h-48 md:h-64 shrink-0">
+                                    <img src={detailEvent.image} className="w-full h-full object-cover" alt="" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F131F] via-transparent to-transparent" />
+                                    <button onClick={() => setDetailEvent(null)} className="absolute top-6 right-6 p-2 bg-black/30 backdrop-blur-xl rounded-full text-white border border-white/10 hover:bg-white/10"><X size={20} /></button>
+                                    <div className="absolute bottom-6 left-6 right-6 md:left-8 md:right-8">
+                                        <div className="flex gap-2 mb-2 md:mb-3">
+                                            <span className="px-3 py-1 bg-younify-blue/80 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-bold text-white uppercase">{detailEvent.city}</span>
+                                        </div>
+                                        <h2 className="text-2xl md:text-5xl font-black text-white leading-tight line-clamp-2">{detailEvent.title}</h2>
+                                    </div>
                                 </div>
-                                <button onClick={() => setIsCreateModalOpen(false)} className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
-                                    <X size={20} />
-                                </button>
+
+                                <div className="p-5 md:p-8 overflow-y-auto space-y-5 md:space-y-8 flex-1 scrollbar-thin scrollbar-thumb-white/10">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                        <div className="bg-white/5 p-3 md:p-4 rounded-2xl border border-white/5"><Calendar className="text-younify-blue mb-2" /><p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Data</p><p className="text-white text-sm md:text-base font-medium">{new Date(detailEvent.date).toLocaleString('it-IT', {weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</p></div>
+                                        <div className="bg-white/5 p-3 md:p-4 rounded-2xl border border-white/5"><MapPin className="text-rose-500 mb-2" /><p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Dove</p><p className="text-white text-sm md:text-base font-medium">{detailEvent.location}</p></div>
+                                    </div>
+                                    <div><h3 className="text-base md:text-lg font-bold text-white mb-2">Descrizione</h3><p className="text-slate-400 leading-relaxed text-sm md:text-lg">{detailEvent.description}</p></div>
+                                    <div onClick={() => setShowParticipantsPanel(!showParticipantsPanel)} className={`flex items-center justify-between p-3 md:p-4 rounded-2xl border cursor-pointer transition-all group ${showParticipantsPanel ? 'bg-younify-blue/10 border-younify-blue/30' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}>
+                                        <div className="flex items-center gap-3"><div className={`p-2 rounded-full transition-colors ${showParticipantsPanel ? 'bg-younify-blue text-white' : 'bg-younify-blue/20 text-younify-blue group-hover:bg-younify-blue group-hover:text-white'}`}><Users size={20} /></div><div><p className={`text-sm font-bold ${showParticipantsPanel ? 'text-younify-blue' : 'text-white'}`}>Lista Partecipanti</p><p className="text-xs text-slate-400">{detailEvent.participantsCount} persone partecipano</p></div></div>
+                                        {showParticipantsPanel ? <ChevronLeft size={20} className="text-younify-blue" /> : <ChevronRight size={20} className="text-slate-500 group-hover:text-white" />}
+                                    </div>
+                                </div>
+
+                                {!isHost && (
+                                    <div className="p-5 md:p-6 border-t border-white/5 bg-[#0F131F] backdrop-blur-xl flex gap-4 z-20 shrink-0 pb-8 md:pb-6">
+                                        <motion.button onClick={() => handleJoinToggle(detailEvent.id)} animate={{ backgroundColor: detailEvent.isJoined ? "rgba(255, 255, 255, 0.05)" : "#ffffff", borderColor: detailEvent.isJoined ? "rgba(255, 255, 255, 0.1)" : "transparent", color: detailEvent.isJoined ? "#ffffff" : "#000000" }} transition={{ duration: 0.3 }} whileTap={{ scale: 0.95 }} className={`relative flex-1 h-14 md:h-16 rounded-2xl font-bold text-lg flex items-center justify-center overflow-hidden border ${detailEvent.isJoined ? "border-white/10" : "border-transparent"} shadow-lg`}>
+                                            <AnimatePresence mode="wait" initial={false}>
+                                                {detailEvent.isJoined ? (
+                                                    <motion.div key="joined" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="flex items-center gap-2 text-rose-400"><span>Disdici Partecipazione</span><X size={20} /></motion.div>
+                                                ) : (
+                                                    <motion.div key="join" initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="flex items-center gap-2"><span>Partecipa all'Evento</span><ArrowRight size={20} /></motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.button>
+                                    </div>
+                                )}
+                            </motion.div>
+
+                            {/* CARD PARTECIPANTI */}
+                            <AnimatePresence>
+                                {showParticipantsPanel && (
+                                    <motion.div
+                                        initial={isMobile ? { y: "100%" } : { width: 0, opacity: 0, marginLeft: 0 }}
+                                        animate={isMobile ? { y: 0 } : { width: 350, opacity: 1, marginLeft: 24 }}
+                                        exit={isMobile ? { y: "100%" } : { width: 0, opacity: 0, marginLeft: 0 }}
+
+                                        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                        className={`bg-[#0F131F] border border-white/10 shadow-2xl flex flex-col overflow-hidden pointer-events-auto ${isMobile ? 'absolute inset-x-0 bottom-0 h-[85vh] rounded-t-[2.5rem] z-50' : 'rounded-[2.5rem] max-h-[90vh] shrink-0'}`}
+                                    >
+                                        <div className={`${isMobile ? 'w-full' : 'w-[350px]'} flex flex-col h-full`}>
+                                            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#0F131F]"><h3 className="text-xl font-bold text-white">Partecipanti</h3><button onClick={() => setShowParticipantsPanel(false)} className="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors"><X size={20} /></button></div>
+                                            <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-white/10">
+                                                {(detailEvent.participantsList || detailEvent.avatars || []).length > 0 ? (
+                                                    (detailEvent.participantsList || detailEvent.avatars.map((av, i) => ({name: `Utente ${i+1}`, avatar: av}))).map((user, idx) => (
+                                                        <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors">
+                                                            <img src={user.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10" /><span className="text-slate-200 font-medium">{user.name}</span>
+                                                        </motion.div>
+                                                    ))
+                                                ) : (<div className="py-10 text-center text-slate-500"><Users size={32} className="mx-auto mb-2 opacity-30" /><p>Ancora nessun partecipante.</p></div>)}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* MODALE CREAZIONE (Versione Super Compatta No-Scroll) */}
+            <AnimatePresence>
+                {isCreateModalOpen && isHost && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-4 overflow-x-hidden">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsCreateModalOpen(false)} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            // MODIFICA: h-[98dvh] per usare quasi tutto lo schermo in alto
+                            className="relative w-full h-[96dvh] md:h-auto max-w-4xl bg-[#0F131F] border-t md:border border-white/10 rounded-t-[2rem] md:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[100dvh] md:max-h-[90vh] mt-auto md:mt-0"
+                        >
+                            <div className="p-4 md:p-6 border-b border-white/5 flex justify-between items-center bg-[#0F131F] z-10 shrink-0">
+                                <h2 className="text-lg md:text-2xl font-black text-white tracking-tight">Nuovo Evento</h2>
+                                <button onClick={() => setIsCreateModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors"><X size={24} /></button>
                             </div>
 
-                            <form onSubmit={handleCreateEvent} className="flex flex-col gap-5">
-                                {/* Titolo */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 ml-1">TITOLO EVENTO</label>
-                                    <input required name="title" value={newEvent.title} onChange={(e) => setNewEvent({...newEvent, title: e.target.value})} placeholder="Es. Festa di Fine Sessione" className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-younify-blue outline-none" />
-                                </div>
+                            {/* MODIFICA: p-3 per ridurre margini laterali */}
+                            <form className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 md:space-y-6 scrollbar-thin scrollbar-thumb-white/10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-8 h-full">
+                                    <div className="flex flex-col gap-3 md:gap-6">
 
-                                {/* Città (Full Width) */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 ml-1">CITTÀ</label>
-                                    <CustomDropdown options={CITIES.slice(1)} value={newEvent.city} onChange={(val) => setNewEvent({...newEvent, city: val})} icon={MapPin} placeholder="Città" />
-                                </div>
+                                        {/* FOTO (Ridotta a h-20) */}
+                                        <div className="space-y-1 md:space-y-2">
+                                            <div className="flex justify-between">
+                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Locandina *</label>
+                                                {formErrors.poster && <span className="text-[10px] md:text-xs font-bold text-rose-500">{formErrors.poster}</span>}
+                                            </div>
+                                            <div onClick={() => fileInputRef.current?.click()} className={`relative w-full h-28 md:h-56 rounded-xl border ${formErrors.poster || fileError ? 'border-rose-500' : 'border-white/10 hover:border-younify-blue/50'} bg-white/[0.02] flex flex-col items-center justify-center cursor-pointer overflow-hidden group transition-all`}>
+                                                {previewImage ? (
+                                                    <>
+                                                        <img src={previewImage} alt="Uploaded" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity"><Upload size={24} className="text-white drop-shadow-lg" /></div>
+                                                        <button onClick={handleRemoveImage} type="button" className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-rose-500/90 text-white rounded-full transition-colors z-20 backdrop-blur-md shadow-lg border border-white/10"><X size={12} /></button>
+                                                    </>
+                                                ) : (
+                                                    <div className="flex flex-col items-center text-slate-500 group-hover:text-slate-300 transition-colors"><ImageIcon size={20} className={`mb-1 ${formErrors.poster ? 'text-rose-500' : ''}`} /><p className="text-[10px] md:text-sm font-medium">Carica foto</p></div>
+                                                )}
+                                                <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/jpeg, image/png, image/webp, image/jpg" className="hidden" />
+                                            </div>
+                                            {fileError && <div className="flex items-center gap-1 text-rose-500 text-[10px] md:text-xs mt-1 ml-1"><AlertCircle size={12}/> {fileError}</div>}
+                                        </div>
 
-                                {/* Data e Ora */}
-                                <div className="flex gap-4">
-                                    <div className="flex-1 space-y-1">
-                                        <label className="text-xs font-bold text-slate-400 ml-1">DATA</label>
-                                        <input required type="date" name="date" value={newEvent.date} onChange={(e) => setNewEvent({...newEvent, date: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-younify-blue outline-none [color-scheme:dark]" />
+                                        {/* DESCRIZIONE DESKTOP */}
+                                        <div className="space-y-1 md:space-y-2 flex-1 flex flex-col hidden md:flex">
+                                            <div className="flex justify-between">
+                                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Descrizione *</label>
+                                                {formErrors.description ? <span className="text-xs font-bold text-rose-500">{formErrors.description}</span> : <span className={`text-xs font-bold ${newEvent.description.length > 200 ? 'text-rose-500' : 'text-slate-600'}`}>{newEvent.description.length}/200</span>}
+                                            </div>
+                                            <textarea maxLength={200} value={newEvent.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Dettagli..." className={`${getInputStyle('description')} resize-none flex-1 min-h-[150px]`} />
+                                        </div>
                                     </div>
-                                    <div className="w-1/3 space-y-1">
-                                        <label className="text-xs font-bold text-slate-400 ml-1">ORA</label>
-                                        <input required type="time" name="time" value={newEvent.time} onChange={(e) => setNewEvent({...newEvent, time: e.target.value})} className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3.5 px-4 text-white text-center focus:border-younify-blue outline-none [color-scheme:dark]" />
-                                    </div>
-                                </div>
 
-                                {/* Luogo Specifico */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 ml-1">LUOGO (Indirizzo)</label>
-                                    <input required name="location" value={newEvent.location} onChange={(e) => setNewEvent({...newEvent, location: e.target.value})} placeholder="Es. Via Roma 10" className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:border-younify-blue outline-none" />
-                                </div>
+                                    {/* COLONNA DESTRA (Compattata gap-2) */}
+                                    <div className="flex flex-col gap-2 md:gap-5 pt-0 md:pt-1 min-w-0">
+                                        <div className="space-y-1 md:space-y-2">
+                                            <div className="flex justify-between">
+                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Nome Evento *</label>
+                                                {formErrors.name ? <span className="text-[10px] md:text-xs font-bold text-rose-500">{formErrors.name}</span> : <span className={`text-[10px] md:text-xs font-bold ${newEvent.name.length > 100 ? 'text-rose-500' : 'text-slate-600'}`}>{newEvent.name.length}/100</span>}
+                                            </div>
+                                            <input type="text" maxLength={100} value={newEvent.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="Es. Erasmus Party" className={getInputStyle('name')} />
+                                        </div>
 
-                                {/* UPLOAD IMMAGINE (Nuovo) */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 ml-1">COPERTINA (Max 10MB)</label>
-                                    <label className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl bg-slate-950/30 hover:bg-slate-950/50 transition-colors cursor-pointer group overflow-hidden">
+                                        {/* DATA (Fix Layout) */}
+                                        <div className="space-y-1 md:space-y-2 w-full min-w-0">
+                                            <div className="flex justify-between">
+                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5"><Clock size={12} /> Data *</label>
+                                                {formErrors.dateAndTime && <span className="text-[10px] md:text-xs font-bold text-rose-500">{formErrors.dateAndTime}</span>}
+                                            </div>
+                                            <input
+                                                type="datetime-local"
+                                                min={minDateTime}
+                                                value={newEvent.dateAndTime}
+                                                onChange={(e) => handleInputChange('dateAndTime', e.target.value)}
+                                                style={{ boxSizing: 'border-box' }}
+                                                className={`${getInputStyle('dateAndTime')} w-full max-w-full appearance-none [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50`}
+                                            />
+                                        </div>
 
-                                        {newEvent.image ? (
-                                            <>
-                                                <img src={newEvent.image} alt="Preview" className="w-full h-full object-cover" />
-                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <Trash2 size={24} className="text-white" />
-                                                    {/* Pulsante invisibile per rimuovere */}
-                                                    <button type="button" onClick={handleRemoveImage} className="absolute inset-0 w-full h-full" />
+                                        <div className="space-y-1 md:space-y-2 relative z-20">
+                                            <div className="flex justify-between">
+                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Città *</label>
+                                                {formErrors.city ? <span className="text-[10px] md:text-xs font-bold text-rose-500">{formErrors.city}</span> : <span className={`text-[10px] md:text-xs font-bold ${newEvent.city.length > 30 ? 'text-rose-500' : 'text-slate-600'}`}>{newEvent.city.length}/30</span>}
+                                            </div>
+                                            <div className="relative">
+                                                <input type="text" maxLength={30} value={newEvent.city} onChange={(e) => { handleInputChange('city', e.target.value); if(e.target.value.length > 0) setShowCityDropdown(true); }} onFocus={() => { if(newEvent.city.length > 0) setShowCityDropdown(true); }} placeholder="Cerca..." className={getInputStyle('city')} />
+                                                <AnimatePresence>
+                                                    {showCityDropdown && newEvent.city.length >= 1 && (
+                                                        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-white/10 rounded-xl max-h-40 overflow-y-auto shadow-2xl z-50 scrollbar-thin scrollbar-thumb-white/20">
+                                                            <div className="p-1">
+                                                                {comuniList.filter(c => c.nome.toLowerCase().startsWith(newEvent.city.toLowerCase())).slice(0, 50).map((c, i) => (
+                                                                    <button key={i} type="button" className="w-full text-left p-2.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white text-sm transition-colors" onClick={() => { setNewEvent({...newEvent, city: c.nome}); setShowCityDropdown(false); }}>{c.nome}</button>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-2 md:gap-4">
+                                            <div className="col-span-2 space-y-1 md:space-y-2">
+                                                <div className="flex justify-between">
+                                                    <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Indirizzo *</label>
+                                                    {formErrors.street && <span className="text-[10px] md:text-xs font-bold text-rose-500">!</span>}
                                                 </div>
-                                            </>
-                                        ) : (
-                                            <div className="flex flex-col items-center text-slate-500">
-                                                <Upload size={24} className="mb-2 group-hover:text-younify-blue transition-colors" />
-                                                <span className="text-xs font-medium">Clicca per caricare</span>
-                                                <span className="text-[10px] mt-1">JPG, PNG, WEBP</span>
+                                                <input type="text" maxLength={60} value={newEvent.street} onChange={(e) => handleInputChange('street', e.target.value)} placeholder="Via Roma 1" className={getInputStyle('street')} />
+                                            </div>
+                                            <div className="col-span-1 space-y-1 md:space-y-2">
+                                                <div className="flex justify-between">
+                                                    <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">CAP *</label>
+                                                    {formErrors.CAP && <span className="text-[10px] md:text-xs font-bold text-rose-500">!</span>}
+                                                </div>
+                                                <input type="text" maxLength={5} value={newEvent.CAP} onChange={(e) => handleInputChange('CAP', e.target.value)} placeholder="000" className={getInputStyle('CAP')} />
+                                            </div>
+                                        </div>
+
+                                        {(formErrors.street || formErrors.CAP) && (
+                                            <div className="flex gap-4">
+                                                <div className="col-span-2 w-2/3">{formErrors.street && <p className="text-[10px] text-rose-500 ml-1">{formErrors.street}</p>}</div>
+                                                <div className="col-span-1 w-1/3">{formErrors.CAP && <p className="text-[10px] text-rose-500 ml-1">{formErrors.CAP}</p>}</div>
                                             </div>
                                         )}
 
-                                        {/* Input File Nascosto */}
-                                        <input
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/jpeg, image/png, image/jpg, image/webp"
-                                            onChange={handleImageUpload}
-                                        />
-                                    </label>
-                                    {/* Messaggio Errore */}
-                                    {fileError && <p className="text-rose-500 text-xs ml-1 mt-1">{fileError}</p>}
+                                        <div className="space-y-1 flex flex-col md:hidden">
+                                            <div className="flex justify-between">
+                                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Descrizione *</label>
+                                                {formErrors.description ? <span className="text-[10px] font-bold text-rose-500">{formErrors.description}</span> : <span className={`text-[10px] font-bold ${newEvent.description.length > 200 ? 'text-rose-500' : 'text-slate-600'}`}>{newEvent.description.length}/200</span>}
+                                            </div>
+                                            <textarea maxLength={200} rows={2} value={newEvent.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Dettagli..." className={`${getInputStyle('description')} resize-none py-1.5`} />
+                                        </div>
+                                    </div>
                                 </div>
-
-                                {/* Descrizione */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-400 ml-1">DESCRIZIONE</label>
-                                    <textarea required name="description" value={newEvent.description} onChange={(e) => setNewEvent({...newEvent, description: e.target.value})} rows="4" placeholder="Dettagli..." className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-younify-blue outline-none resize-none" />
-                                </div>
-
-                                <button type="submit" className="mt-4 w-full bg-younify-blue text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-600 transition-all">Pubblica Evento</button>
                             </form>
+                            <div className="p-3 md:p-6 border-t border-white/5 bg-[#0F131F] shrink-0 pb-6 md:pb-6">
+                                <button onClick={handleSubmit} className="w-full py-3 md:py-4 rounded-xl font-bold bg-white text-black hover:bg-slate-200 transition-colors shadow-lg uppercase tracking-wide text-sm active:scale-[0.99]">Pubblica Evento</button>
+                            </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
-
         </div>
     );
 };

@@ -21,6 +21,11 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
 
         // LOGIN / 2FA_CONFIRMED -> Vai alla Home (Thread)
         case 'LOGIN':
+            if (accountId && accountId.toUpperCase().startsWith('H')) {
+                localStorage.setItem('isHost', 'true');
+            } else {
+                localStorage.setItem('isHost', 'false');
+            }
             localStorage.setItem('user_is_logged_in', 'true');
             navigate('/');
             return null;

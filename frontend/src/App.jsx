@@ -2,96 +2,94 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
-// Gestione Notifiche (Toastify)
 import { ToastContainer, cssTransition } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Import Pagine Auth & Landing
 import AuthPage from './pages/Auth/AuthPage';
 import LoginPage from './pages/Auth/LoginPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
+//import ThreadPage from './pages/Thread/ThreadPage';
+//import ThreadDetail from './pages/Thread/ThreadDetail';
+import EventPage from './pages/Event/EventsPage';
 
-// Import Pagine App (Private/Interne)
-import ThreadPage from './pages/Thread/ThreadPage';
-import ThreadDetail from './pages/Thread/ThreadDetail';
-import EventsPage from './pages/Event/EventsPage';
+// --- IMPORTANTE: Importa gli stili dei blob qui ---
+import styles from './pages/LandingPage/LandingPage.module.css';
 
-// --- COMPONENTI DI UTILITÀ ---
+// ----------------------------------------------------------------------
+// 1. COMPONENTE SFONDO INTELLIGENTE
+// ----------------------------------------------------------------------
+const GlobalBackground = () => {
+    const location = useLocation();
 
-// 1. Placeholder per le pagine "Coming Soon"
-const PlaceholderPage = ({ title }) => (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        <h1 className="text-3xl font-bold">{title} Coming Soon</h1>
-    </div>
-);
+    // LISTA NERA: Aggiungi qui le rotte che NON devono avere i blob globali.
+    // Esempio: const hiddenPaths = ['/admin', '/dashboard-nera', '/settings'];
+    const hiddenPaths = [];
 
-// 2. Logica Rotta Pubblica:
-// Se l'utente è già loggato, non deve vedere Login/Auth, ma viene reindirizzato all'App (es. /threads)
+    // Se la pagina attuale è nella lista, non renderizza nulla (sfondo trasparente/assente)
+    // permettendo alla pagina specifica di definire il proprio sfondo.
+    if (hiddenPaths.includes(location.pathname)) {
+        return null;
+    }
+
+    return (
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-slate-950">
+            <div className={`${styles.blob} ${styles.blue}`}></div>
+            <div className={`${styles.blob} ${styles.indigo}`}></div>
+            <div className={`${styles.blob} ${styles.magenta}`}></div>
+            <div className={`${styles.blob} ${styles.crimson}`}></div>
+            <div className={`${styles.blob} ${styles.purple}`}></div>
+            <div className={`${styles.blob} ${styles.amber}`}></div>
+        </div>
+    );
+};
+
+// ----------------------------------------------------------------------
+// 2. ROTTE E PROTEZIONE
+// ----------------------------------------------------------------------
 const PublicRoute = () => {
     const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
-    // Se è loggato, lo mandiamo ai threads invece che alla Landing Page
-    if (isLogged) { return <Navigate to="/threads" replace />; }
-
+    if (isLogged) { return <Navigate to="/" replace />; }
     return <Outlet />;
 };
 
-// 3. Transizione custom per i Toast
-const SoftFade = cssTransition({
-    enter: "soft-enter",
-    exit: "soft-exit"
-});
-
-// --- GESTIONE ROTTE CON ANIMAZIONI ---
 const AnimatedRoutes = () => {
     const location = useLocation();
 
     return (
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-
-                {/* --- HOME PAGE (Landing) --- */}
                 <Route path="/" element={<LandingPage />} />
-
-                {/* --- ROTTE PUBBLICHE (Accessibili solo se NON sei loggato) --- */}
                 <Route element={<PublicRoute />}>
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/2fa" element={<TwoFactorAuth />} />
                 </Route>
-
-                {/* --- ROTTE APP (Interne) --- */}
-                {/* Qui vanno tutte le pagine dell'applicazione vera e propria */}
-
-                {/* Sezione Threads */}
-                <Route path="/threads" element={<ThreadPage />} />
-                <Route path="/threads/:id" element={<ThreadDetail />} />
-
-                {/* Sezioni Placeholder */}
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/match" element={<PlaceholderPage title="Match" />} />
-                <Route path="/profile" element={<PlaceholderPage title="Profile" />} />
-                <Route path="/notifications" element={<PlaceholderPage title="Notifiche" />} />
-
+                {/* <Route path="/thread" element={<ThreadPage />} /> */}
+                {/* <Route path="/thread/:id" element={<ThreadDetail />} /> */}
+                <Route path="/events" element={<EventPage />} />
             </Routes>
         </AnimatePresence>
     );
 };
 
-// --- APP PRINCIPALE ---
+const SoftFade = cssTransition({
+    enter: "soft-enter",
+    exit: "soft-exit"
+});
+
+// ----------------------------------------------------------------------
+// 3. APP PRINCIPALE
+// ----------------------------------------------------------------------
 function App() {
     return (
         <BrowserRouter>
-            {/* Contenitore Notifiche */}
-            <ToastContainer
-                position="top-center"
-                theme="dark"
-                transition={SoftFade}
-                autoClose={5000}
-                limit={3}
-            />
+            {/* Inseriamo qui il componente sfondo che reagisce al cambio pagina */}
+            <GlobalBackground />
 
-            {/* Routing Animato */}
+            <ToastContainer position="top-center" theme="dark" transition={SoftFade} autoClose={5000} limit={3} />
+
+            {/* Le pagine verranno renderizzate sopra lo sfondo */}
             <AnimatedRoutes />
         </BrowserRouter>
     );
