@@ -9,8 +9,6 @@ import AuthPage from './pages/Auth/AuthPage';
 import LoginPage from './pages/Auth/LoginPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
-//import ThreadPage from './pages/Thread/ThreadPage';
-//import ThreadDetail from './pages/Thread/ThreadDetail';
 import EventPage from './pages/Event/EventsPage';
 
 // --- IMPORTANTE: Importa gli stili dei blob qui ---
@@ -53,6 +51,12 @@ const PublicRoute = () => {
     return <Outlet />;
 };
 
+const ProtectedRoute = () => {
+    const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
+    if (!isLogged) { return <Navigate to="/login" replace />; }
+    return <Outlet />;
+}
+
 const AnimatedRoutes = () => {
     const location = useLocation();
 
@@ -65,9 +69,9 @@ const AnimatedRoutes = () => {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/2fa" element={<TwoFactorAuth />} />
                 </Route>
-                {/* <Route path="/thread" element={<ThreadPage />} /> */}
-                {/* <Route path="/thread/:id" element={<ThreadDetail />} /> */}
-                <Route path="/events" element={<EventPage />} />
+                <Route element={<ProtectedRoute />}>
+                    <Route path="/events" element={<EventPage />} />
+                </Route>
             </Routes>
         </AnimatePresence>
     );
