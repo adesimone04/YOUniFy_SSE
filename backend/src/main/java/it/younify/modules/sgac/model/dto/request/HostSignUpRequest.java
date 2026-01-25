@@ -1,9 +1,13 @@
 package it.younify.modules.sgac.model.dto.request;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
+import lombok.NoArgsConstructor;
 
 /**
  * The {@code HostSignUpRequest} class is a Data Transfer Object (DTO) used for
@@ -12,6 +16,9 @@ import jakarta.validation.constraints.NotBlank;
  * This DTO contains all the necessary fields for creating a new host account.
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class HostSignUpRequest {
 
     /**
@@ -34,6 +41,7 @@ public class HostSignUpRequest {
      */
     @NotBlank
     @Size(min = 11, max = 16)
+    @JsonProperty("PIVA")
     private String PIVA;
 
     /**
@@ -42,6 +50,7 @@ public class HostSignUpRequest {
      */
     @NotBlank
     @Size(max = 40)
+    @JsonProperty("PEC")
     private String PEC;
 
     /**
