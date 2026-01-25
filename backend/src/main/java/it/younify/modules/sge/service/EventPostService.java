@@ -55,7 +55,7 @@ public class EventPostService {
             String posterPath = imageStorageService.uploadImage(eventPostRequest.getPoster(), UUID.randomUUID().toString(), UPLOAD_DIR);
 
             String name = eventPostRequest.getName();
-            String description =eventPostRequest.getDescription();
+            String description = eventPostRequest.getDescription();
 
             if(censorshipService.containsSensitiveContent(name) ||
                     censorshipService.containsSensitiveContent(description)){
