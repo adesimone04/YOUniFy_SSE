@@ -21,7 +21,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
-    @Size(max = 30)
+    @Size(min = 3, max = 30)
     private String firstName;
 
     /**
@@ -29,7 +29,7 @@ public class UserSignUpRequest {
      * This field is mandatory.
      */
     @NotBlank
-    @Size(max = 30)
+    @Size(min = 3, max = 30)
     private String lastName;
 
     /**

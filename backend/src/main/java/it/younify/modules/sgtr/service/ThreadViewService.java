@@ -1,14 +1,18 @@
 package it.younify.modules.sgtr.service;
 
 
+import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.dto.response.ThreadResponse;
 import it.younify.modules.sgtr.model.entity.FlagCategory;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -31,7 +35,8 @@ public class ThreadViewService {
      * @param pageable The pagination information.
      * @return A paginated list of {@link ThreadResponse}.
      */
-    public Page<ThreadResponse> getThreadsByDate(Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsByDate(@NonNull Pageable pageable) {
 
         return threadRepository.findAllByOrderByPublicationDateDesc(pageable).map(this::toResponse);
     }
@@ -44,7 +49,8 @@ public class ThreadViewService {
      * @param pageable The pagination information.
      * @return A paginated list of {@link ThreadResponse}.
      */
-    public Page<ThreadResponse> getThreadsByFlag(FlagCategory flag, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsByFlag(@NonNull FlagCategory flag, @NonNull Pageable pageable) {
         return threadRepository.findAllByFlagOrderByPublicationDateDesc(flag, pageable).map(this::toResponse);
     }
 
@@ -57,8 +63,57 @@ public class ThreadViewService {
      * @param pageable The pagination information.
      * @return A paginated list of {@link ThreadResponse}.
      */
-    public Page<ThreadResponse> getThreadsByUniversity(String university, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsByUniversity(@NonNull String university, @NonNull Pageable pageable) {
+
         return threadRepository.findByHost_UniListContainingIgnoreCaseOrUser_UniversityIgnoreCaseOrderByPublicationDateDesc(university, university, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of threads filtered by a specific university and flag category,
+     * sorted by publication date in descending order.
+     *
+     * @param university The university to filter by.
+     * @param flag The flag category to filter by.
+     * @param pageable The pagination information.
+     * @return A paginated list of {@link ThreadResponse}.
+     */
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsByUniversityAndFlag(@NonNull String university, @NonNull FlagCategory flag, @NonNull Pageable pageable) {
+
+        return threadRepository.findByUniversityAndFlag(university, flag, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of threads posted by a specific user.
+     * The results are ordered by publication date in descending order.
+     *
+     * @param user The user who posted the threads.
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link ThreadResponse} objects.
+     * @see User
+     * @see Page
+     */
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsPostedByUser(@NonNull User user, @NonNull Pageable pageable) {
+
+        return threadRepository.findByUserOrderByPublicationDateDesc(user, pageable).map(this::toResponse);
+    }
+
+    /**
+     * Retrieves a paginated list of threads posted by a specific host.
+     * The results are ordered by publication date in descending order.
+     *
+     * @param host The host who posted the threads.
+     * @param pageable The pagination information.
+     * @return A {@link Page} of {@link ThreadResponse} objects.
+     * @see Host
+     * @see Page
+     */
+    @Transactional(readOnly = true)
+    public Page<ThreadResponse> getThreadsPostedByHost(@NonNull Host host, @NonNull Pageable pageable) {
+
+        return threadRepository.findByHostOrderByPublicationDateDesc(host, pageable).map(this::toResponse);
     }
 
 

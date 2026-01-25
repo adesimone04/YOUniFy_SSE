@@ -64,6 +64,7 @@ public class SecurityConfig {
                                         "/api/auth/host/signup"
                                         )
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                .spa()
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -73,15 +74,6 @@ public class SecurityConfig {
                                 "/api/auth/2FA",
                                 "/api/auth/resend/2FA"
                         ).anonymous()
-
-                        .requestMatchers(
-                                "/api/auth/logout",
-                                "/api/auth/refresh"
-                        ).authenticated()
-
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/host/**").hasRole("HOST")
-                        .requestMatchers("/api/user/**").hasRole("USER")
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

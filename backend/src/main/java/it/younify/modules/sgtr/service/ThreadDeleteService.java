@@ -7,10 +7,9 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.ThreadRepository;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +41,7 @@ public class ThreadDeleteService {
      * @throws AccessDeniedException if the current user is not authorized to delete the thread.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void delete(@NotNull Long threadId) {
+    public void delete(@NonNull Long threadId) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Threads> optT = threadRepository.findById(threadId);
@@ -79,10 +78,10 @@ public class ThreadDeleteService {
 
                         threadRepository.delete(thread);
                     }
-                    else throw new AccessDeniedException("Access is denied");
+                    else throw new AccessDeniedException("Access is denied for this operation");
                 }
             }
         }
-        else throw new ResourceNotFoundException("Thread not found");
+        else throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
 }

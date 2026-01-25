@@ -7,11 +7,13 @@ import it.younify.modules.sgtr.model.dto.request.CommentVoteRequest;
 import it.younify.modules.sgtr.model.dto.response.CommentResponse;
 import it.younify.modules.sgtr.service.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/thread")
 @RequiredArgsConstructor
+@Validated
 public class CommentController {
 
     private final CommentFacade commentFacade;
@@ -44,6 +47,7 @@ public class CommentController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("POSTED_SUCCESSFULLY")
+                        .internalCode("POSTED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -59,13 +63,14 @@ public class CommentController {
      * @throws it.younify.core.exception.ResourceNotFoundException if the comment does not exist.
      */
     @DeleteMapping("/comment/delete/{commentId}")
-    public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable("commentId") Long commentId) {
+    public ResponseEntity<ApiResponse<Void>> deleteComment(@Positive @PathVariable("commentId") Long commentId) {
 
         commentFacade.deleteComment(commentId);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("DELETED_SUCCESSFULLY")
+                        .internalCode("DELETED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -79,13 +84,14 @@ public class CommentController {
      * @throws it.younify.core.exception.ResourceNotFoundException if the comment does not exist.
      */
     @PostMapping("/comment/react")
-    public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody CommentVoteRequest commentVoteRequest) {
+    public ResponseEntity<ApiResponse<Void>> reactCFU(@Valid @RequestBody CommentVoteRequest commentVoteRequest) {
 
         commentFacade.reactionComment(commentVoteRequest);
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("REACT_SUCCESSFULLY")
+                        .internalCode("REACT_SUCCESSFULLY")
                         .build()
         );
     }
@@ -99,7 +105,7 @@ public class CommentController {
      * @return A {@link ResponseEntity} containing a paginated list of {@link CommentResponse}.
      */
     @GetMapping("/comment/{threadId}")
-    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComment(@PathVariable("threadId") Long threadId,
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComment(@Positive @PathVariable("threadId") Long threadId,
                                                                          @PageableDefault(size = 10) Pageable pageable){
 
         Page<CommentResponse> page = commentFacade.commentView(threadId, pageable);
@@ -108,6 +114,32 @@ public class CommentController {
                 ApiResponse.<Page<CommentResponse>>builder()
                         .data(page)
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
+                        .build()
+        );
+    }
+
+
+    /**
+     * Retrieves a paginated list of comments posted by the currently authenticated user.
+     * This endpoint provides a summary of the user's own comments.
+     *
+     * @param pageable The pagination information, with a default size of 10.
+     * @return A {@link ResponseEntity} containing a paginated list of {@link CommentResponse} objects posted by the user.
+     * @see CommentFacade#getCommentPosted(Pageable)
+     * @see Pageable
+     * @see CommentResponse
+     */
+    @GetMapping("/summary/commented")
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getCommentPosted(@PageableDefault(size = 10) Pageable pageable){
+
+        Page<CommentResponse> page = commentFacade.getCommentPosted(pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<CommentResponse>>builder()
+                        .data(page)
+                        .message("RETRIEVE_SUCCESSFULLY")
+                        .internalCode("RETRIEVE_SUCCESSFULLY")
                         .build()
         );
     }

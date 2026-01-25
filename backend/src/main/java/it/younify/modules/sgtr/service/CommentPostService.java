@@ -8,7 +8,7 @@ import it.younify.modules.sgtr.model.entity.Comment;
 import it.younify.modules.sgtr.model.entity.Threads;
 import it.younify.modules.sgtr.repository.CommentRepository;
 import it.younify.modules.sgtr.repository.ThreadRepository;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,7 +41,7 @@ public class CommentPostService {
      * @throws ResourceNotFoundException if the parent thread with the given ID does not exist.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void post(@NotNull CommentPostRequest commentPostRequest) {
+    public void post(@NonNull CommentPostRequest commentPostRequest) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -83,6 +83,6 @@ public class CommentPostService {
                 }
             }
         }
-        else throw new ResourceNotFoundException("Thread not found");
+        else throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
 }

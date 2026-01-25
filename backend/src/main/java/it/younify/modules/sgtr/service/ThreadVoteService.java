@@ -9,6 +9,7 @@ import it.younify.modules.sgtr.model.entity.ThreadsVote;
 import it.younify.modules.sgtr.model.entity.VoteType;
 import it.younify.modules.sgtr.repository.ThreadRepository;
 import it.younify.modules.sgtr.repository.ThreadVoteRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class ThreadVoteService {
      * @throws ResourceNotFoundException if the specified thread does not exist.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void vote(ThreadVoteRequest threadVoteRequest){
+    public void vote(@NonNull ThreadVoteRequest threadVoteRequest){
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         VoteType accountVoteType = threadVoteRequest.getVoteType();
@@ -117,7 +118,7 @@ public class ThreadVoteService {
                     threadRepository.save(thread);
                 }
             }
-        } else throw new ResourceNotFoundException("Thread not found");
+        } else throw new ResourceNotFoundException("Thread not found", "THREAD_NOT_FOUND");
     }
 
 

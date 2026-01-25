@@ -6,7 +6,7 @@ import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgtr.model.entity.Comment;
 import it.younify.modules.sgtr.repository.CommentRepository;
-import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,7 +40,7 @@ public class CommentDeleteService {
      * @throws AccessDeniedException if the current user is not authorized to delete the comment.
      */
     @Transactional(rollbackFor = Exception.class)
-    public void delete(@NotNull Long commentId) {
+    public void delete(@NonNull Long commentId) {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Comment> optC = commentRepository.findById(commentId);
@@ -77,10 +77,10 @@ public class CommentDeleteService {
 
                         commentRepository.delete(comment);
                     }
-                    else throw new AccessDeniedException("Access is denied");
+                    else throw new AccessDeniedException("Access is denied for this operation");
                 }
             }
         }
-        else throw new ResourceNotFoundException("Comment not found");
+        else throw new ResourceNotFoundException("Comment not found", "COMMENT_NOT_FOUND");
     }
 }
