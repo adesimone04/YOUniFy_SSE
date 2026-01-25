@@ -64,6 +64,7 @@ public class SecurityConfig {
                                         "/api/auth/host/signup"
                                         )
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                .spa()
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
