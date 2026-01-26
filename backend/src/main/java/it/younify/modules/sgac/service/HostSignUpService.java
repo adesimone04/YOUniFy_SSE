@@ -140,7 +140,7 @@ public class HostSignUpService {
                     throw new BadRequestException("The PEC address " + PEC + " is not valid", "PEC_ADDRESS_NOT_VALID");
                 }
 
-                throw new BadRequestException("The PEC address " + PEC + " is not associated with VAT number " + PIVA, "PEC_ADDRESS_DOESNT_MATCH_VATCODE");
+                throw new BadRequestException("La PEC " + PEC + " non è associata alla PIVA" + PIVA, "PEC_ADDRESS_DOESNT_MATCH_VATCODE");
             }
 
             throw new BadRequestException("Some data are not valid", "DATA_NOT_VALID");
