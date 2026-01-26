@@ -21,13 +21,17 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
 
         // LOGIN / 2FA_CONFIRMED -> Vai alla Home (Thread)
         case 'LOGIN':
+
             if (accountId && accountId.toUpperCase().startsWith('H')) {
+
                 localStorage.setItem('isHost', 'true');
-            } else {
+            }
+            else {
                 localStorage.setItem('isHost', 'false');
             }
+
             localStorage.setItem('user_is_logged_in', 'true');
-            navigate('/');
+            navigate('/thread');
             return null;
 
         case '2FA_CONFIRMED':
@@ -36,7 +40,6 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
 
         // LOGOUT -> Vai alla Landing
         case 'LOGOUT':
-            localStorage.removeItem('user_is_logged_in');
             localStorage.clear();
             navigate('/');
             return null;
@@ -96,8 +99,8 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
         // possono mostrare il Toast specifico o pulire i campi.
 
         // Login Page
-        case 'BAD_CREDENTIALS':         // Login mostra scritta rossa
-        case 'ACCOUNT_NOT_FOUND':       // Login mostra scritta rossa
+        case 'BAD_CREDENTIALS':
+        case 'ACCOUNT_NOT_FOUND':
 
         // 2FA Page
         case 'MAX_ATTEMPTS':            // 2FA Page farà il resend automatico
@@ -110,7 +113,12 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
         case 'PEC_ADDRESS_NOT_VALID':
         case 'EMAIL_NOT_VALID':
         case 'PEC_ADDRESS_DOESNT_MATCH_VATCODE':
-            return internalCode; // Restituisce la stringa, la pagina visualizzerà il Toast errore
+        case 'OPEN_API_ERROR':
+            return internalCode;
+
+        case 'DATA_NOT_VALID':
+            toast.error("Alcuni dati inseriti non sono validi.");
+            return null;
 
         default:
             console.warn("Codice non gestito:", internalCode);
