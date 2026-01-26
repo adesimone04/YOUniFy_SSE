@@ -72,7 +72,8 @@ public class SecurityConfig {
                                 "/api/auth/user/signup",
                                 "/api/auth/host/signup",
                                 "/api/auth/2FA",
-                                "/api/auth/resend/2FA"
+                                "/api/auth/resend/2FA",
+                                "/api/auth/refresh"
                         ).anonymous()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()

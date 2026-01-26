@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The {@code GeoValidationService} is responsible for validating Italian geographical locations.
@@ -19,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GeoValidationService {
 
-    private final Map<String, String> validCitiesMap = new HashMap<>();
+    private final Map<String, Set<String>> validCitiesMap = new HashMap<>();
 
     /**
      * Initializes the service by loading a list of Italian municipalities from the {@code /data/comuni.json} resource file.
@@ -43,13 +45,10 @@ public class GeoValidationService {
 
                     if (node.has("nome") && node.has("provincia")) {
 
-                        String comune = node.get("nome").asText();
-                        String province = node.get("provincia").get("nome").asText();
+                        String comune = node.get("nome").asText().trim().toUpperCase();
+                        String province = node.get("provincia").get("nome").asText().trim().toUpperCase();
 
-                        validCitiesMap.put(
-                                comune.trim().toUpperCase(),
-                                province.trim().toUpperCase()
-                        );
+                        validCitiesMap.computeIfAbsent(comune, k -> new HashSet<>()).add(province);
                     }
                 }
             }
@@ -74,7 +73,12 @@ public class GeoValidationService {
         String normalizedCity = city.trim().toUpperCase();
 
         return validCitiesMap.containsKey(normalizedCity) &&
-                validCitiesMap.get(normalizedCity).equals(normalizedProv);
+            validCitiesMap.get(normalizedCity).contains(normalizedProv);
 
+    }
+
+    public boolean isValidCityOnly(String city) {
+
+        return validCitiesMap.containsKey(city.trim().toUpperCase());
     }
 }
