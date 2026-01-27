@@ -26,6 +26,9 @@ public class HostProfileViewResponse {
      */
     private String PEC;
 
+
+    private String profileImage;
+
     /**
      * The province where the host is located.
      */

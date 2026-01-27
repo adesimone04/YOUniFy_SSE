@@ -1,7 +1,9 @@
 package it.younify.modules.sgu.service;
 
+import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgu.model.dto.response.UserProfileViewResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,10 @@ import org.springframework.stereotype.Service;
  * @see User
  */
 @Service
+@RequiredArgsConstructor
 public class UserProfileViewService {
+
+    private final ImageStorageService imageStorageService;
 
     /**
      * Retrieves the profile information for the currently authenticated user.
@@ -35,6 +40,7 @@ public class UserProfileViewService {
                     .firstName(user.getFirstName())
                     .lastName(user.getLastName())
                     .email(user.getEmail())
+                    .profileImage(imageStorageService.getPresignedUrl(user.getProfileImage()))
                     .cdl(user.getCdl())
                     .university(user.getUniversity())
                     .dateOfBirth(user.getDateOfBirth())

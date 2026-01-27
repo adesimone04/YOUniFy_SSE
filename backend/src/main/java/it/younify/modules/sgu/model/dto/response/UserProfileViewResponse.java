@@ -28,6 +28,9 @@ public class UserProfileViewResponse {
      */
     private String email;
 
+
+    private String profileImage;
+
     /**
      * The user's course of study (Corso di Laurea).
      */

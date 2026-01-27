@@ -1,7 +1,9 @@
 package it.younify.modules.sgu.service;
 
+import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.Host;
 import it.younify.modules.sgu.model.dto.response.HostProfileViewResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,10 @@ import org.springframework.stereotype.Service;
  * @see Host
  */
 @Service
+@RequiredArgsConstructor
 public class HostProfileViewService {
+
+    private final ImageStorageService imageStorageService;
 
     /**
      * Retrieves the profile information for the currently authenticated host.
@@ -35,6 +40,7 @@ public class HostProfileViewService {
                     .hostName(host.getHostName())
                     .PIVA(host.getPIVA())
                     .PEC(host.getPEC())
+                    .profileImage(imageStorageService.getPresignedUrl(host.getProfileImage()))
                     .province(host.getProvince())
                     .city(host.getCity())
                     .uniList(host.getUniList())
