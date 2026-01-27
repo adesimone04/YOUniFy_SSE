@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,40 +20,63 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
     
     /**
-     * Retrieves a paginated list of all events, ordered by date and time in ascending order.
-     * This is typically used for displaying a timeline of upcoming events.
+     * Retrieves a paginated list of all events, ordered by their proximity to the current date and time.
+     * Upcoming events are listed first, sorted in ascending order of date and time.
+     * Past events are listed after upcoming events, sorted in descending order of date and time.
      *
      * @param pageable The pagination information.
      * @return A paginated list of events.
      */
-    Page<Event> findAllByOrderByDateAndTimeAsc(Pageable pageable);
+    @Query("SELECT e FROM Event e ORDER BY " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN 0 ELSE 1 END, " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN e.dateAndTime END ASC, " +
+            "CASE WHEN e.dateAndTime < CURRENT_TIMESTAMP THEN e.dateAndTime END DESC")
+    Page<Event> findAllOrderedByProximity(Pageable pageable);
 
     /**
-     * Retrieves a paginated list of events hosted by a specific host, ordered by date.
+     * Retrieves a paginated list of events hosted by a specific host, ordered by their proximity to the current date and time.
+     * Upcoming events are listed first, sorted in ascending order of date and time.
+     * Past events are listed after upcoming events, sorted in descending order of date and time.
      *
      * @param host The host whose events are to be retrieved.
      * @param pageable The pagination information.
      * @return A paginated list of the host's events.
      */
-    Page<Event> findAllByHostOrderByDateAndTimeAsc(Host host, Pageable pageable);
+    @Query("SELECT e FROM Event e WHERE e.host = :host ORDER BY " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN 0 ELSE 1 END, " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN e.dateAndTime END ASC, " +
+            "CASE WHEN e.dateAndTime < CURRENT_TIMESTAMP THEN e.dateAndTime END DESC")
+    Page<Event> findAllByHostOrderedByProximity(@Param("host") Host host, Pageable pageable);
 
     /**
-     * Retrieves a paginated list of events taking place in a specific city, ordered by date.
+     * Retrieves a paginated list of events taking place in a specific city, ordered by their proximity to the current date and time.
+     * Upcoming events are listed first, sorted in ascending order of date and time.
+     * Past events are listed after upcoming events, sorted in descending order of date and time.
      *
      * @param city The name of the city.
      * @param pageable The pagination information.
      * @return A paginated list of events in the specified city.
      */
-    Page<Event> findAllByCityOrderByDateAndTimeAsc(String city, Pageable pageable);
+    @Query("SELECT e FROM Event e WHERE e.city = :city ORDER BY " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN 0 ELSE 1 END, " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN e.dateAndTime END ASC, " +
+            "CASE WHEN e.dateAndTime < CURRENT_TIMESTAMP THEN e.dateAndTime END DESC")
+    Page<Event> findAllByCityOrderedByProximity(@Param("city") String city, Pageable pageable);
 
     /**
-     * Retrieves a paginated list of distinct events that a specific user is participating in.
+     * Retrieves a paginated list of distinct events that a specific user is participating in, ordered by their proximity to the current date and time.
+     * Upcoming events are listed first, sorted in ascending order of date and time.
+     * Past events are listed after upcoming events, sorted in descending order of date and time.
      *
      * @param user The user whose participating events are to be retrieved.
      * @param pageable The pagination information.
      * @return A paginated list of events the user has joined.
      */
-    Page<Event> findDistinctByParticipationsUser(User user, Pageable pageable);
+    @Query("SELECT DISTINCT e FROM Event e JOIN e.participations p WHERE p.user = :user ORDER BY " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN 0 ELSE 1 END, " +
+            "CASE WHEN e.dateAndTime >= CURRENT_TIMESTAMP THEN e.dateAndTime END ASC, " +
+            "CASE WHEN e.dateAndTime < CURRENT_TIMESTAMP THEN e.dateAndTime END DESC")
+    Page<Event> findDistinctByParticipationsUserOrderedByProximity(@Param("user") User user, Pageable pageable);
 
     /**
      * Checks for the existence of an event with the same host, date, and name.

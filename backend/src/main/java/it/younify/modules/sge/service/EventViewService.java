@@ -49,10 +49,10 @@ public class EventViewService {
 
         if (principal instanceof User) {
 
-            return eventRepository.findAllByOrderByDateAndTimeAsc(pageable)
+            return eventRepository.findAllOrderedByProximity(pageable)
                     .map(event -> toResponse(((User) principal).getID(), event));
         }
-        else return eventRepository.findAllByOrderByDateAndTimeAsc(pageable)
+        else return eventRepository.findAllOrderedByProximity(pageable)
                 .map(event -> toResponse(((Host) principal).getID(), event));
     }
 
@@ -67,7 +67,7 @@ public class EventViewService {
     @Transactional(readOnly = true)
     public Page<EventResponse> getEventsByHost(@NonNull Host host, @NonNull Pageable pageable){
 
-        return eventRepository.findAllByHostOrderByDateAndTimeAsc(host, pageable).map(this::toMyResponse);
+        return eventRepository.findAllByHostOrderedByProximity(host, pageable).map(this::toMyResponse);
     }
 
     /**
@@ -86,10 +86,10 @@ public class EventViewService {
 
         if (principal instanceof User) {
 
-            return eventRepository.findAllByCityOrderByDateAndTimeAsc(city, pageable)
+            return eventRepository.findAllByCityOrderedByProximity(city, pageable)
                     .map(event -> toResponse(((User) principal).getID(), event));
         }
-        else return eventRepository.findAllByCityOrderByDateAndTimeAsc(city, pageable)
+        else return eventRepository.findAllByCityOrderedByProximity(city, pageable)
                 .map(event -> toResponse(((Host) principal).getID(), event));
     }
 
@@ -104,7 +104,7 @@ public class EventViewService {
     @Transactional(readOnly = true)
     public Page<EventResponse> getEventsByJoined(@NonNull User user, @NonNull Pageable pageable){
 
-        return eventRepository.findDistinctByParticipationsUser(user, pageable).map(this::toMyResponse);
+        return eventRepository.findDistinctByParticipationsUserOrderedByProximity(user, pageable).map(this::toMyResponse);
     }
 
 
