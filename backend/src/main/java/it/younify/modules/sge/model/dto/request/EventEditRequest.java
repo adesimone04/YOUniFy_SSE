@@ -1,9 +1,6 @@
 package it.younify.modules.sge.model.dto.request;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
@@ -55,7 +52,7 @@ public class EventEditRequest {
      * The updated postal code (CAP) of the event's location.
      */
     @NotBlank
-    @Size(max = 5)
+    @Pattern(regexp = "\\d{5}")
     private String CAP;
 
     /**
