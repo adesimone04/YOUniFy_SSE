@@ -117,7 +117,10 @@ axiosClient.interceptors.response.use(
                 isRefreshing = false;
 
                 return response;
-            } catch (refreshError) {
+
+            }
+            catch (refreshError) {
+
                 processQueue(refreshError);
                 isRefreshing = false;
 
@@ -127,7 +130,9 @@ axiosClient.interceptors.response.use(
                     console.error('Refresh fallito, sessione scaduta');
                     localStorage.clear();
                     window.location.href = '/login';
-                } else {
+                }
+                else {
+
                     console.error('Accesso negato:', originalRequest.url);
                 }
 

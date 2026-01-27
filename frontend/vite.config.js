@@ -1,14 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import basicSsl from '@vitejs/plugin-basic-ssl'
+import mkcert from 'vite-plugin-mkcert'
 
-// https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
         react(),
-        basicSsl() // Questo abilita HTTPS e il cookie Secure
+        mkcert() // usa lo stesso CA di mkcert del backend
     ],
     server: {
-        https: true
+        https: true,
+        host: true,
+        proxy: {
+            '/api': {
+                target: 'https://192.168.1.7:8443',
+                changeOrigin: true,
+                secure: false
+            }
+        }
     }
 })
