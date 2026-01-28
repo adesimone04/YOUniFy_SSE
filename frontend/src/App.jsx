@@ -9,11 +9,13 @@ import AuthPage from './pages/Auth/AuthPage';
 import LoginPage from './pages/Auth/LoginPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
+import NotificationsPage from './pages/Notifications/NotificationsPage';
 import EventPage from './pages/Event/EventsPage';
 import MatchingPage from './pages/Matching/MatchingPage';
 
 // --- IMPORTANTE: Importa gli stili dei blob qui ---
 import styles from './pages/LandingPage/LandingPage.module.css';
+
 
 // ----------------------------------------------------------------------
 // 1. COMPONENTE SFONDO INTELLIGENTE
@@ -76,6 +78,7 @@ const AnimatedRoutes = () => {
                     <Route path="/2fa" element={<TwoFactorAuth />} />
                 </Route>
                 <Route element={<ProtectedRoute />}>
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/events" element={<EventPage />} />
                     <Route path="/match" element={<MatchingPage />} />
                 </Route>
