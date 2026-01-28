@@ -2,8 +2,8 @@ import React from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { GraduationCap, Sparkles, BookOpen } from 'lucide-react';
 
-const SwipeCard = ({ user, onSwipe, style }) => {
-    // --- LOGICA SWIPE (INVARIATA) ---
+const SwipeCard = ({ user, onSwipeLeft, onSwipeRight, exitDir, style }) => {
+    // --- LOGICA SWIPE ---
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-200, 200], [-10, 10]);
     const opacityLike = useTransform(x, [50, 150], [0, 1]);
@@ -13,10 +13,16 @@ const SwipeCard = ({ user, onSwipe, style }) => {
     const borderColor = useTransform(x, [-200, 0, 200], ["rgba(244, 63, 94, 0.5)", "rgba(255,255,255,0.1)", "rgba(34, 197, 94, 0.5)"]);
 
     const handleDragEnd = (event, info) => {
-        if (info.offset.x > 100) {
-            onSwipe('right');
-        } else if (info.offset.x < -100) {
-            onSwipe('left');
+        const offset = info.offset.x;
+        const velocity = info.velocity.x;
+
+        // Swipe RIGHT: offset positivo OPPURE velocità alta verso destra
+        if (offset > 100 || (offset > 50 && velocity > 500)) {
+            onSwipeRight?.();
+        }
+        // Swipe LEFT: offset negativo OPPURE velocità alta verso sinistra
+        else if (offset < -100 || (offset < -50 && velocity < -500)) {
+            onSwipeLeft?.();
         }
     };
 
@@ -29,6 +35,14 @@ const SwipeCard = ({ user, onSwipe, style }) => {
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             onDragEnd={handleDragEnd}
+            initial={{ scale: 1, opacity: 1 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{
+                x: exitDir * 300,
+                opacity: 0,
+                rotate: exitDir * 20,
+                transition: { duration: 0.3, ease: "easeOut" }
+            }}
             className="absolute top-0 left-0 w-full h-full cursor-grab active:cursor-grabbing will-change-transform"
         >
             <motion.div
