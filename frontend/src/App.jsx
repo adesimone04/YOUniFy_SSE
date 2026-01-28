@@ -9,10 +9,12 @@ import AuthPage from './pages/Auth/AuthPage';
 import LoginPage from './pages/Auth/LoginPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
+import NotificationsPage from './pages/Notifications/NotificationsPage';
 import EventPage from './pages/Event/EventsPage';
 
 // --- IMPORTANTE: Importa gli stili dei blob qui ---
 import styles from './pages/LandingPage/LandingPage.module.css';
+
 
 // ----------------------------------------------------------------------
 // 1. COMPONENTE SFONDO INTELLIGENTE
@@ -46,8 +48,10 @@ const GlobalBackground = () => {
 // 2. ROTTE E PROTEZIONE
 // ----------------------------------------------------------------------
 const PublicRoute = () => {
+
     const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
     if (isLogged) { return <Navigate to="/" replace />; }
+
     return <Outlet />;
 };
 
@@ -63,13 +67,16 @@ const AnimatedRoutes = () => {
     return (
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
+
                 <Route path="/" element={<LandingPage />} />
+
                 <Route element={<PublicRoute />}>
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/2fa" element={<TwoFactorAuth />} />
                 </Route>
                 <Route element={<ProtectedRoute />}>
+                    <Route path="/notifications" element={<NotificationsPage />} />
                     <Route path="/events" element={<EventPage />} />
                 </Route>
             </Routes>
@@ -82,9 +89,6 @@ const SoftFade = cssTransition({
     exit: "soft-exit"
 });
 
-// ----------------------------------------------------------------------
-// 3. APP PRINCIPALE
-// ----------------------------------------------------------------------
 function App() {
     return (
         <BrowserRouter>
