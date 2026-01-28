@@ -48,7 +48,7 @@ const GlobalBackground = () => {
 // ----------------------------------------------------------------------
 const PublicRoute = () => {
     const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
-    if (isLogged) { return <Navigate to="/" replace />; }
+    if (isLogged) { return <Navigate to="/thread" replace />; }
     return <Outlet />;
 };
 

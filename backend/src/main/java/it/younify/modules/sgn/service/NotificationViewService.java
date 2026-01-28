@@ -6,6 +6,7 @@ import it.younify.modules.sgac.model.entity.User;
 import it.younify.modules.sgn.model.dto.response.NotificationResponse;
 import it.younify.modules.sgn.model.entity.Notification;
 import it.younify.modules.sgn.repository.NotificationRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +42,7 @@ public class NotificationViewService {
      * @see NotificationResponse
      */
     @Transactional(readOnly = true)
-    public Page<NotificationResponse> getNotificationsHost(Pageable pageable, Host host) {
+    public Page<NotificationResponse> getNotificationsHost(@NonNull Pageable pageable, @NonNull Host host) {
 
         return notificationRepository.findAllByReceiverHost(host, pageable).map(this::toResponse);
     }
@@ -59,7 +60,7 @@ public class NotificationViewService {
      * @see NotificationResponse
      */
     @Transactional(readOnly = true)
-    public Page<NotificationResponse> getNotificationsUser(Pageable pageable, User user) {
+    public Page<NotificationResponse> getNotificationsUser(@NonNull Pageable pageable, @NonNull User user) {
 
         return notificationRepository.findAllByReceiverUser(user, pageable).map(this::toResponse);
     }

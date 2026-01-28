@@ -7,6 +7,9 @@ import it.younify.modules.sgn.model.entity.Type;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -52,7 +55,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      *
      * @param date The timestamp before which all notifications will be deleted.
      */
-    void deleteAllByDateBefore(Instant date);
+    @Modifying
+    @Query("DELETE FROM Notification n WHERE n.date < :date")
+    void deleteAllByDateBefore(@Param("date") Instant date);
+
 
     /**
      * Deletes all notifications of a specific type sent from a user to another user.

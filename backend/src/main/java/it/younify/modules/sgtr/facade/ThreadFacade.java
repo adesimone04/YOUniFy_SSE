@@ -11,8 +11,8 @@ import it.younify.modules.sgtr.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 /**
@@ -82,7 +82,9 @@ public class ThreadFacade {
      */
     public Page<ThreadResponse> getThreadsByDate(Pageable pageable){
 
-        return threadViewService.getThreadsByDate(pageable);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return threadViewService.getThreadsByDate((UserDetails) principal, pageable);
     }
 
     /**
@@ -94,9 +96,11 @@ public class ThreadFacade {
      */
     public Page<ThreadResponse> getThreadsByFlag(String flag, Pageable pageable){
 
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         FlagCategory flagCategory = FlagCategory.valueOf(flag);
 
-        return threadViewService.getThreadsByFlag(flagCategory, pageable);
+        return threadViewService.getThreadsByFlag((UserDetails) principal, flagCategory, pageable);
     }
 
     /**
@@ -108,7 +112,27 @@ public class ThreadFacade {
      */
     public Page<ThreadResponse> getThreadsByUniversity(String university, Pageable pageable){
 
-        return threadViewService.getThreadsByUniversity(university, pageable);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return threadViewService.getThreadsByUniversity((UserDetails) principal, university, pageable);
+    }
+
+
+    /**
+     * Retrieves a paginated list of threads filtered by a specific university and flag category.
+     *
+     * @param university The name of the university.
+     * @param flag The string representation of the flag category.
+     * @param pageable The pagination information.
+     * @return A paginated list of threads matching the university and flag.
+     */
+    public Page<ThreadResponse> getThreadsByUniversityAndFlag(String university, String flag, Pageable pageable){
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        FlagCategory flagCategory = FlagCategory.valueOf(flag);
+
+        return threadViewService.getThreadsByUniversityAndFlag((UserDetails) principal, university, flagCategory, pageable);
     }
 
     /**
@@ -118,7 +142,6 @@ public class ThreadFacade {
      *
      * @param pageable The pagination information.
      * @return A {@link Page} of {@link ThreadResponse} objects posted by the authenticated principal.
-     * @throws AccessDeniedException if the principal is not a recognized type (User or Host).
      * @see ThreadViewService#getThreadsPostedByUser(User, Pageable)
      * @see ThreadViewService#getThreadsPostedByHost(Host, Pageable)
      */
@@ -130,15 +153,7 @@ public class ThreadFacade {
 
             return threadViewService.getThreadsPostedByUser((User) principal, pageable);
         }
-        else{
-
-            if(principal instanceof Host){
-
-                return threadViewService.getThreadsPostedByHost((Host) principal, pageable);
-            }
-        }
-
-        throw new AccessDeniedException("Access is denied for this operation");
+        else return threadViewService.getThreadsPostedByHost((Host) principal, pageable);
     }
 
     /**

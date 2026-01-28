@@ -84,7 +84,7 @@ public class CommentController {
      * @throws it.younify.core.exception.ResourceNotFoundException if the comment does not exist.
      */
     @PostMapping("/comment/react")
-    public ResponseEntity<ApiResponse<Void>> reactCFU(@RequestBody CommentVoteRequest commentVoteRequest) {
+    public ResponseEntity<ApiResponse<Void>> reactCFU(@Valid @RequestBody CommentVoteRequest commentVoteRequest) {
 
         commentFacade.reactionComment(commentVoteRequest);
 

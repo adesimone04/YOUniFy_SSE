@@ -51,12 +51,9 @@ public class ITPECAdapter implements PIVAlidator {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
 
-                .onStatus(status -> status.value() == 404, (req, res) -> {
-                    throw new ResourceNotFoundException("Partita IVA non trovata nel registro PEC.", "PEC_NOT_FOUND");
-                })
-                .onStatus(status -> status.isError(), (req, res) -> {
+                .onStatus(status -> status.value() == 401 || status.is5xxServerError(), (req, res) -> {
 
-                    throw new ResourceNotFoundException("Nessuna PEC associata a questa Partita IVA.", "PEC_EMPTY_RESULT");
+                    throw new ResourceNotFoundException("Errore nella richiesta al servizio esterno. Riprovare più tardi.", "OPEN_API_ERROR");
                 })
                 .body(PecResponse.class);
 

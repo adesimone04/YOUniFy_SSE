@@ -14,6 +14,40 @@ const axiosClient = axios.create({
     xsrfHeaderName: 'X-XSRF-TOKEN',
 });
 
+/// --- HELPER: Legge un cookie specifico ---
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
+
+axiosClient.interceptors.request.use(async (config) => { // Nota: async qui
+
+    // Funzione che aspetta
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    let xsrfToken = getCookie('XSRF-TOKEN');
+
+    // SE NON LO TROVIAMO SUBITO, ASPETTIAMO UN ATTIMO E RIPROVIAMO
+    if (!xsrfToken) {
+        await sleep(500);
+        xsrfToken = getCookie('XSRF-TOKEN');
+    }
+
+    if (xsrfToken) {
+        if (config.method !== 'get' && config.method !== 'head') {
+            config.headers['X-XSRF-TOKEN'] = xsrfToken;
+        }
+    } else {
+        console.log('❌ Niente da fare, il cookie è invisibile.');
+        console.log('Path attuale:', window.location.pathname);
+        console.log('Cookie visibili:', document.cookie);
+    }
+
+    return config;
+});
+
 // --- INTERCEPTOR RISPOSTE ---
 axiosClient.interceptors.response.use(
 

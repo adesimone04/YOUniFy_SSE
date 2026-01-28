@@ -22,7 +22,7 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
         // LOGIN / 2FA_CONFIRMED -> Vai alla Home (Thread)
         case 'LOGIN':
             localStorage.setItem('user_is_logged_in', 'true');
-            navigate('/');
+            navigate('/thread');
             return null;
 
         case '2FA_CONFIRMED':

@@ -7,6 +7,7 @@ import it.younify.modules.sge.model.dto.response.EventResponse;
 import it.younify.modules.sge.model.dto.response.JoinedUserResponse;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +38,7 @@ public class EventViewService {
      * @return A paginated list of {@link EventResponse} objects.
      */
     @Transactional(readOnly = true)
-    public Page<EventResponse> getEventsByDate(Pageable pageable){
+    public Page<EventResponse> getEventsByDate(@NonNull Pageable pageable){
 
         return eventRepository.findAllByOrderByDateAndTimeAsc(pageable).map(this::toResponse);
     }
@@ -50,7 +51,7 @@ public class EventViewService {
      * @return A paginated list of {@link EventResponse} objects.
      */
     @Transactional(readOnly = true)
-    public Page<EventResponse> getEventsByHost(Host host, Pageable pageable){
+    public Page<EventResponse> getEventsByHost(@NonNull Host host, @NonNull Pageable pageable){
 
         return eventRepository.findAllByHostOrderByDateAndTimeAsc(host, pageable).map(this::toResponse);
     }
@@ -63,7 +64,7 @@ public class EventViewService {
      * @return A paginated list of {@link EventResponse} objects.
      */
     @Transactional(readOnly = true)
-    public Page<EventResponse> getEventsByCity(String city, Pageable pageable){
+    public Page<EventResponse> getEventsByCity(@NonNull String city, @NonNull Pageable pageable){
 
         return eventRepository.findAllByCityOrderByDateAndTimeAsc(city, pageable).map(this::toResponse);
     }
@@ -76,7 +77,7 @@ public class EventViewService {
      * @return A paginated list of {@link EventResponse} objects.
      */
     @Transactional(readOnly = true)
-    public Page<EventResponse> getEventsByJoined(User user, Pageable pageable){
+    public Page<EventResponse> getEventsByJoined(@NonNull User user, @NonNull Pageable pageable){
 
         return eventRepository.findDistinctByParticipationsUser(user, pageable).map(this::toResponse);
     }
