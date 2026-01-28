@@ -8,6 +8,7 @@ import it.younify.modules.sgm.model.dto.response.MatchAcceptedResponse;
 import it.younify.modules.sgm.model.dto.response.MatchPendingResponse;
 import it.younify.modules.sgm.model.dto.response.MatchCardResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -134,7 +135,7 @@ public class MatchController {
      */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{university}")
-    public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCardsByUni(@Positive @PathVariable("university") String university,
+    public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCardsByUni(@NotBlank @PathVariable("university") String university,
                                                                                    @PageableDefault(size = 10) Pageable pageable) {
 
         Page<MatchCardResponse> page = matchFacade.getMatchCardsByUni(university, pageable);
@@ -160,8 +161,8 @@ public class MatchController {
      */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/{university}/{cdl}")
-    public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCardsByUniAndCdl(@Positive @PathVariable("university") String university,
-                                                                                         @Positive @PathVariable("cdl") String cdl,
+    public ResponseEntity<ApiResponse<Page<MatchCardResponse>>> getMatchCardsByUniAndCdl(@NotBlank @PathVariable("university") String university,
+                                                                                         @NotBlank @PathVariable("cdl") String cdl,
                                                                                          @PageableDefault(size = 10) Pageable pageable) {
 
         Page<MatchCardResponse> page = matchFacade.getMatchCardsByUniAndCdl(university, cdl, pageable);

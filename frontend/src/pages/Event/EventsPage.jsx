@@ -43,6 +43,7 @@ const HeroTitle = () => (
 );
 
 const EventsPage = () => {
+
     // --- STATI ---
     const isHost = localStorage.getItem('isHost') === 'true';
 
@@ -138,9 +139,8 @@ const EventsPage = () => {
                 setHasMore(!response.data.last);
                 hasMoreRef.current = !response.data.last;
             }
-        } catch (error) {
-            console.error('❌ Errore caricamento eventi:', error);
-        } finally {
+        }
+        finally {
             setLoading(false);
             loadingRef.current = false;
         }
@@ -476,7 +476,7 @@ const EventsPage = () => {
                                 })}
                             </Masonry>
 
-                            {/* ✅ ELEMENTO SENTINELLA */}
+                            {/* ELEMENTO SENTINELLA */}
                             <div ref={loadMoreRef} className="h-20 flex justify-center items-center py-8 mt-8">
                                 {loading && (
                                     <div className="text-white text-sm animate-pulse flex items-center gap-2">

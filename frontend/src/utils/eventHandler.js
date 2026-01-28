@@ -1,25 +1,30 @@
 import { toast } from 'react-toastify';
 
-export const handleAuthResponse = (responseData, navigate, contextData = {}) => {
+export const handleEventResponse = (responseData, navigate, contextData = {}) => {
 
     const internalCode = responseData.internalCode || responseData.message;
     const { data, message } = responseData;
 
     switch(internalCode){
+
         case 'POSTED_SUCCESSFULLY':
-            toast.success("Postato con successo!")
+            toast.success("Evento postato con successo!")
             return null;
 
         case 'DELETED_SUCCESSFULLY':
-            toast.success("Eliminato con successo!")
+            toast.success("Evento eliminato con successo!")
             return null;
 
         case 'EDITED_SUCCESSFULLY':
-            toast.success("Modifica avvenuta con successo!")
+            toast.success("Evento modificato con successo!")
             return null;
 
         case 'JOINED_SUCCESSFULLY':
             toast.success("Ora partecipi all'evento")
+            return null;
+
+        case 'CANT_JOIN_EVENT':
+            toast.error("Non puoi unirti ad un evento già iniziato")
             return null;
 
         case 'UNJOINED_SUCCESSFULLY':
@@ -54,6 +59,15 @@ export const handleAuthResponse = (responseData, navigate, contextData = {}) => 
 
         case 'ALREADY_NOT_JOINED':
             toast.error("Non sei nella lista dei partecipanti")
+            return null;
+
+        case 'USER_NOT_FOUND':
+            return null;
+
+        case 'HOST_NOT_FOUND':
+            return null;
+
+        case 'ACCOUNT_NOT_FOUND':
             return null;
 
         case 'DB_CONSTRAINS_VIOLATED':
