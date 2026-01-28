@@ -10,6 +10,7 @@ import LoginPage from './pages/Auth/LoginPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import TwoFactorAuth from './pages/TwoFactorAuth/TwoFactorAuth';
 import EventPage from './pages/Event/EventsPage';
+import MatchingPage from './pages/Matching/MatchingPage';
 
 // --- IMPORTANTE: Importa gli stili dei blob qui ---
 import styles from './pages/LandingPage/LandingPage.module.css';
@@ -46,8 +47,10 @@ const GlobalBackground = () => {
 // 2. ROTTE E PROTEZIONE
 // ----------------------------------------------------------------------
 const PublicRoute = () => {
+
     const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
     if (isLogged) { return <Navigate to="/" replace />; }
+
     return <Outlet />;
 };
 
@@ -55,6 +58,7 @@ const ProtectedRoute = () => {
     const isLogged = localStorage.getItem('user_is_logged_in') === 'true';
     if (!isLogged) { return <Navigate to="/login" replace />; }
     return <Outlet />;
+
 }
 
 const AnimatedRoutes = () => {
@@ -63,7 +67,9 @@ const AnimatedRoutes = () => {
     return (
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
+
                 <Route path="/" element={<LandingPage />} />
+
                 <Route element={<PublicRoute />}>
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/login" element={<LoginPage />} />
@@ -71,6 +77,7 @@ const AnimatedRoutes = () => {
                 </Route>
                 <Route element={<ProtectedRoute />}>
                     <Route path="/events" element={<EventPage />} />
+                    <Route path="/match" element={<MatchingPage />} />
                 </Route>
             </Routes>
         </AnimatePresence>
@@ -78,13 +85,10 @@ const AnimatedRoutes = () => {
 };
 
 const SoftFade = cssTransition({
-    enter: "soft-enter",
+    enter: "soft-enter", // Deve corrispondere al nome della classe CSS in index.css
     exit: "soft-exit"
 });
 
-// ----------------------------------------------------------------------
-// 3. APP PRINCIPALE
-// ----------------------------------------------------------------------
 function App() {
     return (
         <BrowserRouter>
