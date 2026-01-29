@@ -71,6 +71,6 @@ public class MatchSendService {
 
             notificationFacade.send(notificationRequest);
 
-        } else throw new ResourceNotFoundException("User not found", "USER_NOT_FOUND");
+        } else throw new ResourceNotFoundException("User not found", "USER_NOT_FOUND_FOR_MATCH");
     }
 }

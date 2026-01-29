@@ -13,6 +13,7 @@ import { motion, AnimatePresence, LayoutGroup} from 'framer-motion';
 //IMPORT STILI
 import authService from '../../services/authService';
 import { handleAuthResponse } from '../../utils/authHandler';
+import styles from '../LandingPage/LandingPage.module.css';
 import PageTransition from '../../components/ui/PageTransition/PageTransition'
 
 // --- IMPORT DATI REALI ---
@@ -244,6 +245,7 @@ const AuthPage = () => {
     };
 
     const handleHostSubmit = async (e) => {
+
         e.preventDefault();
         const newErrors = {};
 
@@ -251,7 +253,8 @@ const AuthPage = () => {
 
         if (!hostData.piva) {
             newErrors.piva = isAssociation ? "Codice Fiscale richiesto" : "Partita IVA richiesta";
-        } else {
+        }
+        else {
             const currentRegex = isAssociation ? associationCfRegex : pivaRegex;
             if (!currentRegex.test(hostData.piva)) {
                 newErrors.piva = isAssociation ? "Codice Fiscale non valido" : "Partita IVA non valida";
@@ -278,17 +281,17 @@ const AuthPage = () => {
         setHostErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
+
             try {
                 // 1. Prepariamo i dati corretti (lista -> stringa)
                 const payload = {
                     ...hostData,
                     isAssociation,
-                    uniList: hostData.uniList.join(','), // <--- Qui diventa una stringa "Uni1,Uni2"
+                    uniList: hostData.uniList.join(','),
                     PIVA: hostData.piva,
                     PEC: hostData.pec
                 };
 
-                // 2. USIAMO "payload" NELLA CHIAMATA (Prima usavi hostData)
                 const response = await authService.registerHost(payload);
 
                 // Caso SUCCESSO (es. HOST_REGISTERED)
@@ -308,7 +311,6 @@ const AuthPage = () => {
                     }
                 }
                 else {
-
                     toast.error("Errore di connessione al server.");
                 }
             }
@@ -401,6 +403,16 @@ const AuthPage = () => {
         }
     }, [isAssociation]); // Si attiva ogni volta che clicchi la checkbox "Sono un'associazione"
 
+    // [SFONDO MOBILE]
+    useEffect(() => {
+        document.body.style.backgroundColor = '#020617';
+        document.body.style.overscrollBehaviorY = 'none';
+        return () => {
+            document.body.style.backgroundColor = '';
+            document.body.style.overscrollBehaviorY = '';
+        };
+    }, []);
+
     const getMaxDate = () => {
         const today = new Date();
         const currentMonth = today.getMonth(); // 0 = Gennaio, ..., 8 = Settembre
@@ -418,19 +430,7 @@ const AuthPage = () => {
             referenceYear = currentYear;
         }
 
-        // Regola anticipatari: 18 anni compiuti entro il 30 Aprile dell'anno successivo all'immatricolazione.
-        // referenceYear è l'anno in cui è iniziato l'a.a. (es. 2025)
-        // Chi si è iscritto nel 2025 deve essere nato al massimo entro Aprile (2025 - 18 + 1) = 2008...
-        // Aspetta, semplifichiamo:
-        // Immatricolazione 2025 -> Nati 2006 (19 anni) e Nati fino ad Aprile 2007 (18 anni).
-
         const cutoffYear = referenceYear - 18;
-
-        // Risultato per Gennaio 2026:
-        // referenceYear = 2025.
-        // cutoffYear = 2007.
-        // Ritorna: 2007-04-30.
-        // BLOCCA: Maggio-Dic 2007 e TUTTO il 2008.
 
         return `${cutoffYear}-04-30`;
     };
@@ -441,7 +441,16 @@ const AuthPage = () => {
 
     return (
 
-        <PageTransition className="fixed inset-0 w-full flex flex-col font-sans">
+        <PageTransition className="fixed inset-0 w-full bg-slate-950 flex flex-col font-sans">
+            {/* BACKGROUND */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                <div className={`${styles.blob} ${styles.blue}`}></div>
+                <div className={`${styles.blob} ${styles.indigo}`}></div>
+                <div className={`${styles.blob} ${styles.magenta}`}></div>
+                <div className={`${styles.blob} ${styles.crimson}`}></div>
+                <div className={`${styles.blob} ${styles.purple}`}></div>
+                <div className={`${styles.blob} ${styles.amber}`}></div>
+            </div>
 
             <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6 h-full">
                 <div className="relative bg-slate-900/60 border border-white/10 w-full max-w-[1100px] h-full md:h-[750px] rounded-none md:rounded-[30px] shadow-2xl flex flex-col md:flex-row overflow-hidden backdrop-blur-md">

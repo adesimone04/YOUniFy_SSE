@@ -1,8 +1,10 @@
 package it.younify.modules.sge.service;
 
+import it.younify.core.exception.BadRequestException;
 import it.younify.core.exception.ResourceAlreadyExistsException;
 import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.service.validator.GeoValidationService;
 import it.younify.modules.sge.model.dto.request.EventPostRequest;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
@@ -30,6 +32,7 @@ public class EventPostService {
     private final EventRepository eventRepository;
     private final ImageStorageService imageStorageService;
     private final CensorshipService censorshipService;
+    private final GeoValidationService geoValidationService;
 
     private final String UPLOAD_DIR = "uploads/events";
 
@@ -64,18 +67,23 @@ public class EventPostService {
                 description = censorshipService.censorText(description);
             }
 
-            eventRepository.save(
-                    Event.builder()
-                            .name(name)
-                            .description(description)
-                            .dateAndTime(eventPostRequest.getDateAndTime())
-                            .street(eventPostRequest.getStreet())
-                            .city(eventPostRequest.getCity())
-                            .CAP(eventPostRequest.getCAP())
-                            .poster(posterPath)
-                            .host(host)
-                            .build()
-            );
+            String city = eventPostRequest.getCity();
+            if(geoValidationService.isValidCityOnly(city)){
+
+                eventRepository.save(
+                        Event.builder()
+                                .name(name)
+                                .description(description)
+                                .dateAndTime(eventPostRequest.getDateAndTime())
+                                .street(eventPostRequest.getStreet())
+                                .city(eventPostRequest.getCity())
+                                .CAP(eventPostRequest.getCAP())
+                                .poster(posterPath)
+                                .host(host)
+                                .build()
+                );
+            }
+            else throw new BadRequestException("The city inserted is not valid", "CITY_NOT_VALID");
         }
         else throw new ResourceAlreadyExistsException("The host has already posted this event for this day and time", "EVENT_ALREADY_EXISTS");
     }
