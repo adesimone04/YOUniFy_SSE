@@ -100,21 +100,6 @@ class MatchService {
         }
     }
 
-    async getTotalMatched() {
-
-        try {
-
-            const response = await axiosClient.get('/match/totalMatched');
-            handleMatchResponse(response.data);
-            return response.data;
-        }
-        catch (error) {
-
-            throw this.handleError(error);
-        }
-    }
-
-
     async sendMatch(receiverID) {
 
         try {
@@ -162,7 +147,6 @@ class MatchService {
             throw this.handleError(error);
         }
     }
-
 
     handleError(error) {
 
