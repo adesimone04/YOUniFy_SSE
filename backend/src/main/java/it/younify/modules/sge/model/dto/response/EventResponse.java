@@ -60,6 +60,12 @@ public class EventResponse {
     private String hostName;
 
     /**
+     * Indicates whether the currently authenticated user has joined this event.
+     * This field is typically populated based on the user's participation status.
+     */
+    private boolean joined;
+
+    /**
      * A list of users who have joined the event.
      */
     private List<JoinedUserResponse> joinedUsers;

@@ -245,6 +245,7 @@ const AuthPage = () => {
     };
 
     const handleHostSubmit = async (e) => {
+
         e.preventDefault();
         const newErrors = {};
 
@@ -252,7 +253,8 @@ const AuthPage = () => {
 
         if (!hostData.piva) {
             newErrors.piva = isAssociation ? "Codice Fiscale richiesto" : "Partita IVA richiesta";
-        } else {
+        }
+        else {
             const currentRegex = isAssociation ? associationCfRegex : pivaRegex;
             if (!currentRegex.test(hostData.piva)) {
                 newErrors.piva = isAssociation ? "Codice Fiscale non valido" : "Partita IVA non valida";
@@ -279,17 +281,17 @@ const AuthPage = () => {
         setHostErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
+
             try {
                 // 1. Prepariamo i dati corretti (lista -> stringa)
                 const payload = {
                     ...hostData,
                     isAssociation,
-                    uniList: hostData.uniList.join(','), // <--- Qui diventa una stringa "Uni1,Uni2"
+                    uniList: hostData.uniList.join(','),
                     PIVA: hostData.piva,
                     PEC: hostData.pec
                 };
 
-                // 2. USIAMO "payload" NELLA CHIAMATA (Prima usavi hostData)
                 const response = await authService.registerHost(payload);
 
                 // Caso SUCCESSO (es. HOST_REGISTERED)
@@ -309,7 +311,6 @@ const AuthPage = () => {
                     }
                 }
                 else {
-
                     toast.error("Errore di connessione al server.");
                 }
             }
@@ -347,7 +348,7 @@ const AuthPage = () => {
             }
         });
 
-        // 2. Rimuovi l'errore se presente
+
         // Usiamo un timeout brevissimo o controlliamo lo stato precedente perché setHostData è asincrono,
         // ma per l'errore basta sapere che l'utente ha interagito.
         if (hostErrors.uniList) {
@@ -379,11 +380,11 @@ const AuthPage = () => {
     // Reset P.IVA Error on Checkbox toggle
     useEffect(() => {
         if (hostData.piva.length > 0) {
-            // Opzionale: rivalida al volo se vuoi
+
         }
     }, [isAssociation]);
 
-    // --- FIX: Aggiorna errore PIVA/CF al cambio della checkbox ---
+    // Aggiorna errore PIVA/CF al cambio della checkbox ---
     useEffect(() => {
         // Se esiste già un errore nel campo piva...
         if (hostErrors.piva) {
@@ -402,7 +403,7 @@ const AuthPage = () => {
         }
     }, [isAssociation]); // Si attiva ogni volta che clicchi la checkbox "Sono un'associazione"
 
-    // [FIX SFONDO MOBILE]
+    // [SFONDO MOBILE]
     useEffect(() => {
         document.body.style.backgroundColor = '#020617';
         document.body.style.overscrollBehaviorY = 'none';
@@ -429,19 +430,7 @@ const AuthPage = () => {
             referenceYear = currentYear;
         }
 
-        // Regola anticipatari: 18 anni compiuti entro il 30 Aprile dell'anno successivo all'immatricolazione.
-        // referenceYear è l'anno in cui è iniziato l'a.a. (es. 2025)
-        // Chi si è iscritto nel 2025 deve essere nato al massimo entro Aprile (2025 - 18 + 1) = 2008...
-        // Aspetta, semplifichiamo:
-        // Immatricolazione 2025 -> Nati 2006 (19 anni) e Nati fino ad Aprile 2007 (18 anni).
-
         const cutoffYear = referenceYear - 18;
-
-        // Risultato per Gennaio 2026:
-        // referenceYear = 2025.
-        // cutoffYear = 2007.
-        // Ritorna: 2007-04-30.
-        // BLOCCA: Maggio-Dic 2007 e TUTTO il 2008.
 
         return `${cutoffYear}-04-30`;
     };

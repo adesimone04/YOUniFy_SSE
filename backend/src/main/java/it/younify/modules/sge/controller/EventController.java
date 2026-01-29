@@ -49,6 +49,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("POSTED_SUCCESSFULLY")
+                        .internalCode("POSTED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -68,6 +69,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("DELETED_SUCCESSFULLY")
+                        .internalCode("DELETED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -88,6 +90,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("EDITED_SUCCESSFULLY")
+                        .internalCode("EDITED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -107,6 +110,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("JOINED_SUCCESSFULLY")
+                        .internalCode("JOINED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -127,6 +131,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
                         .message("UNJOINED_SUCCESSFULLY")
+                        .internalCode("UNJOINED_SUCCESSFULLY")
                         .build()
         );
     }
@@ -145,6 +150,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<EventResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .data(page)
                         .build()
         );
@@ -165,6 +171,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<EventResponse>>builder()
                         .message("VIEW_SUCCESSFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .data(page)
                         .build()
         );
@@ -181,6 +188,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<List<Map<String, String>>>builder()
                         .message("RETRIEVE_SUCCESSFULLY")
+                        .internalCode("RETRIEVE_SUCCESSFULLY")
                         .data(
                                 eventFacade.getCities().stream().map(city -> Map.of(
                                         "value", city,
@@ -207,6 +215,7 @@ public class EventController {
             return ResponseEntity.ok(
                     ApiResponse.<Page<EventResponse>>builder()
                             .message("VIEW_SUCCESSFULLY")
+                            .internalCode("VIEW_SUCCESSFULLY")
                             .data(page)
                             .build()
             );
@@ -227,6 +236,7 @@ public class EventController {
         return ResponseEntity.ok(
                 ApiResponse.<Page<EventResponse>>builder()
                         .message("VIEW_SUCCESFULLY")
+                        .internalCode("VIEW_SUCCESSFULLY")
                         .data(page)
                         .build()
         );
