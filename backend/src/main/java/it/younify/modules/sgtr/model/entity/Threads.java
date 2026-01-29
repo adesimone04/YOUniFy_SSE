@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * The {@code Threads} class is a JPA entity that represents a thread in the application's forum.
@@ -67,4 +68,18 @@ public class Threads {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    /**
+     * The list of comments associated with this thread.
+     * Managed via the {@link Comment} entity.
+     */
+    @OneToMany(mappedBy = "threadId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
+    /**
+     * The list of individual votes associated with this thread.
+     * Managed via the {@link ThreadsVote} entity.
+     */
+    @OneToMany(mappedBy = "thread", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ThreadsVote> votes;
 }

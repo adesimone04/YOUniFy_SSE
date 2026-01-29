@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * The {@code Comment} class is a JPA entity that represents a comment on a thread.
@@ -66,4 +67,11 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id")
     private Host host;
+
+    /**
+     * The list of individual votes associated with this comment.
+     * Managed via the {@link CommentVote} entity.
+     */
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentVote> votes;
 }

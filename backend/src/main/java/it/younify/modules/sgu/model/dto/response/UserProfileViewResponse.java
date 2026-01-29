@@ -14,6 +14,11 @@ import java.time.LocalDate;
 public class UserProfileViewResponse {
 
     /**
+     * The URL or reference to the user's avatar image.
+     */
+    private String avatar;
+
+    /**
      * The user's first name.
      */
     private String firstName;
@@ -27,9 +32,6 @@ public class UserProfileViewResponse {
      * The user's email address.
      */
     private String email;
-
-
-    private String profileImage;
 
     /**
      * The user's course of study (Corso di Laurea).
@@ -51,4 +53,14 @@ public class UserProfileViewResponse {
      * The user's contact information.
      */
     private String contactsInfo;
+
+    /**
+     * The total count of CFU (credits or reputation points) accumulated by the user.
+     */
+    private int totalCfu;
+
+    /**
+     * The total number of matches or connections associated with the user.
+     */
+    private int totalMatch;
 }
