@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+// modify in prod in .env files
 const BASE_URL = import.meta.env.VITE_API_URL;
 
 const axiosClient = axios.create({
