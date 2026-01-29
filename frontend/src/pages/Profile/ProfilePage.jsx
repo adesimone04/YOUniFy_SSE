@@ -1,29 +1,35 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, {useState, useEffect, useMemo, useRef} from 'react';
 import {
     User, Mail, MapPin, Calendar, Camera, Lock, Save,
     Building2, GraduationCap, Award, Shield, Edit3, Star,
     ChevronRight, CheckCircle2, TrendingUp, MessageSquare,
     CalendarDays, X, Instagram, Receipt, CreditCard,
     AlertCircle, School, ChevronDown, CheckCircle,
-    Clock, Users, Sparkles, Upload, ImageIcon,ChevronLeft, PenLine, MessageCircle, Heart, Check, Globe2,
+    Clock, Users, Sparkles, Upload, ImageIcon, ChevronLeft, PenLine, MessageCircle, Heart, Check, Globe2,
 } from 'lucide-react';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
+import {motion, AnimatePresence} from 'framer-motion';
+import {toast} from 'react-toastify';
+import {useNavigate} from 'react-router-dom';
 import InfiniteMenu from '../../components/ui/InfiniteMenu/InfiniteMenu';
 import AppNavbar from '../../components/layout/Navbar/AppNavbar';
 import profileService from '../../services/profileService';
 import eventService from '../../services/eventService';
 import matchService from '../../services/matchService';
+import {threadService} from '../../services/threadService';
+
 
 import rawCitiesData from '../../data/comuni.json';
-import { ALLOWED_EMAIL_DOMAINS } from '../../data/emailDomains';
-import { UNIVERSITY_DATA } from '../../data/universities';
-import { CDL_DATA } from '../../data/cdl';
+import {ALLOWED_EMAIL_DOMAINS} from '../../data/emailDomains';
+import {UNIVERSITY_DATA} from '../../data/universities';
+import {CDL_DATA} from '../../data/cdl';
+
 
 const passwordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}/;
+// Match ricevuti
 
-const PremiumInput = ({ label, icon: Icon, type = "text", disabled = false, error, ...props }) => {
+
+const PremiumInput = ({label, icon: Icon, type = "text", disabled = false, error, ...props}) => {
     return (
         <div className="space-y-2">
             <label className={`block text-xs font-medium uppercase tracking-widest transition-colors ${
@@ -40,7 +46,7 @@ const PremiumInput = ({ label, icon: Icon, type = "text", disabled = false, erro
                         : error
                             ? 'text-rose-400'
                             : 'text-younify-blue'
-                }`} />
+                }`}/>
                 <input
                     type={type}
                     disabled={disabled}
@@ -56,7 +62,7 @@ const PremiumInput = ({ label, icon: Icon, type = "text", disabled = false, erro
             </div>
             {error && (
                 <p className="text-xs text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
+                    <AlertCircle className="h-3 w-3"/>
                     {error}
                 </p>
             )}
@@ -65,7 +71,7 @@ const PremiumInput = ({ label, icon: Icon, type = "text", disabled = false, erro
 };
 
 
-const PremiumSelect = ({ label, icon: Icon, children, disabled = false, error, ...props }) => (
+const PremiumSelect = ({label, icon: Icon, children, disabled = false, error, ...props}) => (
     <div className="space-y-2">
         <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest">
             {label}
@@ -74,7 +80,7 @@ const PremiumSelect = ({ label, icon: Icon, children, disabled = false, error, .
             {Icon && (
                 <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 z-10 transition-colors ${
                     disabled ? 'text-slate-700' : error ? 'text-rose-400' : 'text-slate-500 group-focus-within:text-younify-blue'
-                }`} />
+                }`}/>
             )}
             <select
                 disabled={disabled}
@@ -89,11 +95,12 @@ const PremiumSelect = ({ label, icon: Icon, children, disabled = false, error, .
             >
                 {children}
             </select>
-            <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 rotate-90 pointer-events-none" />
+            <ChevronRight
+                className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 rotate-90 pointer-events-none"/>
         </div>
         {error && (
             <p className="text-xs text-rose-400 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" />
+                <AlertCircle className="h-3 w-3"/>
                 {error}
             </p>
         )}
@@ -103,10 +110,10 @@ const PremiumSelect = ({ label, icon: Icon, children, disabled = false, error, .
 // ========================================
 // COMPONENTE INSTAGRAM INPUT
 // ========================================
-const InstagramInput = ({ value, onChange, disabled = false, error }) => {
+const InstagramInput = ({value, onChange, disabled = false, error}) => {
     const handleChange = (e) => {
         let val = e.target.value.replace('instagram.com/', '').trim();
-        onChange({ target: { name: 'contactsInfo', value: val } });
+        onChange({target: {name: 'contactsInfo', value: val}});
     };
 
     const iconColor = value && value.length > 0
@@ -123,10 +130,12 @@ const InstagramInput = ({ value, onChange, disabled = false, error }) => {
                 Instagram
             </label>
             <div className="relative group">
-                <Instagram className={`absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 z-10 transition-colors ${iconColor}`} />
-                <div className={`absolute left-11 top-1/2 -translate-y-1/2 text-sm pointer-events-none z-10 transition-colors ${
-                    disabled ? 'text-slate-600' : 'text-slate-500'  // ← OSCURATO quando disabled
-                }`}>
+                <Instagram
+                    className={`absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 z-10 transition-colors ${iconColor}`}/>
+                <div
+                    className={`absolute left-11 top-1/2 -translate-y-1/2 text-sm pointer-events-none z-10 transition-colors ${
+                        disabled ? 'text-slate-600' : 'text-slate-500'  // ← OSCURATO quando disabled
+                    }`}>
                     instagram.com/
                 </div>
                 <input
@@ -146,7 +155,7 @@ const InstagramInput = ({ value, onChange, disabled = false, error }) => {
             </div>
             {error && (
                 <p className="text-xs text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
+                    <AlertCircle className="h-3 w-3"/>
                     {error}
                 </p>
             )}
@@ -158,7 +167,7 @@ const InstagramInput = ({ value, onChange, disabled = false, error }) => {
 // ========================================
 // COMPONENTE MULTI-SELECT UNIVERSITÀ
 // ========================================
-const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error }) => {
+const UniversityMultiSelect = ({selectedUnis, onToggle, disabled = false, error}) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -209,7 +218,7 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
                         >
                             <GraduationCap className={`h-3 w-3 transition-colors ${
                                 disabled ? 'text-slate-600' : 'text-younify-blue'
-                            }`} />
+                            }`}/>
                             {uni}
                             {!disabled && (
                                 <button
@@ -217,7 +226,7 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
                                     className="hover:text-white transition-colors"
                                     type="button"
                                 >
-                                    <X className="h-3 w-3" />
+                                    <X className="h-3 w-3"/>
                                 </button>
                             )}
                         </div>
@@ -235,7 +244,7 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
           <span className="text-sm">
             {selectedUnis.length >= 5 ? 'Limite raggiunto (5/5)' : 'Seleziona università'}
           </span>
-                    <ChevronRight className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-90' : ''}`}/>
                 </button>
             )}
 
@@ -243,9 +252,9 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
             <AnimatePresence>
                 {isOpen && !disabled && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
+                        initial={{opacity: 0, height: 0}}
+                        animate={{opacity: 1, height: 'auto'}}
+                        exit={{opacity: 0, height: 0}}
                         className="overflow-hidden rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl"
                     >
                         {/* Search Bar */}
@@ -287,7 +296,7 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
                                         >
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm">{uni}</span>
-                                                {isSelected && <CheckCircle2 className="h-4 w-4 text-younify-blue" />}
+                                                {isSelected && <CheckCircle2 className="h-4 w-4 text-younify-blue"/>}
                                             </div>
                                         </button>
                                     );
@@ -300,7 +309,7 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
 
             {error && (
                 <p className="text-xs text-rose-400 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
+                    <AlertCircle className="h-3 w-3"/>
                     {error}
                 </p>
             )}
@@ -311,67 +320,75 @@ const UniversityMultiSelect = ({ selectedUnis, onToggle, disabled = false, error
 // ==================== HELPER: COLORI TOPIC ====================
 const getTopicColor = (topic) => {
     const colors = {
-        Esami: 'text-rose-300 bg-rose-500/20 border-rose-500/30',
-        Affitti: 'text-orange-300 bg-orange-500/20 border-orange-500/30',
-        'Vita Sociale': 'text-purple-300 bg-purple-500/20 border-purple-500/30',
-        Appunti: 'text-teal-300 bg-teal-500/20 border-teal-500/30',
-        Generale: 'text-slate-300 bg-slate-500/20 border-slate-500/30',
-        Eventi: 'text-blue-300 bg-blue-500/20 border-blue-500/30',
-        Lavoro: 'text-emerald-300 bg-emerald-500/20 border-emerald-500/30',
-        Sport: 'text-yellow-300 bg-yellow-500/20 border-yellow-500/30',
-        default: 'text-slate-400 bg-slate-600/20 border-slate-600/30',
+        'ESAMI': 'text-rose-300 bg-rose-500/20 border-rose-500/30',
+        'AFFITTI': 'text-orange-300 bg-orange-500/20 border-orange-500/30',
+        'VITA SOCIALE': 'text-purple-300 bg-purple-500/20 border-purple-500/30',
+        'APPUNTI': 'text-teal-300 bg-teal-500/20 border-teal-500/30',
+        'GENERALE': 'text-slate-300 bg-slate-500/20 border-slate-500/30',
+        'EVENTI': 'text-blue-300 bg-blue-500/20 border-blue-500/30',
+        'LAVORO': 'text-emerald-300 bg-emerald-500/20 border-emerald-500/30',
+        'SPORT': 'text-yellow-300 bg-yellow-500/20 border-yellow-500/30',
+        'default': 'text-slate-400 bg-slate-600/20 border-slate-600/30',
     };
     return colors[topic] || colors['default'];
 };
 
 
 // ==================== COMPONENTE: MODALE CONFERMA ELIMINAZIONE ====================
-const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message, type = 'default', confirmText = 'Elimina' }) => {
+const ConfirmDeleteModal = ({
+                                isOpen,
+                                onClose,
+                                onConfirm,
+                                title,
+                                message,
+                                type = 'default',
+                                confirmText = 'Elimina'
+                            }) => {
     const getTypeStyles = () => {
         switch (type) {
             case 'event':
                 return {
                     gradient: 'from-amber-600 to-amber-600',
-                    icon: <CalendarDays size={24} />,
+                    icon: <CalendarDays size={24}/>,
                     accentColor: 'amber',
                 };
             case 'thread':
                 return {
                     gradient: 'from-purple-600 to-purple-500',
-                    icon: <MessageSquare size={24} />,
+                    icon: <MessageSquare size={24}/>,
                     accentColor: 'purple',
                 };
             case 'comment':
                 return {
                     gradient: 'from-blue-600 to-blue-500',
-                    icon: <MessageCircle size={24} />,
+                    icon: <MessageCircle size={24}/>,
                     accentColor: 'blue',
                 };
-            // ✅ NUOVO: Accetta Match (Verde)
+
             case 'accept':
                 return {
                     gradient: 'from-emerald-500 to-green-600',
-                    icon: <CheckCircle size={24} />,
+                    icon: <CheckCircle size={24}/>,
                     accentColor: 'emerald',
                 };
-            // ✅ NUOVO: Rifiuta Match (Rosso)
+
             case 'reject':
                 return {
                     gradient: 'from-rose-600 to-red-600',
-                    icon: <X size={24} />,
+                    icon: <X size={24}/>,
                     accentColor: 'rose',
                 };
-            // ✅ NUOVO: Annulla Richiesta (Grigio neutro)
+
             case 'cancel':
                 return {
                     gradient: 'from-slate-600 to-slate-700',
-                    icon: <Clock size={24} />,
+                    icon: <Clock size={24}/>,
                     accentColor: 'slate',
                 };
             default:
                 return {
                     gradient: 'from-rose-600 to-red-600',
-                    icon: <AlertCircle size={24} />,
+                    icon: <AlertCircle size={24}/>,
                     accentColor: 'rose',
                 };
         }
@@ -386,19 +403,19 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message, type =
             <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                 {/* Backdrop */}
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}
                     onClick={onClose}
                     className="absolute inset-0 bg-black/60 backdrop-blur-md"
                 />
 
                 {/* Modal Card */}
                 <motion.div
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                    initial={{scale: 0.9, opacity: 0, y: 20}}
+                    animate={{scale: 1, opacity: 1, y: 0}}
+                    exit={{scale: 0.9, opacity: 0, y: 20}}
+                    transition={{type: 'spring', stiffness: 300, damping: 30}}
                     className="relative w-full max-w-md bg-[#0F131F] border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
                 >
                     {/* Header Gradient */}
@@ -408,8 +425,10 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message, type =
                     <div className="p-6 md:p-8">
                         {/* Icon */}
                         <div className="flex justify-center mb-6">
-                            <div className={`relative w-16 h-16 rounded-full bg-${styles.accentColor}-500/20 flex items-center justify-center`}>
-                                <div className={`absolute inset-0 bg-${styles.accentColor}-500/20 blur-xl rounded-full animate-pulse`}></div>
+                            <div
+                                className={`relative w-16 h-16 rounded-full bg-${styles.accentColor}-500/20 flex items-center justify-center`}>
+                                <div
+                                    className={`absolute inset-0 bg-${styles.accentColor}-500/20 blur-xl rounded-full animate-pulse`}></div>
                                 <div className={`relative text-${styles.accentColor}-400`}>
                                     {styles.icon}
                                 </div>
@@ -429,8 +448,8 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message, type =
                         {/* Buttons */}
                         <div className="flex gap-3">
                             <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{scale: 1.02}}
+                                whileTap={{scale: 0.98}}
                                 onClick={onClose}
                                 className="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-slate-300 font-semibold border border-slate-700 hover:bg-slate-700 transition-colors"
                             >
@@ -438,8 +457,8 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message, type =
                             </motion.button>
 
                             <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
+                                whileHover={{scale: 1.02}}
+                                whileTap={{scale: 0.98}}
                                 onClick={() => {
                                     onConfirm();
                                     onClose();
@@ -457,7 +476,7 @@ const ConfirmDeleteModal = ({ isOpen, onClose, onConfirm, title, message, type =
 };
 
 // ==================== COMPONENTE: BANNER THREAD (PROFILO) ====================
-const ProfileThreadItem = ({ thread, onDelete }) => {
+const ProfileThreadItem = ({thread, onDelete}) => {
     const truncateText = (text, maxLength = 150) => {
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
@@ -465,45 +484,59 @@ const ProfileThreadItem = ({ thread, onDelete }) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.3 }}
+            initial={{opacity: 0, x: -20}}
+            animate={{opacity: 1, x: 0}}
+            exit={{opacity: 0, x: 20}}
+            transition={{duration: 0.3}}
             className="group relative flex flex-col gap-3 p-5 rounded-2xl bg-slate-950/30 backdrop-blur-xl border border-white/10 hover:border-purple-500/30 transition-all overflow-hidden"
         >
             {/* Header: Topic + Data */}
             <div className="flex items-center justify-between gap-3">
-        <span className={`px-3 py-1 rounded-full text-[15px] font-bold border truncate ${getTopicColor(thread.topic)}`}>
-          {thread.topic}
-        </span>
+                <span
+                    className={`px-3 py-1 rounded-full text-[15px] font-bold border truncate ${getTopicColor(thread.flag)}`}>
+                    {thread.flag}
+                </span>
                 <span className="text-xs text-slate-500 flex-shrink-0">
-          {new Date(thread.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
-        </span>
+                    {new Date(thread.publicationDate).toLocaleDateString('it-IT', {
+                        day: 'numeric',
+                        month: 'short'
+                    })}
+                </span>
             </div>
 
             {/* Contenuto Thread */}
-            <p className="text-sm text-slate-300 leading-relaxed font-light">
+            <p className="text-lg text-slate-300 leading-relaxed font-light">
                 {truncateText(thread.content)}
             </p>
+
+            {/* Info aggiuntive: CFU + Università */}
+            <div className="flex items-center gap-3 text-xs text-slate-500">
+                <span className="flex items-center gap-1">
+                    <Award size={12}/>
+                    CFU: {thread.CFU}
+                </span>
+
+            </div>
 
             {/* Bottone Elimina */}
             <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
                 <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onDelete}
+                    whileHover={{scale: 1.05}}
+                    whileTap={{scale: 0.95}}
+                    onClick={() => onDelete(thread.ID)}
                     className="p-2 rounded-xl bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 transition-all"
                     title="Elimina Thread"
                 >
-                    <X size={16} />
+                    <X size={16}/>
                 </motion.button>
             </div>
         </motion.div>
     );
 };
 
+
 // ==================== COMPONENTE: BANNER COMMENTO (PROFILO) ====================
-const ProfileCommentItem = ({ comment, onDelete }) => {
+const ProfileCommentItem = ({comment, onDelete}) => {
     const truncateText = (text, maxLength = 120) => {
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
@@ -511,79 +544,99 @@ const ProfileCommentItem = ({ comment, onDelete }) => {
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.3 }}
+            initial={{opacity: 0, x: -20}}
+            animate={{opacity: 1, x: 0}}
+            exit={{opacity: 0, x: 20}}
+            transition={{duration: 0.3}}
             className="group relative flex flex-col gap-3 p-5 rounded-2xl bg-slate-950/30 backdrop-blur-xl border border-white/10 hover:border-blue-500/30 transition-all overflow-hidden"
         >
-            {/* Header: Riferimento Thread + Data */}
+            {/* Header: Data */}
             <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">In risposta a:</p>
-                    <p className="text-lg text-blue-400 font-semibold truncate">
-                        {comment.threadTitle}
-                    </p>
+                    {comment.threadTitle && (
+                        <>
+                            <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">
+                                In risposta a
+                            </p>
+                            <p className="text-lg text-blue-400 font-semibold truncate">
+                                {comment.threadTitle}
+                            </p>
+                        </>
+                    )}
                 </div>
                 <span className="text-xs text-slate-500 flex-shrink-0">
-          {new Date(comment.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
-        </span>
+                    {new Date(comment.publicationDate).toLocaleDateString('it-IT', {
+                        day: 'numeric',
+                        month: 'short'
+                    })}
+                </span>
             </div>
 
             {/* Contenuto Commento */}
-            <p className="text-sm text-slate-300 leading-relaxed font-light">
+            <p className="text-base text-slate-300 leading-relaxed font-light">
                 {truncateText(comment.content)}
             </p>
+
+            {/* Info aggiuntive: CFU (se > 0) */}
+            {comment.CFU > 0 && (
+                <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <Award size={12}/>
+                    CFU: {comment.CFU}
+                </div>
+            )}
 
             {/* Bottone Elimina */}
             <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
                 <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={onDelete}
+                    whileHover={{scale: 1.05}}
+                    whileTap={{scale: 0.95}}
+                    onClick={() => onDelete(comment.ID)}
                     className="p-2 rounded-xl bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 transition-all"
                     title="Elimina Commento"
                 >
-                    <X size={16} />
+                    <X size={16}/>
                 </motion.button>
             </div>
         </motion.div>
     );
 };
 
+
 // ==================== COMPONENTE: CARD RICHIESTA MATCH ====================
-const MatchRequestCard = ({ user, type, onAccept, onReject, onCancel }) => {
+const MatchRequestCard = ({user, type, onAccept, onReject, onCancel}) => {
+
     const isReceived = type === 'received';
 
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+            initial={{opacity: 0, scale: 0.95}}
+            animate={{opacity: 1, scale: 1}}
+            exit={{opacity: 0, scale: 0.95}}
+            transition={{duration: 0.3}}
             className="group relative flex items-center gap-4 p-5 rounded-2xl bg-slate-950/30 backdrop-blur-xl border border-white/10 hover:border-emerald-500/30 transition-all overflow-hidden"
         >
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full" />
+                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"/>
                 <div className="relative w-16 h-16 rounded-full overflow-hidden ring-2 ring-white/10">
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    <img src={user.senderPhoto} alt={user.senderName} className="w-full h-full object-cover"/>
                 </div>
                 {isReceived && (
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
-                        <Heart size={12} className="text-white fill-white" />
+                    <div
+                        className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
+                        <Heart size={12} className="text-white fill-white"/>
                     </div>
                 )}
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-                <h4 className="text-base font-bold text-white mb-1 truncate">{user.name}</h4>
-                <p className="text-sm text-slate-400 truncate mb-2">{user.major}</p>
+                <h4 className="text-base font-bold text-white mb-1 truncate">{user.senderName}</h4>
+                <p className="text-sm text-slate-400 truncate mb-2">{user.senderCdl}</p>
 
                 {!isReceived && (
                     <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-            <Clock size={12} />
+            <Clock size={12}/>
             In attesa di risposta
           </span>
                 )}
@@ -594,28 +647,28 @@ const MatchRequestCard = ({ user, type, onAccept, onReject, onCancel }) => {
                 {isReceived ? (
                     <>
                         <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{scale: 1.05}}
+                            whileTap={{scale: 0.95}}
                             onClick={onAccept}
                             className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white border border-emerald-500/30 transition-all"
                             title="Accetta"
                         >
-                            <Check size={18} />
+                            <Check size={18}/>
                         </motion.button>
                         <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{scale: 1.05}}
+                            whileTap={{scale: 0.95}}
                             onClick={onReject}
                             className="p-2.5 rounded-xl bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 transition-all"
                             title="Rifiuta"
                         >
-                            <X size={18} />
+                            <X size={18}/>
                         </motion.button>
                     </>
                 ) : (
                     <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{scale: 1.05}}
+                        whileTap={{scale: 0.95}}
                         onClick={onCancel}
                         className="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800/50 text-slate-400 hover:bg-rose-500/20 hover:text-rose-400 border border-slate-700/50 hover:border-rose-500/30 transition-all"
                     >
@@ -628,38 +681,41 @@ const MatchRequestCard = ({ user, type, onAccept, onReject, onCancel }) => {
 };
 
 // ==================== COMPONENTE: LISTA MATCH (Vista Lista) ====================
-const MatchList = ({ matches }) => {
+const MatchList = ({matches}) => {
     return (
         <div className="space-y-3">
             {matches.map((match, index) => (
                 <motion.div
-                    key={match.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
+                    key={match.matchID}
+                    initial={{opacity: 0, x: -20}}
+                    animate={{opacity: 1, x: 0}}
+                    transition={{delay: index * 0.05}}
                     className="group flex items-center justify-between p-4 rounded-2xl bg-slate-950/30 backdrop-blur-xl border border-white/10 hover:border-purple-500/30 transition-all"
                 >
                     {/* Left: Avatar + Info */}
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="relative w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/10 flex-shrink-0">
-                            <img src={match.avatar} alt={match.name} className="w-full h-full object-cover" />
+                        <div
+                            className="relative w-14 h-14 rounded-full overflow-hidden ring-2 ring-white/10 flex-shrink-0">
+                            <img src={match.matcherPhoto} alt={match.matcherName}
+                                 className="w-full h-full object-cover"/>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h4 className="text-base font-bold text-white mb-0.5 truncate">{match.name}</h4>
-                            <p className="text-sm text-slate-400 truncate">{match.major}</p>
+                            <h4 className="text-base font-bold text-white mb-0.5 truncate">{match.matcherName}</h4>
+                            <p className="text-sm text-slate-400 truncate">{match.matcherUni}, </p>
+                            <p className="text-sm text-slate-400 truncate">{match.matcherDegree}</p>
                         </div>
                     </div>
 
                     {/* Right: Instagram Button */}
                     <motion.a
-                        href={`https://instagram.com/${match.instagram}`}
+                        href={`https://${match.matcherContact}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{scale: 1.05}}
+                        whileTap={{scale: 0.95}}
                         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-sm shadow-lg hover:shadow-purple-500/30 transition-all flex-shrink-0"
                     >
-                        <Instagram size={16} />
+                        <Instagram size={16}/>
                         <span className="hidden sm:inline">Contatta</span>
                     </motion.a>
                 </motion.div>
@@ -670,32 +726,33 @@ const MatchList = ({ matches }) => {
 
 
 // ==================== COMPONENTE BANNER EVENTO (PROFILO) ====================
-const ProfileEventItem = ({ event, isHost, onView, onUnjoin, onEdit, onDelete }) => {
-    const isEventPast = new Date(event.date) < new Date();
+const ProfileEventItem = ({event, isHost, onView, onUnjoin, onEdit, onDelete}) => {
+    const isEventPast = new Date(event.dateAndTime) < new Date();
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.3 }}
+            initial={{opacity: 0, x: -20}}
+            animate={{opacity: 1, x: 0}}
+            exit={{opacity: 0, x: 20}}
+            transition={{duration: 0.3}}
             className={`group relative flex items-center gap-4 p-4 rounded-2xl bg-slate-900/40 backdrop-blur-xl border border-white/10 hover:border-younify-blue/30 transition-all cursor-pointer overflow-hidden ${
                 isEventPast ? 'opacity-70' : ''
             }`}
             onClick={onView}
         >
             {/* Immagine */}
-            <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/10">
+            <div
+                className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0 ring-2 ring-white/10">
                 <img
-                    src={event.image}
-                    alt={event.title}
+                    src={event.posterUrl}
+                    alt={event.name}
                     className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 ${
                         isEventPast ? 'grayscale' : ''
                     }`}
                 />
                 {isEventPast && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                        <Clock size={20} className="text-slate-400" />
+                        <Clock size={20} className="text-slate-400"/>
                     </div>
                 )}
             </div>
@@ -707,19 +764,20 @@ const ProfileEventItem = ({ event, isHost, onView, onUnjoin, onEdit, onDelete })
             {event.city}
           </span>
                     {isEventPast && (
-                        <span className="px-2 py-0.5 text-[10px] font-bold text-slate-500 bg-slate-800/50 rounded-full uppercase border border-slate-700/50">
+                        <span
+                            className="px-2 py-0.5 text-[10px] font-bold text-slate-500 bg-slate-800/50 rounded-full uppercase border border-slate-700/50">
               Concluso
             </span>
                     )}
                 </div>
                 <h4 className="text-base md:text-lg font-bold text-white mb-1 truncate">
-                    {event.title}
+                    {event.name}
                 </h4>
                 <div className="flex items-center gap-3 text-xs md:text-sm text-slate-400">
                     <div className="flex items-center gap-1">
-                        <Calendar size={14} className="flex-shrink-0" />
+                        <Calendar size={14} className="flex-shrink-0"/>
                         <span className="truncate">
-              {new Date(event.date).toLocaleDateString('it-IT', {
+              {new Date(event.dateAndTime).toLocaleDateString('it-IT', {
                   day: 'numeric',
                   month: 'short',
                   hour: '2-digit',
@@ -728,7 +786,7 @@ const ProfileEventItem = ({ event, isHost, onView, onUnjoin, onEdit, onDelete })
             </span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <Users size={14} className="flex-shrink-0" />
+                        <Users size={14} className="flex-shrink-0"/>
                         <span>{event.participantsCount}</span>
                     </div>
                 </div>
@@ -742,28 +800,29 @@ const ProfileEventItem = ({ event, isHost, onView, onUnjoin, onEdit, onDelete })
                         {!isEventPast ? (
                             <>
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                    whileHover={{scale: 1.05}}
+                                    whileTap={{scale: 0.95}}
                                     onClick={() => onEdit(event)}
                                     className="p-2 md:p-2.5 rounded-xl bg-younify-blue/20 text-younify-blue hover:bg-younify-blue hover:text-white border border-younify-blue/30 transition-all"
                                     title="Modifica"
                                 >
-                                    <Edit3 size={16} />
+                                    <Edit3 size={16}/>
                                 </motion.button>
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                    whileHover={{scale: 1.05}}
+                                    whileTap={{scale: 0.95}}
                                     onClick={onDelete}
                                     className="p-2 md:p-2.5 rounded-xl bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30 transition-all"
                                     title="Elimina"
                                 >
-                                    <X size={16} />
+                                    <X size={16}/>
                                 </motion.button>
                             </>
                         ) : (
                             // Badge "Storico" per eventi passati (HOST)
-                            <div className="px-3 py-2 md:px-4 md:py-2 rounded-xl text-sm font-semibold bg-slate-800/50 text-slate-500 border border-slate-700/50 flex items-center gap-2">
-                                <Clock size={14} />
+                            <div
+                                className="px-3 py-2 md:px-4 md:py-2 rounded-xl text-sm font-semibold bg-slate-800/50 text-slate-500 border border-slate-700/50 flex items-center gap-2">
+                                <Clock size={14}/>
                                 <span className="hidden md:inline">Evento passato</span>
                             </div>
                         )}
@@ -773,19 +832,20 @@ const ProfileEventItem = ({ event, isHost, onView, onUnjoin, onEdit, onDelete })
                     <>
                         {!isEventPast ? (
                             <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{scale: 1.05}}
+                                whileTap={{scale: 0.95}}
                                 onClick={onUnjoin}
                                 className="px-3 py-2 md:px-4 md:py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/30"
                                 title="Disdici"
                             >
-                                <X size={14} />
+                                <X size={14}/>
                                 <span className="hidden md:inline">Disdici</span>
                             </motion.button>
                         ) : (
                             // Badge "Passato" per eventi passati (USER)
-                            <div className="px-3 py-2 md:px-4 md:py-2 rounded-xl text-sm font-semibold bg-slate-800/50 text-slate-500 border border-slate-700/50 flex items-center gap-2">
-                                <Clock size={14} />
+                            <div
+                                className="px-3 py-2 md:px-4 md:py-2 rounded-xl text-sm font-semibold bg-slate-800/50 text-slate-500 border border-slate-700/50 flex items-center gap-2">
+                                <Clock size={14}/>
                                 <span className="hidden md:inline">Passato</span>
                             </div>
                         )}
@@ -796,14 +856,53 @@ const ProfileEventItem = ({ event, isHost, onView, onUnjoin, onEdit, onDelete })
     );
 };
 
+
 // ========================================
 // COMPONENTE PRINCIPALE
 // ========================================
 const ProfilePage = () => {
+
     const [isHost, setIsHost] = useState(false);
-    const [profileData, setProfileData] = useState(MOCK_USER_DATA.user);
-    const [originalData, setOriginalData] = useState(MOCK_USER_DATA.user);
-    const [avatarPreview, setAvatarPreview] = useState(profileData.avatar);
+    const navigate = useNavigate();
+
+    const [profileData, setProfileData] = useState({
+        // Campi comuni
+        avatar: '',
+        email: '',
+        university: '',
+        degreeProgram: '',
+        cfuCount: 0,
+
+        // Campi USER
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '',
+        contactsInfo: '',
+        matchCount: 0,
+
+        // Campi HOST
+        hostName: '',
+        province: '',
+        city: '',
+        uniList: [],
+        piva: '',
+        pec: '',
+
+        // Dati aggiuntivi (da backend)
+        eventsCreated: [],
+        eventsJoined: [],
+        threads: [],
+        comments: [],
+        matching: {
+            received: [],
+            sent: [],
+            history: []
+        }
+    });
+
+    const [originalData, setOriginalData] = useState({});
+
+    const [avatarPreview, setAvatarPreview] = useState('load');
     const [isEditing, setIsEditing] = useState(false);
     const [errors, setErrors] = useState({});
     const [isEditingUniversity, setIsEditingUniversity] = useState(false);
@@ -868,6 +967,91 @@ const ProfilePage = () => {
     };
 
     const [minEditDateTime, setMinEditDateTime] = useState(getMinDateTimeForEdit());
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const loadProfileData = async () => {
+            try {
+                setIsLoading(true);
+                const isHostRole = localStorage.getItem('isHost') === 'true';
+                setIsHost(isHostRole);
+
+                // 1. Carica dati profilo base
+                const response = isHostRole
+                    ? await profileService.getHostProfile()
+                    : await profileService.getUserProfile();
+
+                if (response.data) {
+
+                    const mappedData = {
+                        ...response.data,
+                        cfuCount: response.data.totalCfu || 0,
+                        matchCount: response.data.totalMatch || 0,
+                        degreeProgram: response.data.cdl,
+                        ...(isHostRole && {
+                            uniList: response.data.uniList
+                                ? (typeof response.data.uniList === 'string'
+                                    ? response.data.uniList.split(', ').filter(u => u)
+                                    : response.data.uniList)
+                                : []
+                        }),
+                        pec: response.data.PEC || "",
+                        piva: response.data.PIVA || ""
+                    };
+
+                    setProfileData(mappedData);
+                    setOriginalData(mappedData);
+                    setAvatarPreview(mappedData.avatar || '');
+                }
+
+                // 2. CARICA EVENTI
+                if (isHostRole) {
+                    const eventsResponse = await eventService.getMyEvents();
+                    setEvents(eventsResponse?.data?.content || []);
+
+                } else {
+                    const eventsResponse = await eventService.getJoinedEvents();
+                    setEvents(eventsResponse?.data?.content || []);
+                }
+
+                try {
+                    const [myThreads, myComments] = await Promise.all([
+                        threadService.getMyThreads(0, 100),
+                        threadService.getMyComments(0, 100)
+                    ]);
+
+
+                    setThreads(myThreads?.data?.data?.content || []);
+                    setComments(myComments?.data?.data?.content || []);
+
+                } catch (error) {
+
+                    toast.warning('Thread e commenti non disponibili');
+                }
+
+                // 4. CARICA MATCHING (solo per USER)
+                if (!isHostRole) {
+                    const [receivedResponse, sentResponse, historyResponse] = await Promise.all([
+                        matchService.getReceivedPendingMatches(),
+                        matchService.getSentPendingMatches(),
+                        matchService.getAcceptedMatches()
+                    ]);
+
+                    setMatchReceived(receivedResponse?.data?.content || []);
+                    setMatchSent(sentResponse?.data?.content || []);
+                    setMatchHistory(historyResponse?.data?.content || []);
+                }
+
+            } catch (error) {
+                toast.error('Impossibile caricare il profilo');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadProfileData();
+    }, []);
+
 
 // Aggiorna minDateTime quando si apre il modale
     useEffect(() => {
@@ -884,7 +1068,8 @@ const ProfilePage = () => {
         message: '',
         type: 'default',
         confirmText: 'Elimina',  // ← AGGIUNGI QUESTA RIGA
-        onConfirm: () => {},
+        onConfirm: () => {
+        },
     });
 
 // Helper per aprire il modale
@@ -897,13 +1082,14 @@ const ProfilePage = () => {
 
 
     const closeConfirmModal = () => setConfirmModal({
-    isOpen: false,
+        isOpen: false,
         title: '',
         message: '',
         type: 'default',
         confirmText: 'Elimina',
-        onConfirm: () => {}
-});
+        onConfirm: () => {
+        }
+    });
 
 
 // Lista comuni (già presente in ProfilePage? Se no, aggiungi)
@@ -966,19 +1152,17 @@ const ProfilePage = () => {
     const italianPlaces = useMemo(() => {
         const places = {};
         if (!rawCitiesData || !Array.isArray(rawCitiesData)) return {};
-        try {
-            rawCitiesData.forEach(city => {
-                const nomeProvincia = city.provincia?.nome || city.provincia;
-                const nomeComune = city.nome;
-                if (nomeProvincia && nomeComune) {
-                    if (!places[nomeProvincia]) places[nomeProvincia] = [];
-                    places[nomeProvincia].push(nomeComune);
-                }
-            });
-            Object.keys(places).forEach(prov => places[prov].sort());
-        } catch (error) {
-            console.error("Errore comuni.json:", error);
-        }
+
+        rawCitiesData.forEach(city => {
+            const nomeProvincia = city.provincia?.nome || city.provincia;
+            const nomeComune = city.nome;
+            if (nomeProvincia && nomeComune) {
+                if (!places[nomeProvincia]) places[nomeProvincia] = [];
+                places[nomeProvincia].push(nomeComune);
+            }
+        });
+        Object.keys(places).forEach(prov => places[prov].sort());
+
         return places;
     }, []);
 
@@ -1016,76 +1200,106 @@ const ProfilePage = () => {
 // ==================== HANDLERS THREAD & COMMENTI ====================
     // Handler Elimina Thread
     const handleDeleteThread = (threadId) => {
-        const thread = threads.find((t) => t.id === threadId);
+
+        const thread = threads.find(t => t.ID === threadId);
+
+        if (!thread) {
+            return;
+        }
+
         openConfirmModal({
             title: 'Elimina Thread',
-            message: `Sei sicuro di voler eliminare questo thread? Verranno eliminati anche tutti i commenti associati.`,
+            message: 'Sei sicuro di voler eliminare questo thread? Verranno eliminati anche tutti i commenti associati.',
             type: 'thread',
-            onConfirm: () => {
-                setThreads((prev) => prev.filter((t) => t.id !== threadId));
-                toast.success('Thread eliminato');
-            },
+            onConfirm: async () => {
+                try {
+
+                    await threadService.deleteThread(threadId);
+
+                    // Aggiorna stato locale
+                    setThreads(prev => prev.filter(t => t.ID !== threadId));
+                    toast.success('Thread eliminato');
+                } catch (error) {
+
+                    if (error.response?.data?.message) {
+
+                        toast.error(error.response.data.message);
+                    } else {
+                        toast.error('Impossibile eliminare il thread. Potrebbe avere commenti associati.');
+                    }
+                }
+            }
         });
     };
 
+
     // Handler Elimina Commento
     const handleDeleteComment = (commentId) => {
-        const comment = comments.find((c) => c.id === commentId);
+        const comment = comments.find(c => c.id === commentId);
+
         openConfirmModal({
             title: 'Elimina Commento',
             message: `Sei sicuro di voler eliminare questo commento? Questa azione non può essere annullata.`,
             type: 'comment',
-            onConfirm: () => {
-                setComments((prev) => prev.filter((c) => c.id !== commentId));
-                toast.success('Commento eliminato');
-            },
+            onConfirm: async () => {
+                try {
+
+                    await threadService.deleteComment(commentId);
+
+                    setComments(prev => prev.filter(c => c.id !== commentId));
+                    toast.success('Commento eliminato');
+                } catch (error) {
+                    toast.error('Impossibile eliminare il commento');
+                }
+            }
         });
     };
 
 
-    useEffect(() => {
-        const userRole = localStorage.getItem('userRole') || 'user';
-        const isHostRole = userRole === 'host';
-        setIsHost(isHostRole);
-        const data = isHostRole ? MOCK_USER_DATA.host : MOCK_USER_DATA.user;
-        setProfileData(data);
-        setOriginalData(data);
-        setAvatarPreview(data.avatar);
-        const loadedEvents = isHostRole ? (data.eventsCreated || []) : (data.eventsJoined || []);
-        setEvents(loadedEvents);
-        setThreads(data.threads || []);
-        setComments(data.comments || []);
-    }, []);
+    const handleUnjoinEvent = (event) => {
+        if (!event) {
+            return;
+        }
 
-    // Handler Disdici Evento (User)
-    const handleUnjoinEvent = (eventId) => {
-        const event = events.find((e) => e.id === eventId);
+        const eventId = event.ID;
+        const eventName = event.name;
+
         openConfirmModal({
             title: 'Disdici Partecipazione',
-            message: `Confermi di voler disdire la partecipazione a "${event?.title || 'questo evento'}"?`,
+            message: `Confermi di voler disdire la partecipazione a "${eventName}"?`,
             type: 'event',
-            onConfirm: () => {
-                setEvents((prev) => prev.filter((ev) => ev.id !== eventId));
-                toast.success('Partecipazione annullata');
-            },
-        });
-    };
-    // Handler Elimina Evento
-    const handleDeleteEvent = (eventId) => {
-        const event = events.find((e) => e.id === eventId);
-        openConfirmModal({
-            title: 'Elimina Evento',
-            message: `Sei sicuro di voler eliminare "${event?.title || 'questo evento'}"? Questa azione non può essere annullata.`,
-            type: 'event',
-            onConfirm: () => {
-                setEvents((prev) => prev.filter((ev) => ev.id !== eventId));
-                toast.success('Evento eliminato con successo');
-            },
+            confirmText: 'Disdici',
+            onConfirm: async () => {
+
+                await eventService.unjoinEvent(eventId);
+                setEvents(prev => prev.filter(ev => ev.ID !== eventId));
+            }
         });
     };
 
+    const handleDeleteEvent = (event) => {
+        if (!event) {
+            return;
+        }
+
+        const eventId = event.ID;
+        const eventName = event.name;
+
+        openConfirmModal({
+            title: 'Elimina Evento',
+            message: `Sei sicuro di voler eliminare "${eventName}"?`,
+            type: 'event',
+            confirmText: 'Elimina',
+            onConfirm: async () => {
+
+                await eventService.deleteEvent(eventId);
+                setEvents(prev => prev.filter(ev => ev.ID !== eventId));
+            }
+        });
+    };
+
+
     const handleEditEvent = (eventId) => {
-        console.log('Modifica evento:', eventId);
         toast.info('Funzione modifica in sviluppo');
     };
 
@@ -1102,56 +1316,75 @@ const ProfilePage = () => {
     // ==================== HANDLERS MATCHING ====================
 
 // Handler Accetta Match
-    const handleAcceptMatch = (matchId) => {
-        const match = matchReceived.find((m) => m.id === matchId);
+    const handleAcceptMatch = async (matchId) => {
+        const match = matchReceived.find(m => m.matchID === matchId);
         if (!match) return;
 
         openConfirmModal({
             title: 'Accetta Match',
-            message: `Confermi di voler accettare il match con ${match.name}?`,
+            message: `Confermi di voler accettare il match con ${match.senderName}?`,
             type: 'accept',
             confirmText: 'Accetta',
-            onConfirm: () => {
-                setMatchReceived((prev) => prev.filter((m) => m.id !== matchId));
-                setMatchHistory((prev) => [match, ...prev]);
-                toast.success(`Match confermato con ${match.name}!`);
-            },
+            onConfirm: async () => {
+                try {
+                    await matchService.reactToMatch(matchId, 'ACCEPTED');
+                    setMatchReceived(prev => prev.filter(m => m.matchID !== matchId));
+                    setMatchHistory(prev => [match, ...prev]);
+                } catch (error) {
+
+                    toast.error('Impossibile accettare il match');
+                }
+            }
         });
     };
 
-
-// Handler Rifiuta Match
-    const handleRejectMatch = (matchId) => {
-        const match = matchReceived.find((m) => m.id === matchId);
+    const handleRejectMatch = async (matchId) => {
+        const match = matchReceived.find(m => m.matchID === matchId);
         if (!match) return;
 
         openConfirmModal({
             title: 'Rifiuta Match',
-            message: `Sei sicuro di voler rifiutare il match con ${match.name}?`,
+            message: `Sei sicuro di voler rifiutare il match con ${match.senderName}?`,
             type: 'reject',
             confirmText: 'Rifiuta',
-            onConfirm: () => {
-                setMatchReceived((prev) => prev.filter((m) => m.id !== matchId));
-                toast.info('Match rifiutato');
-            },
+            onConfirm: async () => {
+                try {
+
+                    await matchService.reactToMatch(matchId, 'REJECTED');
+                    setMatchReceived(prev => prev.filter(m => m.matchID !== matchId));
+                } catch (error) {
+
+                    toast.error('Impossibile rifiutare il match');
+                }
+            }
         });
     };
 
 
 // Handler Annulla Richiesta Inviata
-    const handleCancelSentMatch = (matchId) => {
-        const match = matchSent.find((m) => m.id === matchId);
+    const handleCancelSentMatch = async (matchId) => {
+        const match = matchSent.find(m => m.matchID === matchId);
         if (!match) return;
 
         openConfirmModal({
             title: 'Annulla Richiesta',
-            message: `Vuoi annullare la richiesta di match inviata a ${match.name}?`,
+            message: `Vuoi annullare la richiesta di match inviata a ${match.senderName}?`,
             type: 'cancel',
             confirmText: 'Ritira richiesta',
-            onConfirm: () => {
-                setMatchSent((prev) => prev.filter((m) => m.id !== matchId));
-                toast.info('Richiesta annullata');
-            },
+            onConfirm: async () => {
+                try {
+
+                    await matchService.deleteMatch(matchId);
+
+                    // Rimuovi dallo stato locale
+                    setMatchSent(prev => prev.filter(m => m.matchID !== matchId));
+
+                    // Toast gestito automaticamente da matchHandler
+                } catch (error) {
+
+                    toast.error('Impossibile annullare la richiesta');
+                }
+            }
         });
     };
 
@@ -1159,41 +1392,15 @@ const ProfilePage = () => {
 // ==================== useEffect: Carica Dati Matching ====================
 // Aggiungi nel useEffect principale (cerca quello che carica eventi/threads)
 
-    useEffect(() => {
-        const userRole = localStorage.getItem('userRole') || 'user';
-        const isHostRole = userRole === 'host';
-        setIsHost(isHostRole);
-
-        const data = isHostRole ? MOCK_USER_DATA.host : MOCK_USER_DATA.user;
-        setProfileData(data);
-        setOriginalData(data);
-        setAvatarPreview(data.avatar);
-
-        // Carica eventi
-        const loadedEvents = isHostRole ? data.eventsCreated : data.eventsJoined;
-        setEvents(loadedEvents || []);
-
-        // Carica thread e commenti
-        setThreads(data.threads || []);
-        setComments(data.comments || []);
-
-        // ⬇️ NUOVO: Carica dati matching (solo per user)
-        if (!isHostRole && data.matching) {
-            setMatchReceived(data.matching.received || []);
-            setMatchSent(data.matching.sent || []);
-            setMatchHistory(data.matching.history || []);
-        }
-    }, []);
-
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
         // Aggiorna il valore
         if (name === "province") {
-            setProfileData(prev => ({ ...prev, province: value, city: "" }));
+            setProfileData(prev => ({...prev, province: value, city: ""}));
         } else {
-            setProfileData(prev => ({ ...prev, [name]: value }));
+            setProfileData(prev => ({...prev, [name]: value}));
         }
 
         // Validazione in tempo reale
@@ -1225,14 +1432,14 @@ const ProfilePage = () => {
         }
 
         // Aggiorna gli errori
-        setErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
+        setErrors(prev => ({...prev, [name]: value ? errorMsg : null}));
     };
 
     // Dopo handleInputChange, aggiungi:
     const handleUniversityChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
-        setProfileData(prev => ({ ...prev, [name]: value }));
+        setProfileData(prev => ({...prev, [name]: value}));
 
         // Validazione real-time per email
         let errorMsg = null;
@@ -1242,12 +1449,12 @@ const ProfilePage = () => {
             }
         }
 
-        setUniversityErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
+        setUniversityErrors(prev => ({...prev, [name]: value ? errorMsg : null}));
     };
 
     const handleUniversitySelect = (field, value) => {
-        setProfileData(prev => ({ ...prev, [field]: value }));
-        setUniversityErrors(prev => ({ ...prev, [field]: null }));
+        setProfileData(prev => ({...prev, [field]: value}));
+        setUniversityErrors(prev => ({...prev, [field]: null}));
     };
 
     const handleEditUniversity = () => {
@@ -1261,7 +1468,7 @@ const ProfilePage = () => {
         toast.info("Modifiche annullate");
     };
 
-    const handleSaveUniversity = () => {
+    const handleSaveUniversity = async () => {
         // Validazione completa
         const newErrors = {};
 
@@ -1289,19 +1496,48 @@ const ProfilePage = () => {
             return;
         }
 
-        // Salva
-        setOriginalData(profileData);
-        setIsEditingUniversity(false);
-        setUniversityErrors({});
-        toast.success("Dati universitari aggiornati!");
-        console.log("Saving university data:", profileData);
+
+        try {
+
+            const editUniversityRequest = {
+                email: profileData.email,
+                university: profileData.university,
+                cdl: profileData.degreeProgram
+            };
+
+
+            const response = await profileService.changeUniversity(editUniversityRequest, navigate);
+
+
+            setOriginalData(profileData);
+            setIsEditingUniversity(false);
+            setUniversityErrors({});
+
+        } catch (error) {
+
+            // Gestione errori specifici
+            if (error.response?.status === 400) {
+
+                toast.error(error.response.data?.message || "Dati non validi");
+            } else if (error.response?.status === 409) {
+
+                toast.error("Email già in uso da un altro account");
+            } else if (error.response?.status === 500) {
+
+                toast.error("Errore di validazione. Verifica i dati inseriti");
+            } else {
+                toast.error("Errore durante il salvataggio. Riprova più tardi");
+            }
+        }
+
     };
+
 
 // Dopo handleSaveUniversity, aggiungi:
     const handlePasswordChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
-        setPasswords(prev => ({ ...prev, [name]: value }));
+        setPasswords(prev => ({...prev, [name]: value}));
 
         // Validazione real-time
         let errorMsg = null;
@@ -1316,7 +1552,7 @@ const ProfilePage = () => {
             }
         }
 
-        setPasswordErrors(prev => ({ ...prev, [name]: value ? errorMsg : null }));
+        setPasswordErrors(prev => ({...prev, [name]: value ? errorMsg : null}));
     };
 
     const handleEditPassword = () => {
@@ -1324,43 +1560,46 @@ const ProfilePage = () => {
     };
 
     const handleCancelPassword = () => {
-        setPasswords({ newPassword: '', confirmPassword: '' });
+        setPasswords({newPassword: '', confirmPassword: ''});
         setIsEditingPassword(false);
         setPasswordErrors({});
         toast.info("Modifiche annullate");
     };
 
-    const handleSavePassword = () => {
-        // Validazione completa
+    const handleSavePassword = async () => {
+        // Validazione
         const newErrors = {};
 
-        // Valida Password
         if (!passwords.newPassword) {
-            newErrors.newPassword = "Password richiesta";
+            newErrors.newPassword = 'Password richiesta';
         } else if (!passwordRegex.test(passwords.newPassword)) {
-            newErrors.newPassword = "Min. 8 caratteri Maiusc, minusc, num e simbolo";
+            newErrors.newPassword = 'Min. 8 car. Maiusc, minusc, num e simbolo';
         }
 
-        // Valida Conferma
         if (!passwords.confirmPassword) {
-            newErrors.confirmPassword = "Conferma password";
+            newErrors.confirmPassword = 'Conferma password';
         } else if (passwords.newPassword !== passwords.confirmPassword) {
-            newErrors.confirmPassword = "Le password non coincidono";
+            newErrors.confirmPassword = 'Le password non coincidono';
         }
 
-        // Se ci sono errori, non salvare
         if (Object.keys(newErrors).length > 0) {
             setPasswordErrors(newErrors);
-            toast.error("Correggi gli errori prima di salvare");
+            toast.error('Correggi gli errori prima di salvare');
             return;
         }
 
-        // Salva
-        setPasswords({ newPassword: '', confirmPassword: '' });
+
+        const changePassRequest = {
+            password: passwords.newPassword,
+            confirmPassword: passwords.confirmPassword
+        };
+
+        await profileService.changePassword(changePassRequest);
+
+        // Reset
+        setPasswords({oldPassword: '', newPassword: '', confirmPassword: ''});
         setIsEditingPassword(false);
         setPasswordErrors({});
-        toast.success("Password aggiornata con successo!");
-        console.log("Saving new password");
     };
 
 
@@ -1368,9 +1607,9 @@ const ProfilePage = () => {
         setProfileData((prev) => {
             const currentList = prev.uniList || [];
             if (currentList.includes(uni)) {
-                return { ...prev, uniList: currentList.filter(item => item !== uni) };
+                return {...prev, uniList: currentList.filter(item => item !== uni)};
             } else {
-                return currentList.length < 5 ? { ...prev, uniList: [...currentList, uni] } : prev;
+                return currentList.length < 5 ? {...prev, uniList: [...currentList, uni]} : prev;
             }
         });
     };
@@ -1399,58 +1638,91 @@ const ProfilePage = () => {
     };
 
 
-    const handleSave = () => {
-        // Validazione completa prima del salvataggio
+    const [isSaving, setIsSaving] = useState(false);
+    const handleSave = async () => {
+
+        if (isSaving) {
+            return;
+        }
+
+
         const newErrors = {};
 
-        // Valida Nome
-        if (!profileData.firstName) {
-            newErrors.firstName = "Nome richiesto";
-        } else if (profileData.firstName.trim().length < 3) {
-            newErrors.firstName = "Minimo 3 caratteri";
-        }
+        if (isHost) {
+            // Validazione HOST
+            if (!profileData.hostName) newErrors.hostName = 'Nome attività richiesto';
+            else if (profileData.hostName.trim().length < 3) newErrors.hostName = 'Minimo 3 caratteri';
 
-        // Valida Cognome
-        if (!profileData.lastName) {
-            newErrors.lastName = "Cognome richiesto";
-        } else if (profileData.lastName.trim().length < 3) {
-            newErrors.lastName = "Minimo 3 caratteri";
-        }
-
-        // Valida Data di nascita
-        if (!profileData.dateOfBirth) {
-            newErrors.dateOfBirth = "Data di nascita richiesta";
+            if (!profileData.province) newErrors.province = 'Provincia richiesta';
+            if (!profileData.city) newErrors.city = 'Città richiesta';
         } else {
-            const maxAllowed = getMaxDate();
-            const minAllowed = getMinDate();
+            // Validazione USER
+            if (!profileData.firstName) newErrors.firstName = 'Nome richiesto';
+            else if (profileData.firstName.trim().length < 3) newErrors.firstName = 'Minimo 3 caratteri';
 
-            if (profileData.dateOfBirth > maxAllowed) {
-                newErrors.dateOfBirth = "Non hai ancora l'età per iscriverti";
-            } else if (profileData.dateOfBirth < minAllowed) {
-                newErrors.dateOfBirth = "Data non valida";
+            if (!profileData.lastName) newErrors.lastName = 'Cognome richiesto';
+            else if (profileData.lastName.trim().length < 3) newErrors.lastName = 'Minimo 3 caratteri';
+
+            if (!profileData.dateOfBirth) newErrors.dateOfBirth = 'Data di nascita richiesta';
+            else {
+                const maxAllowed = getMaxDate();
+                const minAllowed = getMinDate();
+                if (profileData.dateOfBirth > maxAllowed) {
+                    newErrors.dateOfBirth = 'Non hai ancora l\'età per iscriverti';
+                } else if (profileData.dateOfBirth < minAllowed) {
+                    newErrors.dateOfBirth = 'Data non valida';
+                }
             }
-        }
 
-        // Valida Instagram (contactsInfo)
-        const instaUser = profileData.contactsInfo.replace(/instagram\.com\//g, '').trim();
-        if (!instaUser) {
-            newErrors.contactsInfo = "Username Instagram richiesto";
+            const instaUser = profileData.contactsInfo.replace(/instagram\.com/g, '').trim();
+            if (!instaUser) newErrors.contactsInfo = 'Username Instagram richiesto';
         }
 
         // Se ci sono errori, non salvare
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            toast.error("Correggi gli errori prima di salvare");
+            toast.error('Correggi gli errori prima di salvare');
             return;
         }
 
-        // Salva (qui farai la chiamata API)
-        setOriginalData(profileData);
-        setIsEditing(false);
-        setErrors({}); // Pulisci gli errori
-        toast.success("Modifiche salvate con successo!");
-        console.log("Saving data:", profileData);
+        setIsSaving(true);
+
+        try {
+            if (isHost) {
+                // Prepara i dati per HOST
+                const editHostInfoRequest = {
+                    hostName: profileData.hostName,
+                    province: profileData.province,
+                    city: profileData.city,
+                    uniList: Array.isArray(profileData.uniList)
+                        ? profileData.uniList.join(', ')
+                        : profileData.uniList
+                };
+
+                await profileService.editHostProfile(editHostInfoRequest);
+
+            }
+            else {
+                // Prepara i dati per USER
+                const editUserInfoRequest = {
+                    firstName: profileData.firstName,
+                    lastName: profileData.lastName,
+                    dateOfBirth: profileData.dateOfBirth,
+                    contactsInfo: profileData.contactsInfo.replace(/instagram\.com/g, '').trim()
+                };
+
+                await profileService.editUserProfile(editUserInfoRequest);
+            }
+
+            setOriginalData(profileData);
+            setIsEditing(false);
+            setErrors({});
+
+        } finally {
+            setIsSaving(false);
+        }
     };
+
 
     // ==================== HANDLERS MODIFICA EVENTO ====================
 
@@ -1467,17 +1739,17 @@ const ProfilePage = () => {
 
 // Apre il modale con dati pre-compilati
     const handleOpenEditModal = (event) => {
-        setEditEventId(event.id);
+        setEditEventId(event.ID);
         setEditFormData({
-            name: event.title,
+            name: event.name,
             description: event.description,
             dateAndTime: formatDateForInput(event.date),
-            street: event.location,
+            street: event.street,
             city: event.city,
-            CAP: event.CAP || '', // Se disponibile nei dati, altrimenti lascia vuoto
-            poster: null, // File sarà null, usiamo l'URL per preview
+            CAP: event.CAP || '',
+            poster: null,
         });
-        setEditPreviewImage(event.image);
+        setEditPreviewImage(event.posterUrl);
         setEditFormErrors({});
         setEditFileError('');
         setIsEditModalOpen(true);
@@ -1485,9 +1757,9 @@ const ProfilePage = () => {
 
 // Gestione input form
     const handleEditInputChange = (field, value) => {
-        setEditFormData((prev) => ({ ...prev, [field]: value }));
+        setEditFormData((prev) => ({...prev, [field]: value}));
         if (editFormErrors[field]) {
-            setEditFormErrors((prev) => ({ ...prev, [field]: null }));
+            setEditFormErrors((prev) => ({...prev, [field]: null}));
         }
     };
 
@@ -1495,7 +1767,7 @@ const ProfilePage = () => {
     const handleEditImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setEditFormErrors((prev) => ({ ...prev, poster: null }));
+            setEditFormErrors((prev) => ({...prev, poster: null}));
 
             if (file.size > 10 * 1024 * 1024) {
                 return setEditFileError('Il file supera i 10MB');
@@ -1510,110 +1782,116 @@ const ProfilePage = () => {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setEditPreviewImage(reader.result);
-                setEditFormData({ ...editFormData, poster: file });
+                setEditFormData({...editFormData, poster: file});
             };
             reader.readAsDataURL(file);
         }
     };
 
-// Rimuovi immagine
+
     const handleEditRemoveImage = (e) => {
         e.stopPropagation();
         setEditPreviewImage(null);
-        setEditFormData({ ...editFormData, poster: null });
+        setEditFormData({...editFormData, poster: null});
         if (fileInputEditRef.current) {
             fileInputEditRef.current.value = '';
         }
     };
 
-// Salva modifiche
+
 // ==================== SALVA MODIFICHE EVENTO (CON VALIDAZIONI COMPLETE) ====================
     const handleSaveEdit = async (e) => {
         e.preventDefault();
+
         const errors = {};
 
-        //VALIDAZIONE LOCANDINA
-        if (!editPreviewImage) {
-            errors.poster = 'La locandina è obbligatoria.';
+        // VALIDAZIONE LOCANDINA
+        if (!editPreviewImage) errors.poster = "La locandina è obbligatoria.";
+
+        // VALIDAZIONE TITOLO
+        if (!editFormData.name.trim()) errors.name = "Il titolo è obbligatorio.";
+        else if (editFormData.name.length > 100) errors.name = "Massimo 100 caratteri.";
+
+        // VALIDAZIONE DESCRIZIONE
+        if (!editFormData.description.trim()) errors.description = "La descrizione è obbligatoria.";
+        else if (editFormData.description.length > 200) errors.description = "Massimo 200 caratteri.";
+
+        // VALIDAZIONE CITTÀ
+        if (!editFormData.city.trim()) errors.city = "La città è obbligatoria.";
+        else if (editFormData.city.length > 30) errors.city = "Massimo 30 caratteri.";
+        else {
+            const cityExists = comuniList.some(c => c.nome.toLowerCase() === editFormData.city.toLowerCase());
+            if (!cityExists) errors.city = "Seleziona una città dalla lista.";
         }
 
-        //VALIDAZIONE TITOLO
-        if (!editFormData.name.trim()) {
-            errors.name = 'Il titolo è obbligatorio.';
-        } else if (editFormData.name.length > 100) {
-            errors.name = 'Massimo 100 caratteri.';
-        }
+        // VALIDAZIONE INDIRIZZO
+        if (!editFormData.street.trim()) errors.street = "L'indirizzo è obbligatorio.";
+        else if (editFormData.street.length > 60) errors.street = "Massimo 60 caratteri.";
 
-        //VALIDAZIONE DESCRIZIONE
-        if (!editFormData.description.trim()) {
-            errors.description = 'La descrizione è obbligatoria.';
-        } else if (editFormData.description.length > 200) {
-            errors.description = 'Massimo 200 caratteri.';
-        }
+        // VALIDAZIONE CAP
+        if (!editFormData.CAP.trim()) errors.CAP = "Il CAP è obbligatorio.";
+        else if (editFormData.CAP.length !== 5) errors.CAP = "Il CAP deve essere di 5 cifre.";
+        else if (!/^\d{5}$/.test(editFormData.CAP)) errors.CAP = "Il CAP deve contenere solo numeri.";
 
-        //VALIDAZIONE CITTÀ (con controllo lista comuni)
-        if (!editFormData.city.trim()) {
-            errors.city = 'La città è obbligatoria.';
-        } else if (editFormData.city.length > 30) {
-            errors.city = 'Massimo 30 caratteri.';
-        } else {
-            const cityExists = comuniList.some(
-                (c) => c.nome.toLowerCase() === editFormData.city.toLowerCase()
-            );
-            if (!cityExists) {
-                errors.city = 'Seleziona una città dalla lista.';
-            }
-        }
-
-        //VALIDAZIONE INDIRIZZO
-        if (!editFormData.street.trim()) {
-            errors.street = 'L\'indirizzo è obbligatorio.';
-        } else if (editFormData.street.length > 60) {
-            errors.street = 'Massimo 60 caratteri.';
-        }
-
-        //VALIDAZIONE CAP
-        if (!editFormData.CAP.trim()) {
-            errors.CAP = 'Il CAP è obbligatorio.';
-        } else if (editFormData.CAP.length !== 5) {
-            errors.CAP = 'Il CAP deve essere di 5 cifre.';
-        } else if (!/^\d{5}$/.test(editFormData.CAP)) {
-            errors.CAP = 'Il CAP deve contenere solo numeri.';
-        }
-
-        //VALIDAZIONE DATA (minimo 1 ora nel futuro)
-        if (!editFormData.dateAndTime) {
-            errors.dateAndTime = 'La data è obbligatoria.';
-        } else if (editFormData.dateAndTime < minEditDateTime) {
-            errors.dateAndTime = 'La data deve essere futura (min. 1 ora).';
-        }
+        // VALIDAZIONE DATA (minimo 1 ora nel futuro)
+        if (!editFormData.dateAndTime) errors.dateAndTime = "La data è obbligatoria.";
+        else if (editFormData.dateAndTime < minEditDateTime) errors.dateAndTime = "La data deve essere futura (min. 1 ora).";
 
         // Se ci sono errori, blocca il salvataggio
         if (Object.keys(errors).length > 0) {
             setEditFormErrors(errors);
-            toast.error('Correggi gli errori prima di salvare');
+            toast.error("Correggi gli errori prima di salvare");
             return;
         }
 
-        //SALVATAGGIO (aggiorna stato locale)
-        const updatedEvent = {
-            id: editEventId,
-            title: editFormData.name,
-            description: editFormData.description,
-            date: editFormData.dateAndTime,
-            location: editFormData.street,
-            city: editFormData.city,
-            organizer: profileData.hostName,
-            image: editPreviewImage,
-            participantsCount: events.find((ev) => ev.id === editEventId)?.participantsCount || 0,
-        };
 
-        setEvents((prev) => prev.map((ev) => (ev.id === editEventId ? updatedEvent : ev)));
-        setIsEditModalOpen(false);
-        toast.success('Evento aggiornato con successo!');
+        try {
+            // Prepara FormData per inviare anche il file
+            const formData = new FormData();
+            formData.append('name', editFormData.name);
+            formData.append('description', editFormData.description);
+            formData.append('dateAndTime', editFormData.dateAndTime);
+            formData.append('street', editFormData.street);
+            formData.append('city', editFormData.city);
+            formData.append('CAP', editFormData.CAP);
 
-        // TODO: Chiamata API
-        // await eventService.updateEvent(editEventId, editFormData);
+            // Solo se è stato caricato un nuovo file
+            if (editFormData.poster) {
+                formData.append('poster', editFormData.poster);
+            }
+
+
+            await eventService.editEvent(editEventId, editFormData);
+
+            const updatedEvent = {
+                ID: editEventId,  // Maiuscolo come nel backend
+                name: editFormData.name,
+                description: editFormData.description,
+                dateAndTime: editFormData.dateAndTime,
+                street: editFormData.street,
+                city: editFormData.city,
+                CAP: editFormData.CAP,
+                posterUrl: editPreviewImage,  // URL della preview
+                participantsCount: events.find(ev => ev.ID === editEventId)?.participantsCount || 0,
+            };
+
+            setEvents(prev => prev.map(ev => ev.ID === editEventId ? {...ev, ...updatedEvent} : ev));
+            setIsEditModalOpen(false);
+            toast.success("Evento aggiornato con successo!");
+
+        } catch (error) {
+
+
+            if (error.response?.status === 403) {
+
+                toast.error("Non hai i permessi per modificare questo evento");
+            } else if (error.response?.status === 404) {
+
+                toast.error("Evento non trovato");
+            } else {
+                toast.error("Errore durante la modifica. Riprova più tardi.");
+            }
+        }
     };
 
 
@@ -1628,7 +1906,17 @@ const ProfilePage = () => {
     };
 
     // Prima del return principale, aggiungi questo componente:
-    const SearchableDropdown = ({ label, icon: Icon, options, selected, onSelect, isGrouped, errorMessage, disabled = false }) => {
+
+    const SearchableDropdown = ({
+                                    label,
+                                    icon: Icon,
+                                    options,
+                                    selected,
+                                    onSelect,
+                                    isGrouped,
+                                    errorMessage,
+                                    disabled = false
+                                }) => {
         const [isOpen, setIsOpen] = useState(false);
         const [searchTerm, setSearchTerm] = useState("");
 
@@ -1664,7 +1952,7 @@ const ProfilePage = () => {
                         >
                             <div className="flex items-center justify-between">
                                 <span className="text-sm">{opt}</span>
-                                {isSelected && <CheckCircle2 className="h-4 w-4 text-younify-blue" />}
+                                {isSelected && <CheckCircle2 className="h-4 w-4 text-younify-blue"/>}
                             </div>
                         </button>
                     );
@@ -1679,7 +1967,8 @@ const ProfilePage = () => {
 
                     return (
                         <div key={idx} className="border-b border-white/5 last:border-0">
-                            <div className="px-2 py-1 text-[10px] font-bold text-slate-500 bg-slate-950/80 sticky top-0">
+                            <div
+                                className="px-2 py-1 text-[10px] font-bold text-slate-500 bg-slate-950/80 sticky top-0">
                                 {category}
                             </div>
                             {categoryOptions.map((opt, i) => {
@@ -1697,7 +1986,7 @@ const ProfilePage = () => {
                                     >
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm">{opt}</span>
-                                            {isSelected && <CheckCircle2 className="h-4 w-4 text-younify-blue" />}
+                                            {isSelected && <CheckCircle2 className="h-4 w-4 text-younify-blue"/>}
                                         </div>
                                     </button>
                                 );
@@ -1724,19 +2013,21 @@ const ProfilePage = () => {
                         className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-950/50 border border-white/10 hover:border-younify-blue/30 transition-all duration-300 text-left"
                     >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <Icon className="h-4 w-4 text-younify-blue shrink-0" />
+                            <Icon className="h-4 w-4 text-younify-blue shrink-0"/>
                             <span className={`text-sm truncate ${selected ? 'text-white' : 'text-slate-400'}`}>
               {selected || label}
             </span>
                         </div>
-                        <ChevronRight className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${isOpen ? 'rotate-90' : ''}`} />
+                        <ChevronRight
+                            className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${isOpen ? 'rotate-90' : ''}`}/>
                     </button>
                 )}
 
                 {/* Campo disabled (solo visualizzazione) */}
                 {disabled && (
-                    <div className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/5 cursor-not-allowed">
-                        <Icon className="h-4 w-4 text-slate-600 shrink-0" />
+                    <div
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/5 cursor-not-allowed">
+                        <Icon className="h-4 w-4 text-slate-600 shrink-0"/>
                         <span className="text-sm text-slate-400/60 truncate">
             {selected || label}
           </span>
@@ -1747,9 +2038,9 @@ const ProfilePage = () => {
                 <AnimatePresence>
                     {isOpen && !disabled && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
+                            initial={{opacity: 0, height: 0}}
+                            animate={{opacity: 1, height: 'auto'}}
+                            exit={{opacity: 0, height: 0}}
                             className="overflow-hidden rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl"
                         >
                             {/* Search Bar */}
@@ -1774,7 +2065,7 @@ const ProfilePage = () => {
 
                 {errorMessage && (
                     <p className="text-xs text-rose-400 flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
+                        <AlertCircle className="h-3 w-3"/>
                         {errorMessage}
                     </p>
                 )}
@@ -1783,12 +2074,12 @@ const ProfilePage = () => {
     };
 
     // COMPONENTE DROPDOWN MODALITÀ VISTA (coerente con altri dropdown)
-    const ViewModeDropdown = ({ selected, onChange }) => {
+    const ViewModeDropdown = ({selected, onChange}) => {
         const [isOpen, setIsOpen] = useState(false);
 
         const options = [
-            { value: 'list', label: 'Vista Lista', icon: Users },
-            { value: 'globe', label: 'Vista Mappamondo', icon: Globe2 }
+            {value: 'list', label: 'Vista Lista', icon: Users},
+            {value: 'globe', label: 'Vista Mappamondo', icon: Globe2}
         ];
 
         const selectedOption = options.find(opt => opt.value === selected);
@@ -1804,7 +2095,7 @@ const ProfilePage = () => {
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                         {selectedOption && (
                             <>
-                                <selectedOption.icon className="h-4 w-4 text-purple-400 shrink-0" />
+                                <selectedOption.icon className="h-4 w-4 text-purple-400 shrink-0"/>
                                 <span className="text-sm truncate text-white font-semibold">
                 {selectedOption.label}
               </span>
@@ -1821,9 +2112,9 @@ const ProfilePage = () => {
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
+                            initial={{opacity: 0, height: 0}}
+                            animate={{opacity: 1, height: 'auto'}}
+                            exit={{opacity: 0, height: 0}}
                             className="overflow-hidden rounded-2xl bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl"
                         >
                             <div className="p-2">
@@ -1845,11 +2136,11 @@ const ProfilePage = () => {
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <option.icon className="h-4 w-4" />
+                                                    <option.icon className="h-4 w-4"/>
                                                     <span className="text-sm">{option.label}</span>
                                                 </div>
                                                 {isSelected && (
-                                                    <CheckCircle2 className="h-4 w-4 text-purple-400" />
+                                                    <CheckCircle2 className="h-4 w-4 text-purple-400"/>
                                                 )}
                                             </div>
                                         </button>
@@ -1864,15 +2155,14 @@ const ProfilePage = () => {
     };
 
 
-
     return (
         <div
             className="fixed inset-0 text-slate-100 bg-slate-900/20 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none overflow-hidden"
-            style={{ height: '100dvh' }}
+            style={{height: '100dvh'}}
         >
             {/* NAVBAR */}
             <div className="relative z-50 shrink-0 px-4 pt-3 pb-2 md:pb-4 lg:block lg:px-0 lg:pt-0">
-                <AppNavbar />
+                <AppNavbar/>
             </div>
 
             {/* MAIN CONTENT */}
@@ -1883,25 +2173,29 @@ const ProfilePage = () => {
     PROFILE HERO HEADER (Horizontal Layout - No Cover)
 ======================================== */}
                     <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{opacity: 0, y: -20}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{duration: 0.6, ease: [0.22, 1, 0.36, 1]}}
                         className="relative rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden mb-8 lg:mb-12"
                     >
                         {/* Background Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-younify-blue/5 via-purple-600/5 to-pink-600/5 pointer-events-none" />
+                        <div
+                            className="absolute inset-0 bg-gradient-to-br from-younify-blue/5 via-purple-600/5 to-pink-600/5 pointer-events-none"/>
 
                         {/* Content Container */}
                         <div className="relative p-6 md:p-8 lg:p-10">
 
-                            <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 xl:gap-8 flex-wrap">
+                            <div
+                                className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 xl:gap-8 flex-wrap">
 
                                 {/* LEFT SIDE - Avatar + Info + Contacts */}
                                 <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1">
                                     {/* Avatar */}
                                     <div className="relative flex-shrink-0">
-                                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-younify-blue via-purple-500 to-pink-500 blur-xl opacity-60 animate-pulse" />
-                                        <div className="relative h-32 w-32 md:h-36 md:w-36 rounded-full overflow-hidden border-4 border-slate-900 shadow-2xl ring-4 ring-white/10">
+                                        <div
+                                            className="absolute inset-0 rounded-full bg-gradient-to-br from-younify-blue via-purple-500 to-pink-500 blur-xl opacity-60 animate-pulse"/>
+                                        <div
+                                            className="relative h-32 w-32 md:h-36 md:w-36 rounded-full overflow-hidden border-4 border-slate-900 shadow-2xl ring-4 ring-white/10">
                                             <img
                                                 src={avatarPreview}
                                                 alt="Profile"
@@ -1912,7 +2206,8 @@ const ProfilePage = () => {
                                             htmlFor="avatar-upload"
                                             className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-younify-blue to-purple-600 border-2 border-slate-900 shadow-lg cursor-pointer hover:scale-110 hover:rotate-12 transition-all duration-300 group"
                                         >
-                                            <Camera className="h-4 w-4 text-white group-hover:scale-110 transition-transform" />
+                                            <Camera
+                                                className="h-4 w-4 text-white group-hover:scale-110 transition-transform"/>
                                             <input
                                                 type="file"
                                                 id="avatar-upload"
@@ -1929,8 +2224,9 @@ const ProfilePage = () => {
                                             {isHost ? profileData.hostName : `${profileData.firstName} ${profileData.lastName}`}
                                         </h2>
 
-                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-3">
-                                            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        <div
+                                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-3">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"/>
                                             <span className="text-xs font-medium text-slate-300">
                                               {isHost ? 'Host Partner' : 'Studente'}
                                             </span>
@@ -1938,53 +2234,67 @@ const ProfilePage = () => {
 
                                         <div className="space-y-2 text-sm text-slate-400">
                                             <div className="flex items-center justify-center sm:justify-start gap-2">
-                                                <Mail className="h-3.5 w-3.5" />
-                                                <span className="truncate">{profileData.email}</span>
+                                                <Mail className="h-3.5 w-3.5"/>
+                                                <span
+                                                    className="truncate">{isHost ? profileData.pec : profileData.email}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 {/* CFU Card */}
                                 <div className="flex gap-4 justify-center xl:justify-end flex-wrap">
-                                    <div className="relative px-8 py-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/20 shadow-2xl">
-                                    <div className="text-center">
-                                        {/* CFU Number */}
-                                        <div className="relative mb-3">
-                                            <div className="text-4xl md:text-5xl font-black bg-gradient-to-br from-white via-younify-blue to-purple-400 bg-clip-text text-transparent tracking-tighter leading-none">
-                                                {profileData.cfuCount.toLocaleString()}
+                                    <div
+                                        className="relative px-8 py-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/20 shadow-2xl">
+                                        <div className="text-center">
+                                            {/* CFU Number */}
+                                            <div className="relative mb-3">
+                                                <div
+                                                    className="text-4xl md:text-5xl font-black bg-gradient-to-br from-white via-younify-blue to-purple-400 bg-clip-text text-transparent tracking-tighter leading-none">
+                                                    {profileData.cfuCount?.toLocaleString() ?? '0'}
+                                                </div>
                                             </div>
-                                        </div>
-                                        {/* Label */}
-                                        <div className="flex items-center justify-center gap-2 mb-2">
-                                            <div className="h-px w-8 bg-gradient-to-r from-transparent to-slate-600" />
-                                            <span className="text-xs text-slate-400 uppercase tracking-[0.2em] font-bold">
+                                            {/* Label */}
+                                            <div className="flex items-center justify-center gap-2 mb-2">
+                                                <div
+                                                    className="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"/>
+                                                <span
+                                                    className="text-xs text-slate-400 uppercase tracking-[0.2em] font-bold">
                                                     CFU Totali
                                                     </span>
-                                            <div className="h-px w-8 bg-gradient-to-l from-transparent to-slate-600" />
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Matching Card */}
-                                    <div className="relative px-8 py-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/20 shadow-2xl">
-                                    <div className="text-center">
-                                        {/* CFU Number */}
-                                        <div className="relative mb-3">
-                                            <div className="text-4xl md:text-5xl font-black bg-gradient-to-br from-red-500 via-rose-400 to-pink-500 bg-clip-text text-transparent tracking-tighter leading-none">
-                                                {profileData.matchCount.toLocaleString()}
+                                                <div
+                                                    className="h-px w-8 bg-gradient-to-l from-transparent to-slate-600"/>
                                             </div>
                                         </div>
-                                        {/* Label */}
-                                        <div className="flex items-center justify-center gap-2 mb-2">
-                                            <div className="h-px w-8 bg-gradient-to-r from-transparent to-slate-600" />
-                                            <span className="text-xs text-slate-400 uppercase tracking-[0.2em] font-bold">
-                                                    Match Totali
-                                                    </span>
-                                            <div className="h-px w-8 bg-gradient-to-l from-transparent to-slate-600" />
-                                        </div>
                                     </div>
+                                    {/* Matching Card - SOLO PER USER */}
+                                    {!isHost && (
+                                        <div
+                                            className="relative px-8 py-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border border-white/20 shadow-2xl">
+                                            <div className="text-center">
+                                                {/* CFU Number */}
+                                                <div className="relative mb-3">
+                                                    <div
+                                                        className="text-4xl md:text-5xl font-black bg-gradient-to-br from-red-500 via-rose-400 to-pink-500 bg-clip-text text-transparent tracking-tighter leading-none">
+                                                        {profileData.matchCount?.toLocaleString() ?? 0}
+                                                    </div>
+                                                </div>
+                                                {/* Label */}
+                                                <div className="flex items-center justify-center gap-2 mb-2">
+                                                    <div
+                                                        className="h-px w-8 bg-gradient-to-r from-transparent to-slate-600"></div>
+                                                    <span
+                                                        className="text-xs text-slate-400 uppercase tracking-[0.2em] font-bold">
+                    Match Totali
+                </span>
+                                                    <div
+                                                        className="h-px w-8 bg-gradient-to-l from-transparent to-slate-600"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                 </div>
                             </div>
-                        </div>
                         </div>
                     </motion.div>
 
@@ -1993,23 +2303,25 @@ const ProfilePage = () => {
               DATI PERSONALI (Con Modifica)
           ======================================== */}
                     <motion.section
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{opacity: 0, y: 30}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1]}}
                         className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 overflow-hidden mb-6"
                     >
                         {/* Header con Bottoni */}
-                        <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0">
+                        <div
+                            className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0">
                             <div>
                                 <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">
                                     Impostazioni
                                 </p>
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-younify-blue/20 to-purple-600/20 border border-younify-blue/20">
+                                    <div
+                                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-younify-blue/20 to-purple-600/20 border border-younify-blue/20">
                                         {isHost ? (
-                                            <Building2 className="h-5 w-5 text-younify-blue" />
+                                            <Building2 className="h-5 w-5 text-younify-blue"/>
                                         ) : (
-                                            <User className="h-5 w-5 text-younify-blue" />
+                                            <User className="h-5 w-5 text-younify-blue"/>
                                         )}
                                     </div>
                                     <div>
@@ -2025,29 +2337,29 @@ const ProfilePage = () => {
                             <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                                 {!isEditing ? (
                                     <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{scale: 1.05}}
+                                        whileTap={{scale: 0.95}}
                                         onClick={handleEdit}
                                         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-younify-blue to-purple-600 text-white text-sm font-semibold shadow-lg hover:shadow-younify-blue/40 transition-all duration-300"
                                     >
-                                        <Edit3 className="h-4 w-4" />
+                                        <Edit3 className="h-4 w-4"/>
                                         Modifica
                                     </motion.button>
                                 ) : (
                                     <>
                                         <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            whileHover={{scale: 1.05}}
+                                            whileTap={{scale: 0.95}}
                                             onClick={handleCancel}
                                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold border border-slate-700 hover:bg-slate-700 transition-all duration-300"
                                         >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-4 w-4"/>
                                             Annulla
                                         </motion.button>
 
                                         <motion.button
-                                            whileHover={{ scale: hasPersonalDataChanges ? 1.05 : 1 }}
-                                            whileTap={{ scale: hasPersonalDataChanges ? 0.95 : 1 }}
+                                            whileHover={{scale: hasPersonalDataChanges ? 1.05 : 1}}
+                                            whileTap={{scale: hasPersonalDataChanges ? 0.95 : 1}}
                                             onClick={handleSave}
                                             disabled={!hasPersonalDataChanges}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-300 ${
@@ -2056,7 +2368,7 @@ const ProfilePage = () => {
                                                     : 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
                                             }`}
                                         >
-                                            <Save className="h-4 w-4" />
+                                            <Save className="h-4 w-4"/>
                                             Salva
                                         </motion.button>
                                     </>
@@ -2104,7 +2416,12 @@ const ProfilePage = () => {
                                             icon={MapPin}
                                             options={Object.keys(italianPlaces)}
                                             selected={profileData.province}
-                                            onSelect={(val) => handleInputChange({ target: { name: 'province', value: val } })}
+                                            onSelect={(val) => handleInputChange({
+                                                target: {
+                                                    name: 'province',
+                                                    value: val
+                                                }
+                                            })}
                                             isGrouped={false}
                                             disabled={!isEditing}
                                             errorMessage={errors.province}
@@ -2115,7 +2432,7 @@ const ProfilePage = () => {
                                             icon={MapPin}
                                             options={availableCities}
                                             selected={profileData.city}
-                                            onSelect={(val) => handleInputChange({ target: { name: 'city', value: val } })}
+                                            onSelect={(val) => handleInputChange({target: {name: 'city', value: val}})}
                                             isGrouped={false}
                                             disabled={!isEditing || !profileData.province}
                                             errorMessage={errors.city}
@@ -2170,7 +2487,7 @@ const ProfilePage = () => {
                                     />
 
                                     <InstagramInput
-                                        value={profileData.contactsInfo}
+                                        value={profileData.contactsInfo.replace(/^instagram\.com\//i, '').replace(/^@/, '')}
                                         onChange={handleInputChange}
                                         disabled={!isEditing}
                                         error={errors.contactsInfo}
@@ -2184,22 +2501,25 @@ const ProfilePage = () => {
                     {/* ========================================
     DATI UNIVERSITARI (Nuova Sezione Separata)
 ======================================== */}
+
                     {!isHost && (
                         <motion.section
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                            initial={{opacity: 0, y: 30}}
+                            animate={{opacity: 1, y: 0}}
+                            transition={{duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1]}}
                             className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 overflow-hidden mb-6"
                         >
                             {/* Header con Bottoni */}
-                            <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0">
+                            <div
+                                className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0">
                                 <div>
                                     <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">
                                         Istruzione
                                     </p>
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/20">
-                                            <GraduationCap className="h-5 w-5 text-purple-400" />
+                                        <div
+                                            className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/20">
+                                            <GraduationCap className="h-5 w-5 text-purple-400"/>
                                         </div>
                                         <div>
                                             <h3 className="text-2xl font-bold text-white">Dati Universitari</h3>
@@ -2212,29 +2532,29 @@ const ProfilePage = () => {
                                 <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                                     {!isEditingUniversity ? (
                                         <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            whileHover={{scale: 1.05}}
+                                            whileTap={{scale: 0.95}}
                                             onClick={handleEditUniversity}
                                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm font-semibold shadow-lg hover:shadow-purple-500/40 transition-all duration-300"
                                         >
-                                            <Edit3 className="h-4 w-4" />
+                                            <Edit3 className="h-4 w-4"/>
                                             Modifica
                                         </motion.button>
                                     ) : (
                                         <>
                                             <motion.button
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
+                                                whileHover={{scale: 1.05}}
+                                                whileTap={{scale: 0.95}}
                                                 onClick={handleCancelUniversity}
                                                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold border border-slate-700 hover:bg-slate-700 transition-all duration-300"
                                             >
-                                                <X className="h-4 w-4" />
+                                                <X className="h-4 w-4"/>
                                                 Annulla
                                             </motion.button>
 
                                             <motion.button
-                                                whileHover={{ scale: hasUniversityChanges ? 1.05 : 1 }}
-                                                whileTap={{ scale: hasUniversityChanges ? 0.95 : 1 }}
+                                                whileHover={{scale: hasUniversityChanges ? 1.05 : 1}}
+                                                whileTap={{scale: hasUniversityChanges ? 0.95 : 1}}
                                                 onClick={handleSaveUniversity}
                                                 disabled={!hasUniversityChanges}
                                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-300 ${
@@ -2243,7 +2563,7 @@ const ProfilePage = () => {
                                                         : 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
                                                 }`}
                                             >
-                                                <Save className="h-4 w-4" />
+                                                <Save className="h-4 w-4"/>
                                                 Salva
                                             </motion.button>
                                         </>
@@ -2276,16 +2596,22 @@ const ProfilePage = () => {
                                         errorMessage={universityErrors.university}
                                     />
 
-                                    <SearchableDropdown
-                                        label="Corso di Laurea"
-                                        icon={GraduationCap}
-                                        options={CDL_DATA}
-                                        selected={profileData.degreeProgram}
-                                        onSelect={(val) => handleUniversitySelect('degreeProgram', val)}
-                                        isGrouped={true}
-                                        disabled={!isEditingUniversity}
-                                        errorMessage={universityErrors.degreeProgram}
-                                    />
+                                    {isLoading ? (
+                                        <div className="animate-pulse">
+                                            <div className="h-12 bg-slate-800 rounded-2xl"></div>
+                                        </div>
+                                    ) : (
+                                        <SearchableDropdown
+                                            label="Corso di Laurea"
+                                            icon={GraduationCap}
+                                            options={CDL_DATA}
+                                            selected={profileData.degreeProgram || ''}
+                                            onSelect={(val) => handleUniversitySelect('degreeProgram', val)}
+                                            isGrouped={true}
+                                            disabled={!isEditingUniversity}
+                                            errorMessage={universityErrors.degreeProgram}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </motion.section>
@@ -2295,20 +2621,22 @@ const ProfilePage = () => {
     SICUREZZA - Password (Solo Indicatori)
 ======================================== */}
                     <motion.section
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{opacity: 0, y: 30}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1]}}
                         className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 overflow-hidden mb-6"
                     >
                         {/* Header con Bottoni */}
-                        <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0">
+                        <div
+                            className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0">
                             <div>
                                 <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">
                                     Protezione
                                 </p>
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-600/20 border border-rose-500/20">
-                                        <Shield className="h-5 w-5 text-rose-400" />
+                                    <div
+                                        className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500/20 to-pink-600/20 border border-rose-500/20">
+                                        <Shield className="h-5 w-5 text-rose-400"/>
                                     </div>
                                     <div>
                                         <h3 className="text-2xl font-bold text-white">Sicurezza</h3>
@@ -2321,29 +2649,29 @@ const ProfilePage = () => {
                             <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                                 {!isEditingPassword ? (
                                     <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
+                                        whileHover={{scale: 1.05}}
+                                        whileTap={{scale: 0.95}}
                                         onClick={handleEditPassword}
                                         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-sm font-semibold shadow-lg hover:shadow-rose-500/40 transition-all duration-300"
                                     >
-                                        <Edit3 className="h-4 w-4" />
+                                        <Edit3 className="h-4 w-4"/>
                                         Modifica
                                     </motion.button>
                                 ) : (
                                     <>
                                         <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            whileHover={{scale: 1.05}}
+                                            whileTap={{scale: 0.95}}
                                             onClick={handleCancelPassword}
                                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-sm font-semibold border border-slate-700 hover:bg-slate-700 transition-all duration-300"
                                         >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-4 w-4"/>
                                             Annulla
                                         </motion.button>
 
                                         <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
+                                            whileHover={{scale: 1.05}}
+                                            whileTap={{scale: 0.95}}
                                             onClick={handleSavePassword}
                                             disabled={!passwordRegex.test(passwords.newPassword) || passwords.newPassword !== passwords.confirmPassword || !passwords.confirmPassword}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition-all duration-300 ${
@@ -2352,7 +2680,7 @@ const ProfilePage = () => {
                                                     : 'bg-slate-800/50 text-slate-500 cursor-not-allowed'
                                             }`}
                                         >
-                                            <Save className="h-4 w-4" />
+                                            <Save className="h-4 w-4"/>
                                             Salva
                                         </motion.button>
                                     </>
@@ -2392,22 +2720,23 @@ const ProfilePage = () => {
                             <AnimatePresence>
                                 {isEditingPassword && (
                                     <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
+                                        initial={{opacity: 0, height: 0}}
+                                        animate={{opacity: 1, height: 'auto'}}
+                                        exit={{opacity: 0, height: 0}}
                                         className="space-y-3 p-4 rounded-xl bg-slate-950/30 border border-white/5"
                                     >
                                         {/* Requisiti password */}
                                         <div className={`flex items-center gap-2 text-sm transition-colors ${
                                             passwordRegex.test(passwords.newPassword) ? 'text-emerald-400' : 'text-slate-500'
                                         }`}>
-                                            <div className={`flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
-                                                passwordRegex.test(passwords.newPassword)
-                                                    ? 'border-emerald-400 bg-emerald-400/10'
-                                                    : 'border-slate-600 bg-slate-800/30'
-                                            }`}>
+                                            <div
+                                                className={`flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
+                                                    passwordRegex.test(passwords.newPassword)
+                                                        ? 'border-emerald-400 bg-emerald-400/10'
+                                                        : 'border-slate-600 bg-slate-800/30'
+                                                }`}>
                                                 {passwordRegex.test(passwords.newPassword) && (
-                                                    <CheckCircle2 className="h-3 w-3" />
+                                                    <CheckCircle2 className="h-3 w-3"/>
                                                 )}
                                             </div>
                                             <span className="font-medium">
@@ -2421,13 +2750,14 @@ const ProfilePage = () => {
                                                 ? 'text-emerald-400'
                                                 : 'text-slate-500'
                                         }`}>
-                                            <div className={`flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
-                                                passwords.newPassword === passwords.confirmPassword && passwords.confirmPassword
-                                                    ? 'border-emerald-400 bg-emerald-400/10'
-                                                    : 'border-slate-600 bg-slate-800/30'
-                                            }`}>
+                                            <div
+                                                className={`flex h-5 w-5 items-center justify-center rounded-full border transition-all ${
+                                                    passwords.newPassword === passwords.confirmPassword && passwords.confirmPassword
+                                                        ? 'border-emerald-400 bg-emerald-400/10'
+                                                        : 'border-slate-600 bg-slate-800/30'
+                                                }`}>
                                                 {passwords.newPassword === passwords.confirmPassword && passwords.confirmPassword && (
-                                                    <CheckCircle2 className="h-3 w-3" />
+                                                    <CheckCircle2 className="h-3 w-3"/>
                                                 )}
                                             </div>
                                             <span className="font-medium">
@@ -2441,12 +2771,11 @@ const ProfilePage = () => {
                     </motion.section>
 
 
-
                     {/* ==================== SEZIONE EVENTI ==================== */}
                     <motion.section
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{opacity: 0, y: 30}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1]}}
                         className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 mb-6 overflow-hidden">
                         {/* Header */}
                         <div className="mb-6">
@@ -2454,8 +2783,9 @@ const ProfilePage = () => {
                                 {isHost ? 'Gestione' : 'Partecipazioni'}
                             </p>
                             <div className="flex items-center gap-3">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/20">
-                                    <CalendarDays className="h-5 w-5 text-amber-400" />
+                                <div
+                                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/20">
+                                    <CalendarDays className="h-5 w-5 text-amber-400"/>
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-bold text-white">Eventi</h3>
@@ -2472,32 +2802,32 @@ const ProfilePage = () => {
                                 <div className="space-y-3">
                                     {displayedEvents.map((event) => (
                                         <ProfileEventItem
-                                            key={event.id}
+                                            key={event.ID}
                                             event={event}
                                             isHost={isHost}
                                             onView={() => handleViewEventDetail(event)}
-                                            onUnjoin={() => handleUnjoinEvent(event.id)}
+                                            onUnjoin={() => handleUnjoinEvent(event)}
                                             onEdit={() => handleOpenEditModal(event)}
-                                            onDelete={() => handleDeleteEvent(event.id)}
+                                            onDelete={() => handleDeleteEvent(event)}
                                         />
                                     ))}
                                     {/* Bottone Mostra Altri Eventi */}
                                     {events.length > INITIAL_ITEMS_LIMIT && (
                                         <motion.button
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
+                                            whileHover={{scale: 1.02}}
+                                            whileTap={{scale: 0.98}}
                                             onClick={() => setShowAllEvents(!showAllEvents)}
                                             className="w-full mt-4 py-3 rounded-xl bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:border-younify-blue/30 transition-all flex items-center justify-center gap-2 font-semibold text-sm"
                                         >
                                             {showAllEvents ? (
                                                 <>
-                                                    <ChevronLeft size={16} />
+                                                    <ChevronLeft size={16}/>
                                                     Mostra meno
                                                 </>
                                             ) : (
                                                 <>
                                                     Carica altro ({events.length - INITIAL_ITEMS_LIMIT})
-                                                    <ChevronRight size={16} />
+                                                    <ChevronRight size={16}/>
                                                 </>
                                             )}
                                         </motion.button>
@@ -2506,9 +2836,11 @@ const ProfilePage = () => {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <div className="relative mb-6">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full blur-2xl" />
-                                        <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-slate-950/50 border border-white/10">
-                                            <Sparkles className="h-9 w-9 text-amber-400/40" />
+                                        <div
+                                            className="absolute inset-0 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full blur-2xl"/>
+                                        <div
+                                            className="relative flex h-20 w-20 items-center justify-center rounded-full bg-slate-950/50 border border-white/10">
+                                            <Sparkles className="h-9 w-9 text-amber-400/40"/>
                                         </div>
                                     </div>
                                     <p className="text-slate-400 text-sm max-w-md">
@@ -2523,21 +2855,23 @@ const ProfilePage = () => {
 
                     {/* ==================== PART 6: SEZIONE STORICO THREAD & COMMENTI ==================== */}
                     <motion.section
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                        initial={{opacity: 0, y: 30}}
+                        animate={{opacity: 1, y: 0}}
+                        transition={{duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1]}}
                         className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 overflow-hidden mb-6"
                     >
                         {/* Header con Tab Switcher */}
                         <div className="mb-6 md:mb-8">
-                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0 mb-6">
+                            <div
+                                className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-0 mb-6">
                                 <div>
                                     <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">
                                         Attività Sociale
                                     </p>
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 border border-purple-500/20">
-                                            <MessageSquare className="h-5 w-5 text-purple-400" />
+                                        <div
+                                            className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600/20 to-blue-600/20 border border-purple-500/20">
+                                            <MessageSquare className="h-5 w-5 text-purple-400"/>
                                         </div>
                                         <div>
                                             <h3 className="text-2xl font-bold text-white">Thread & Commenti</h3>
@@ -2558,7 +2892,7 @@ const ProfilePage = () => {
                                     }`}
                                 >
                                     <div className="flex items-center justify-center gap-2">
-                                        <PenLine size={16} />
+                                        <PenLine size={16}/>
                                         <span>I miei Thread</span>
                                         <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs font-bold">
             {threads.length}
@@ -2574,7 +2908,7 @@ const ProfilePage = () => {
                                     }`}
                                 >
                                     <div className="flex items-center justify-center gap-2">
-                                        <MessageCircle size={16} />
+                                        <MessageCircle size={16}/>
                                         <span>I miei Commenti</span>
                                         <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs font-bold">
             {comments.length}
@@ -2589,53 +2923,56 @@ const ProfilePage = () => {
                             {socialTab === 'threads' && (
                                 <motion.div
                                     key="threads"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 20 }}
-                                    transition={{ duration: 0.3 }}
+                                    initial={{opacity: 0, x: -20}}
+                                    animate={{opacity: 1, x: 0}}
+                                    exit={{opacity: 0, x: 20}}
+                                    transition={{duration: 0.3}}
                                     className="space-y-4"
                                 >
                                     {threads.length > 0 ? (
                                         displayedThreads.map((thread) => (
-                                            <ProfileThreadItem
-                                                key={thread.id}
-                                                thread={thread}
-                                                onDelete={() => handleDeleteThread(thread.id)}
-                                            />
-                                        )
+                                                <ProfileThreadItem
+                                                    key={thread.ID}
+                                                    thread={thread}
+                                                    onDelete={() => handleDeleteThread(thread.ID)}
+                                                />
+                                            )
                                         )
                                     ) : (
                                         <div className="flex flex-col items-center justify-center py-16 text-center">
                                             <div className="relative mb-6">
-                                                <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full" />
-                                                <div className="relative w-20 h-20 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
-                                                    <Sparkles size={32} className="text-slate-600" />
+                                                <div
+                                                    className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full"/>
+                                                <div
+                                                    className="relative w-20 h-20 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
+                                                    <Sparkles size={32} className="text-slate-600"/>
                                                 </div>
                                             </div>
                                             <p className="text-lg font-semibold text-slate-400 mb-2">
                                                 Nessun thread pubblicato
                                             </p>
                                             <p className="text-sm text-slate-500 max-w-md">
-                                                Condividi le tue domande, esperienze o consigli con la community universitaria.
+                                                Condividi le tue domande, esperienze o consigli con la community
+                                                universitaria.
                                             </p>
                                         </div>
                                     )}
                                     {threads.length > INITIAL_ITEMS_LIMIT && (
                                         <motion.button
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
+                                            whileHover={{scale: 1.02}}
+                                            whileTap={{scale: 0.98}}
                                             onClick={() => setShowAllThreads(!showAllThreads)}
                                             className="w-full mt-4 py-3 rounded-xl bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 transition-all flex items-center justify-center gap-2 font-semibold text-sm"
                                         >
                                             {showAllThreads ? (
                                                 <>
-                                                    <ChevronLeft size={16} />
+                                                    <ChevronLeft size={16}/>
                                                     Mostra meno
                                                 </>
                                             ) : (
                                                 <>
                                                     Carica altro ({threads.length - INITIAL_ITEMS_LIMIT})
-                                                    <ChevronRight size={16} />
+                                                    <ChevronRight size={16}/>
                                                 </>
                                             )}
                                         </motion.button>
@@ -2648,52 +2985,54 @@ const ProfilePage = () => {
                             {socialTab === 'comments' && (
                                 <motion.div
                                     key="comments"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 20 }}
-                                    transition={{ duration: 0.3 }}
+                                    initial={{opacity: 0, x: -20}}
+                                    animate={{opacity: 1, x: 0}}
+                                    exit={{opacity: 0, x: 20}}
+                                    transition={{duration: 0.3}}
                                     className="space-y-4"
                                 >
                                     {comments.length > 0 ? (
                                         displayedComments.map((comment) => (
                                             <ProfileCommentItem
-                                                key={comment.id}
+                                                key={comment.ID}
                                                 comment={comment}
-                                                onDelete={() => handleDeleteComment(comment.id)}
+                                                onDelete={() => handleDeleteComment(comment.ID)}
                                             />
                                         ))
                                     ) : (
                                         <div className="flex flex-col items-center justify-center py-16 text-center">
                                             <div className="relative mb-6">
-                                                <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full" />
-                                                <div className="relative w-20 h-20 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
-                                                    <MessageSquare size={32} className="text-slate-600" />
+                                                <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"/>
+                                                <div
+                                                    className="relative w-20 h-20 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
+                                                    <MessageSquare size={32} className="text-slate-600"/>
                                                 </div>
                                             </div>
                                             <p className="text-lg font-semibold text-slate-400 mb-2">
                                                 Nessun commento pubblicato
                                             </p>
                                             <p className="text-sm text-slate-500 max-w-md">
-                                                Inizia a partecipare alle discussioni rispondendo ai thread della community.
+                                                Inizia a partecipare alle discussioni rispondendo ai thread della
+                                                community.
                                             </p>
                                         </div>
                                     )}
                                     {comments.length > INITIAL_ITEMS_LIMIT && (
                                         <motion.button
-                                            whileHover={{ scale: 1.02 }}
-                                            whileTap={{ scale: 0.98 }}
+                                            whileHover={{scale: 1.02}}
+                                            whileTap={{scale: 0.98}}
                                             onClick={() => setShowAllComments(!showAllComments)}
                                             className="w-full mt-4 py-3 rounded-xl bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:border-blue-500/30 transition-all flex items-center justify-center gap-2 font-semibold text-sm"
                                         >
                                             {showAllComments ? (
                                                 <>
-                                                    <ChevronLeft size={16} />
+                                                    <ChevronLeft size={16}/>
                                                     Mostra meno
                                                 </>
                                             ) : (
                                                 <>
                                                     Carica altro ({comments.length - INITIAL_ITEMS_LIMIT})
-                                                    <ChevronRight size={16} />
+                                                    <ChevronRight size={16}/>
                                                 </>
                                             )}
                                         </motion.button>
@@ -2707,9 +3046,9 @@ const ProfilePage = () => {
                     {/* ==================== PART 7: SEZIONE MATCHING DASHBOARD ==================== */}
                     {!isHost && (
                         <motion.section
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            initial={{opacity: 0, y: 30}}
+                            animate={{opacity: 1, y: 0}}
+                            transition={{duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1]}}
                             className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 overflow-hidden mb-8"
                         >
                             {/* Header */}
@@ -2720,12 +3059,14 @@ const ProfilePage = () => {
                                             Connessioni
                                         </p>
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600/20 to-purple-600/20 border border-emerald-500/20">
-                                                <Heart className="h-5 w-5 text-emerald-400" />
+                                            <div
+                                                className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600/20 to-purple-600/20 border border-emerald-500/20">
+                                                <Heart className="h-5 w-5 text-emerald-400"/>
                                             </div>
                                             <div>
                                                 <h3 className="text-2xl font-bold text-white">Matching Dashboard</h3>
-                                                <p className="text-sm text-slate-400">Gestisci le tue richieste di match</p>
+                                                <p className="text-sm text-slate-400">Gestisci le tue richieste di
+                                                    match</p>
                                             </div>
                                         </div>
                                     </div>
@@ -2737,16 +3078,19 @@ const ProfilePage = () => {
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
                                             <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                                                <div
+                                                    className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                                                 Richieste Ricevute
                                             </h4>
-                                            <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">
+                                            <span
+                                                className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">
       {matchReceived.length}
     </span>
                                         </div>
 
                                         {/* Lista Card (limitata o completa) */}
-                                        <div className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                        <div
+                                            className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                             <AnimatePresence>
                                                 {displayedReceived.length > 0 ? (
                                                     displayedReceived.map((match) => (
@@ -2754,16 +3098,19 @@ const ProfilePage = () => {
                                                             key={match.id}
                                                             user={match}
                                                             type="received"
-                                                            onAccept={() => handleAcceptMatch(match.id)}
-                                                            onReject={() => handleRejectMatch(match.id)}
+                                                            onAccept={() => handleAcceptMatch(match.matchID)}
+                                                            onReject={() => handleRejectMatch(match.matchID)}
                                                         />
                                                     ))
                                                 ) : (
-                                                    <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-950/30 rounded-2xl border border-white/5">
+                                                    <div
+                                                        className="flex flex-col items-center justify-center py-12 text-center bg-slate-950/30 rounded-2xl border border-white/5">
                                                         <div className="relative mb-4">
-                                                            <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full"></div>
-                                                            <div className="relative w-16 h-16 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
-                                                                <Heart size={28} className="text-slate-600" />
+                                                            <div
+                                                                className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full"></div>
+                                                            <div
+                                                                className="relative w-16 h-16 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
+                                                                <Heart size={28} className="text-slate-600"/>
                                                             </div>
                                                         </div>
                                                         <p className="text-sm font-semibold text-slate-400 mb-1">
@@ -2780,20 +3127,21 @@ const ProfilePage = () => {
                                         {/* Bottone "Mostra Altre" */}
                                         {matchReceived.length > INITIAL_DISPLAY_LIMIT && (
                                             <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
+                                                whileHover={{scale: 1.02}}
+                                                whileTap={{scale: 0.98}}
                                                 onClick={() => setShowAllReceived(!showAllReceived)}
                                                 className="w-full py-3 rounded-xl bg-slate-800/50 text-slate-400 hover:bg-emerald-500/20 hover:text-emerald-400 border border-slate-700/50 hover:border-emerald-500/30 transition-all font-semibold text-sm flex items-center justify-center gap-2"
                                             >
                                                 {showAllReceived ? (
                                                     <>
-                                                        <ChevronDown size={16} className="rotate-180" />
+                                                        <ChevronDown size={16} className="rotate-180"/>
                                                         Mostra meno
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <ChevronDown size={16} />
-                                                        Mostra altre {matchReceived.length - INITIAL_DISPLAY_LIMIT} richieste
+                                                        <ChevronDown size={16}/>
+                                                        Mostra
+                                                        altre {matchReceived.length - INITIAL_DISPLAY_LIMIT} richieste
                                                     </>
                                                 )}
                                             </motion.button>
@@ -2808,28 +3156,34 @@ const ProfilePage = () => {
                                                 <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
                                                 Richieste Inviate
                                             </h4>
-                                            <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30">
+                                            <span
+                                                className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold border border-purple-500/30">
                                               {matchSent.length}
                                             </span>
                                         </div>
 
-                                        <div className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                                        <div
+                                            className="space-y-3 max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                                             <AnimatePresence>
                                                 {displayedSent.length > 0 ? (
                                                     displayedSent.map((match) => (
                                                         <MatchRequestCard
-                                                            key={match.id}
+                                                            key={match.matchID}
                                                             user={match}
                                                             type="sent"
-                                                            onCancel={() => handleCancelSentMatch(match.id)}
+                                                            onCancel={() => handleCancelSentMatch(match.matchID)}
+
                                                         />
                                                     ))
                                                 ) : (
-                                                    <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-950/30 rounded-2xl border border-white/5">
+                                                    <div
+                                                        className="flex flex-col items-center justify-center py-12 text-center bg-slate-950/30 rounded-2xl border border-white/5">
                                                         <div className="relative mb-4">
-                                                            <div className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full"></div>
-                                                            <div className="relative w-16 h-16 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
-                                                                <Clock size={28} className="text-slate-600" />
+                                                            <div
+                                                                className="absolute inset-0 bg-purple-500/20 blur-2xl rounded-full"></div>
+                                                            <div
+                                                                className="relative w-16 h-16 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
+                                                                <Clock size={28} className="text-slate-600"/>
                                                             </div>
                                                         </div>
                                                         <p className="text-sm font-semibold text-slate-400 mb-1">
@@ -2845,20 +3199,21 @@ const ProfilePage = () => {
 
                                         {matchSent.length > INITIAL_DISPLAY_LIMIT && (
                                             <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
+                                                whileHover={{scale: 1.02}}
+                                                whileTap={{scale: 0.98}}
                                                 onClick={() => setShowAllSent(!showAllSent)}
                                                 className="w-full py-3 rounded-xl bg-slate-800/50 text-slate-400 hover:bg-purple-500/20 hover:text-purple-400 border border-slate-700/50 hover:border-purple-500/30 transition-all font-semibold text-sm flex items-center justify-center gap-2"
                                             >
                                                 {showAllSent ? (
                                                     <>
-                                                        <ChevronDown size={16} className="rotate-180" />
+                                                        <ChevronDown size={16} className="rotate-180"/>
                                                         Mostra meno
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <ChevronDown size={16} />
-                                                        Mostra altre {matchSent.length - INITIAL_DISPLAY_LIMIT} richieste
+                                                        <ChevronDown size={16}/>
+                                                        Mostra
+                                                        altre {matchSent.length - INITIAL_DISPLAY_LIMIT} richieste
                                                     </>
                                                 )}
                                             </motion.button>
@@ -2870,7 +3225,8 @@ const ProfilePage = () => {
 
                             {/* Sezione Storico Match */}
                             <div className="border-t border-white/5 pt-6 md:pt-8">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                                <div
+                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                                     <div>
                                         <h4 className="text-xl font-bold text-white mb-1">Storico Match</h4>
                                         <p className="text-sm text-slate-400">
@@ -2891,29 +3247,30 @@ const ProfilePage = () => {
                                         matchViewMode === 'list' ? (
                                             <motion.div
                                                 key="list-view"
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -20 }}
-                                                transition={{ duration: 0.3 }}
+                                                initial={{opacity: 0, y: 20}}
+                                                animate={{opacity: 1, y: 0}}
+                                                exit={{opacity: 0, y: -20}}
+                                                transition={{duration: 0.3}}
                                             >
-                                                <MatchList matches={displayedHistory} />
+                                                <MatchList matches={displayedHistory}/>
                                                 {/* Bottone Mostra Altri Match Storico */}
                                                 {matchHistory.length > INITIAL_ITEMS_LIMIT && (
                                                     <motion.button
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
+                                                        whileHover={{scale: 1.02}}
+                                                        whileTap={{scale: 0.98}}
                                                         onClick={() => setShowAllHistory(!showAllHistory)}
                                                         className="w-full mt-4 py-3 rounded-xl bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 transition-all flex items-center justify-center gap-2 font-semibold text-sm"
                                                     >
                                                         {showAllHistory ? (
                                                             <>
-                                                                <ChevronLeft size={16} />
+                                                                <ChevronLeft size={16}/>
                                                                 Mostra meno
                                                             </>
                                                         ) : (
                                                             <>
-                                                                Carica altro ({matchHistory.length - INITIAL_ITEMS_LIMIT})
-                                                                <ChevronRight size={16} />
+                                                                Carica altro
+                                                                ({matchHistory.length - INITIAL_ITEMS_LIMIT})
+                                                                <ChevronRight size={16}/>
                                                             </>
                                                         )}
                                                     </motion.button>
@@ -2923,27 +3280,27 @@ const ProfilePage = () => {
                                         ) : (
                                             <motion.div
                                                 key="globe-view"
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.95 }}
-                                                transition={{ duration: 0.3 }}
+                                                initial={{opacity: 0, scale: 0.95}}
+                                                animate={{opacity: 1, scale: 1}}
+                                                exit={{opacity: 0, scale: 0.95}}
+                                                transition={{duration: 0.3}}
                                                 className="relative rounded-2xl overflow-hidden border border-white/10 bg-slate-950/50"
-                                                style={{ height: '600px' }}
+                                                style={{height: '600px'}}
                                             >
                                                 <InfiniteMenu
                                                     items={displayedHistory.map((match, index) => ({
-                                                        image: match.avatar,
-                                                        link: `https://instagram.com/${match.instagram}`,
-                                                        title: match.name,
-                                                        description: match.major,
+                                                        image: match.senderName,
+                                                        link: `https://instagram.com/${match.contactsInfo}`,
+                                                        title: match.senderName,
+                                                        description: match.stud,
                                                     }))}
                                                     scale={1}
                                                 />
                                                 {/* Bottone Mostra Storico Completo */}
                                                 {matchHistory.length > INITIAL_ITEMS_LIMIT && (
                                                     <motion.button
-                                                        whileHover={{ scale: 1.02 }}
-                                                        whileTap={{ scale: 0.98 }}
+                                                        whileHover={{scale: 1.02}}
+                                                        whileTap={{scale: 0.98}}
                                                         onClick={() => setShowAllHistory(!showAllHistory)}
                                                         className="w-full mt-4 py-3 rounded-xl bg-slate-800/50 border border-white/10 text-slate-400 hover:text-white hover:border-purple-500/30 transition-all flex items-center justify-center gap-2 font-semibold text-sm"
                                                     >
@@ -2955,21 +3312,24 @@ const ProfilePage = () => {
                                     ) : (
                                         <motion.div
                                             key="empty-state"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
+                                            initial={{opacity: 0}}
+                                            animate={{opacity: 1}}
                                             className="flex flex-col items-center justify-center py-20 text-center bg-slate-950/30 rounded-2xl border border-white/5"
                                         >
                                             <div className="relative mb-6">
-                                                <div className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full" />
-                                                <div className="relative w-20 h-20 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
-                                                    <Users size={32} className="text-slate-600" />
+                                                <div
+                                                    className="absolute inset-0 bg-purple-500/20 blur-3xl rounded-full"/>
+                                                <div
+                                                    className="relative w-20 h-20 rounded-full bg-slate-900/50 border border-white/10 flex items-center justify-center">
+                                                    <Users size={32} className="text-slate-600"/>
                                                 </div>
                                             </div>
                                             <p className="text-lg font-semibold text-slate-400 mb-2">
                                                 Nessun match confermato
                                             </p>
                                             <p className="text-sm text-slate-500 max-w-md">
-                                                Accetta le richieste ricevute o cerca nuovi match per costruire la tua rete universitaria.
+                                                Accetta le richieste ricevute o cerca nuovi match per costruire la tua
+                                                rete universitaria.
                                             </p>
                                         </motion.div>
                                     )}
@@ -2979,80 +3339,86 @@ const ProfilePage = () => {
                     )}
 
 
-
                     {/* ==================== MODALE DETTAGLIO EVENTO ==================== */}
                     <AnimatePresence>
                         {detailEvent && (
                             <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-4">
                                 {/* Backdrop */}
                                 <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
+                                    initial={{opacity: 0}}
+                                    animate={{opacity: 1}}
+                                    exit={{opacity: 0}}
+                                    transition={{duration: 0.3}}
                                     onClick={() => setDetailEvent(null)}
                                     className="absolute inset-0 bg-black/60 backdrop-blur-md"
                                 />
 
                                 {/* Card Principale + Panel Laterale */}
-                                <div className="relative z-10 flex flex-col md:flex-row items-end md:items-start justify-end md:justify-center w-full h-full md:h-auto md:max-h-[90vh] pointer-events-none">
+                                <div
+                                    className="relative z-10 flex flex-col md:flex-row items-end md:items-start justify-end md:justify-center w-full h-full md:h-auto md:max-h-[90vh] pointer-events-none">
                                     {/* CARD PRINCIPALE */}
                                     <motion.div
                                         layout
-                                        initial={{ opacity: 0, y: 100 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 100 }}
-                                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                        initial={{opacity: 0, y: 100}}
+                                        animate={{opacity: 1, y: 0}}
+                                        exit={{opacity: 0, y: 100}}
+                                        transition={{type: 'spring', stiffness: 300, damping: 30}}
                                         className="w-full md:w-[600px] h-auto max-h-[92vh] md:max-h-[90vh] bg-[#0F131F] border-t md:border border-white/10 rounded-t-[2.5rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col pointer-events-auto"
                                     >
                                         {/* Immagine Header */}
                                         <div className="relative h-48 md:h-64 shrink-0">
                                             <img
-                                                src={detailEvent.image}
-                                                className={`w-full h-full object-cover ${new Date(detailEvent.date) < new Date() ? 'grayscale opacity-80' : ''}`}
+                                                src={detailEvent.posterUrl}
+                                                className={`w-full h-full object-cover ${new Date(detailEvent.dateAndTime) < new Date() ? 'grayscale opacity-80' : ''}`}
                                                 alt=""
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-[#0F131F] via-transparent to-transparent" />
+                                            <div
+                                                className="absolute inset-0 bg-gradient-to-t from-[#0F131F] via-transparent to-transparent"/>
 
                                             {/* Bottone Chiudi */}
                                             <button
                                                 onClick={() => setDetailEvent(null)}
                                                 className="absolute top-6 right-6 p-2 bg-black/30 backdrop-blur-xl rounded-full text-white border border-white/10 hover:bg-white/10 z-50"
                                             >
-                                                <X size={20} />
+                                                <X size={20}/>
                                             </button>
 
                                             {/* Info Overlay */}
                                             <div className="absolute bottom-6 left-6 right-6 md:left-8 md:right-8">
                                                 <div className="flex gap-2 mb-2 md:mb-3">
-                <span className="px-3 py-1 bg-younify-blue/80 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-bold text-white uppercase">
+                <span
+                    className="px-3 py-1 bg-younify-blue/80 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-bold text-white uppercase">
                   {detailEvent.city}
                 </span>
-                                                    {new Date(detailEvent.date) < new Date() && (
-                                                        <span className="px-3 py-1 bg-slate-800/80 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-bold text-slate-400 uppercase">
+                                                    {new Date(detailEvent.dateAndTime) < new Date() && (
+                                                        <span
+                                                            className="px-3 py-1 bg-slate-800/80 backdrop-blur-md rounded-lg text-[10px] md:text-xs font-bold text-slate-400 uppercase">
                     Concluso
                   </span>
                                                     )}
                                                 </div>
                                                 <h2 className="text-2xl md:text-5xl font-black text-white leading-tight break-words">
-                                                    {detailEvent.title}
+                                                    {detailEvent.name}
                                                 </h2>
                                                 <p className="text-slate-400 text-sm md:text-base mt-2 font-medium flex items-center gap-2">
-                                                    <Users size={16} className="opacity-70" />
-                                                    Organizzato da <span className="text-white font-semibold">{detailEvent.organizer}</span>
+                                                    <Users size={16} className="opacity-70"/>
+                                                    Organizzato da <span
+                                                    className="text-white font-semibold">{detailEvent.hostName}</span>
                                                 </p>
                                             </div>
                                         </div>
 
                                         {/* Contenuto Scrollabile */}
-                                        <div className="p-5 md:p-8 overflow-y-auto space-y-5 md:space-y-8 flex-1 scrollbar-thin scrollbar-thumb-white/10">
+                                        <div
+                                            className="p-5 md:p-8 overflow-y-auto space-y-5 md:space-y-8 flex-1 scrollbar-thin scrollbar-thumb-white/10">
                                             {/* Info Cards */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                                                <div className="bg-white/5 p-3 md:p-4 rounded-2xl border border-white/5">
-                                                    <Calendar className="text-younify-blue mb-2" />
+                                                <div
+                                                    className="bg-white/5 p-3 md:p-4 rounded-2xl border border-white/5">
+                                                    <Calendar className="text-younify-blue mb-2"/>
                                                     <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Data</p>
                                                     <p className="text-white text-sm md:text-base font-medium">
-                                                        {new Date(detailEvent.date).toLocaleString('it-IT', {
+                                                        {new Date(detailEvent.dateAndTime).toLocaleString('it-IT', {
                                                             weekday: 'short',
                                                             day: 'numeric',
                                                             month: 'short',
@@ -3062,10 +3428,11 @@ const ProfilePage = () => {
                                                     </p>
                                                 </div>
 
-                                                <div className="bg-white/5 p-3 md:p-4 rounded-2xl border border-white/5">
-                                                    <MapPin className="text-rose-500 mb-2" />
+                                                <div
+                                                    className="bg-white/5 p-3 md:p-4 rounded-2xl border border-white/5">
+                                                    <MapPin className="text-rose-500 mb-2"/>
                                                     <p className="text-[10px] md:text-xs text-slate-500 font-bold uppercase">Dove</p>
-                                                    <p className="text-white text-sm md:text-base font-medium">{detailEvent.location}</p>
+                                                    <p className="text-white text-sm md:text-base font-medium">{detailEvent.street}</p>
                                                 </div>
                                             </div>
 
@@ -3092,7 +3459,7 @@ const ProfilePage = () => {
                                                             ? 'bg-younify-blue text-white'
                                                             : 'bg-younify-blue/20 text-younify-blue group-hover:bg-younify-blue group-hover:text-white'
                                                     }`}>
-                                                        <Users size={20} />
+                                                        <Users size={20}/>
                                                     </div>
                                                     <div>
                                                         <p className={`text-sm font-bold ${showParticipantsPanel ? 'text-younify-blue' : 'text-white'}`}>
@@ -3102,54 +3469,56 @@ const ProfilePage = () => {
                                                     </div>
                                                 </div>
                                                 {showParticipantsPanel ? (
-                                                    <ChevronLeft size={20} className="text-younify-blue" />
+                                                    <ChevronLeft size={20} className="text-younify-blue"/>
                                                 ) : (
-                                                    <ChevronRight size={20} className="text-slate-500 group-hover:text-white" />
+                                                    <ChevronRight size={20}
+                                                                  className="text-slate-500 group-hover:text-white"/>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Footer Actions (Solo User) */}
                                         {!isHost && (
-                                            <div className="p-5 md:p-6 border-t border-white/5 bg-[#0F131F] backdrop-blur-xl flex gap-4 z-20 shrink-0 pb-8 md:pb-6">
+                                            <div
+                                                className="p-5 md:p-6 border-t border-white/5 bg-[#0F131F] backdrop-blur-xl flex gap-4 z-20 shrink-0 pb-8 md:pb-6">
                                                 <motion.button
                                                     onClick={() => {
-                                                        const isEventPast = new Date(detailEvent.date) < new Date();
+                                                        const isEventPast = new Date(detailEvent.dateAndTime) < new Date();
                                                         if (!isEventPast) {
-                                                            handleUnjoinEvent(detailEvent.id);
+                                                            handleUnjoinEvent(detailevent.ID);
                                                             setDetailEvent(null);
                                                         }
                                                     }}
-                                                    disabled={new Date(detailEvent.date) < new Date()}
-                                                    whileTap={new Date(detailEvent.date) < new Date() ? {} : { scale: 0.95 }}
+                                                    disabled={new Date(detailEvent.dateAndTime) < new Date()}
+                                                    whileTap={new Date(detailEvent.dateAndTime) < new Date() ? {} : {scale: 0.95}}
                                                     className={`relative flex-1 h-14 md:h-16 rounded-2xl font-bold text-lg flex items-center justify-center overflow-hidden border shadow-lg transition-all ${
-                                                        new Date(detailEvent.date) < new Date()
+                                                        new Date(detailEvent.dateAndTime) < new Date()
                                                             ? 'bg-white/5 border-white/10 text-slate-500 cursor-not-allowed'
                                                             : 'bg-rose-500 border-rose-400 text-white hover:bg-rose-600'
                                                     }`}
                                                 >
                                                     <AnimatePresence mode="wait" initial={false}>
-                                                        {new Date(detailEvent.date) < new Date() ? (
+                                                        {new Date(detailEvent.dateAndTime) < new Date() ? (
                                                             <motion.div
                                                                 key="past"
-                                                                initial={{ y: 20, opacity: 0 }}
-                                                                animate={{ y: 0, opacity: 1 }}
-                                                                exit={{ y: -20, opacity: 0 }}
+                                                                initial={{y: 20, opacity: 0}}
+                                                                animate={{y: 0, opacity: 1}}
+                                                                exit={{y: -20, opacity: 0}}
                                                                 className="flex items-center gap-2"
                                                             >
                                                                 <span>Evento Passato</span>
-                                                                <Clock size={20} />
+                                                                <Clock size={20}/>
                                                             </motion.div>
                                                         ) : (
                                                             <motion.div
                                                                 key="unjoin"
-                                                                initial={{ y: 20, opacity: 0 }}
-                                                                animate={{ y: 0, opacity: 1 }}
-                                                                exit={{ y: -20, opacity: 0 }}
+                                                                initial={{y: 20, opacity: 0}}
+                                                                animate={{y: 0, opacity: 1}}
+                                                                exit={{y: -20, opacity: 0}}
                                                                 className="flex items-center gap-2"
                                                             >
                                                                 <span>Disdici Partecipazione</span>
-                                                                <X size={20} />
+                                                                <X size={20}/>
                                                             </motion.div>
                                                         )}
                                                     </AnimatePresence>
@@ -3162,37 +3531,52 @@ const ProfilePage = () => {
                                     <AnimatePresence>
                                         {showParticipantsPanel && (
                                             <motion.div
-                                                initial={window.innerWidth < 768 ? { y: 100 } : { width: 0, opacity: 0, marginLeft: 0 }}
-                                                animate={window.innerWidth < 768 ? { y: 0 } : { width: 350, opacity: 1, marginLeft: 24 }}
-                                                exit={window.innerWidth < 768 ? { y: 100 } : { width: 0, opacity: 0, marginLeft: 0 }}
-                                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                                initial={window.innerWidth < 768 ? {y: 100} : {
+                                                    width: 0,
+                                                    opacity: 0,
+                                                    marginLeft: 0
+                                                }}
+                                                animate={window.innerWidth < 768 ? {y: 0} : {
+                                                    width: 350,
+                                                    opacity: 1,
+                                                    marginLeft: 24
+                                                }}
+                                                exit={window.innerWidth < 768 ? {y: 100} : {
+                                                    width: 0,
+                                                    opacity: 0,
+                                                    marginLeft: 0
+                                                }}
+                                                transition={{duration: 0.4, ease: [0.16, 1, 0.3, 1]}}
                                                 className={`bg-[#0F131F] border border-white/10 shadow-2xl flex flex-col overflow-hidden pointer-events-auto ${
                                                     window.innerWidth < 768
                                                         ? 'absolute inset-x-0 bottom-0 h-[85vh] rounded-t-[2.5rem] z-50'
                                                         : 'rounded-[2.5rem] max-h-[90vh] shrink-0'
                                                 }`}
                                             >
-                                                <div className={`${window.innerWidth < 768 ? 'w-full' : 'w-[350px]'} flex flex-col h-full`}>
+                                                <div
+                                                    className={`${window.innerWidth < 768 ? 'w-full' : 'w-[350px]'} flex flex-col h-full`}>
                                                     {/* Header */}
-                                                    <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#0F131F]">
+                                                    <div
+                                                        className="p-6 border-b border-white/5 flex justify-between items-center bg-[#0F131F]">
                                                         <h3 className="text-xl font-bold text-white">Partecipanti</h3>
                                                         <button
                                                             onClick={() => setShowParticipantsPanel(false)}
                                                             className="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors"
                                                         >
-                                                            <X size={20} />
+                                                            <X size={20}/>
                                                         </button>
                                                     </div>
 
                                                     {/* Lista */}
-                                                    <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-white/10">
+                                                    <div
+                                                        className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-white/10">
                                                         {detailEvent.participantsList && detailEvent.participantsList.length > 0 ? (
                                                             detailEvent.participantsList.map((user, idx) => (
                                                                 <motion.div
                                                                     key={idx}
-                                                                    initial={{ opacity: 0, x: -10 }}
-                                                                    animate={{ opacity: 1, x: 0 }}
-                                                                    transition={{ delay: idx * 0.05 }}
+                                                                    initial={{opacity: 0, x: -10}}
+                                                                    animate={{opacity: 1, x: 0}}
+                                                                    transition={{delay: idx * 0.05}}
                                                                     className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors"
                                                                 >
                                                                     <img
@@ -3200,12 +3584,13 @@ const ProfilePage = () => {
                                                                         alt=""
                                                                         className="w-10 h-10 rounded-full object-cover ring-2 ring-white/10"
                                                                     />
-                                                                    <span className="text-slate-200 font-medium">{user.name}</span>
+                                                                    <span
+                                                                        className="text-slate-200 font-medium">{user.name}</span>
                                                                 </motion.div>
                                                             ))
                                                         ) : (
                                                             <div className="py-10 text-center text-slate-500">
-                                                                <Users size={32} className="mx-auto mb-2 opacity-30" />
+                                                                <Users size={32} className="mx-auto mb-2 opacity-30"/>
                                                                 <p>Ancora nessun partecipante.</p>
                                                             </div>
                                                         )}
@@ -3225,43 +3610,48 @@ const ProfilePage = () => {
             {/* ==================== MODALE MODIFICA EVENTO ==================== */}
             <AnimatePresence>
                 {isEditModalOpen && isHost && (
-                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-4 overflow-x-hidden">
+                    <div
+                        className="fixed inset-0 z-[120] flex items-center justify-center p-0 md:p-4 overflow-x-hidden">
                         {/* Backdrop */}
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            initial={{opacity: 0}}
+                            animate={{opacity: 1}}
+                            exit={{opacity: 0}}
                             onClick={() => setIsEditModalOpen(false)}
                             className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
                         />
 
                         {/* Card Modale */}
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            initial={{scale: 0.95, opacity: 0, y: 20}}
+                            animate={{scale: 1, opacity: 1, y: 0}}
+                            exit={{scale: 0.95, opacity: 0, y: 20}}
                             className="relative w-full h-[96dvh] md:h-auto max-w-4xl bg-[#0F131F] border-t md:border border-white/10 rounded-t-[2rem] md:rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[100dvh] md:max-h-[90vh] mt-auto md:mt-0"
                         >
                             {/* Header */}
-                            <div className="p-4 md:p-6 border-b border-white/5 flex justify-between items-center bg-[#0F131F] z-10 shrink-0">
-                                <h2 className="text-lg md:text-2xl font-black text-white tracking-tight">Modifica Evento</h2>
+                            <div
+                                className="p-4 md:p-6 border-b border-white/5 flex justify-between items-center bg-[#0F131F] z-10 shrink-0">
+                                <h2 className="text-lg md:text-2xl font-black text-white tracking-tight">Modifica
+                                    Evento</h2>
                                 <button
                                     onClick={() => setIsEditModalOpen(false)}
                                     className="p-2 hover:bg-white/10 rounded-full text-slate-400 hover:text-white transition-colors"
                                 >
-                                    <X size={24} />
+                                    <X size={24}/>
                                 </button>
                             </div>
 
                             {/* Form */}
-                            <form className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 md:space-y-6 scrollbar-thin scrollbar-thumb-white/10">
+                            <form
+                                className="flex-1 overflow-y-auto p-3 md:p-8 space-y-3 md:space-y-6 scrollbar-thin scrollbar-thumb-white/10">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-8 h-full">
                                     {/* COLONNA SINISTRA */}
                                     <div className="flex flex-col gap-3 md:gap-6">
                                         {/* Upload Foto */}
                                         <div className="space-y-1 md:space-y-2">
                                             <div className="flex justify-between">
-                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">
+                                                <label
+                                                    className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">
                                                     Locandina
                                                 </label>
                                                 {editFormErrors.poster && (
@@ -3285,21 +3675,25 @@ const ProfilePage = () => {
                                                             alt="Uploaded"
                                                             className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                                         />
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <Upload size={24} className="text-white drop-shadow-lg" />
+                                                        <div
+                                                            className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Upload size={24} className="text-white drop-shadow-lg"/>
                                                         </div>
                                                         <button
                                                             onClick={handleEditRemoveImage}
                                                             type="button"
                                                             className="absolute top-1 right-1 p-1 bg-black/60 hover:bg-rose-500/90 text-white rounded-full transition-colors z-20 backdrop-blur-md shadow-lg border border-white/10"
                                                         >
-                                                            <X size={12} />
+                                                            <X size={12}/>
                                                         </button>
                                                     </>
                                                 ) : (
-                                                    <div className="flex flex-col items-center text-slate-500 group-hover:text-slate-300 transition-colors">
-                                                        <ImageIcon size={20} className={`mb-1 ${editFormErrors.poster ? 'text-rose-500' : ''}`} />
-                                                        <p className="text-[10px] md:text-sm font-medium">Carica foto</p>
+                                                    <div
+                                                        className="flex flex-col items-center text-slate-500 group-hover:text-slate-300 transition-colors">
+                                                        <ImageIcon size={20}
+                                                                   className={`mb-1 ${editFormErrors.poster ? 'text-rose-500' : ''}`}/>
+                                                        <p className="text-[10px] md:text-sm font-medium">Carica
+                                                            foto</p>
                                                     </div>
                                                 )}
                                                 <input
@@ -3311,8 +3705,9 @@ const ProfilePage = () => {
                                                 />
                                             </div>
                                             {editFileError && (
-                                                <div className="flex items-center gap-1 text-rose-500 text-[10px] md:text-xs mt-1 ml-1">
-                                                    <AlertCircle size={12} />
+                                                <div
+                                                    className="flex items-center gap-1 text-rose-500 text-[10px] md:text-xs mt-1 ml-1">
+                                                    <AlertCircle size={12}/>
                                                     {editFileError}
                                                 </div>
                                             )}
@@ -3321,11 +3716,14 @@ const ProfilePage = () => {
                                         {/* Descrizione Desktop */}
                                         <div className="space-y-1 md:space-y-2 flex-1 flex-col hidden md:flex">
                                             <div className="flex justify-between">
-                                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Descrizione</label>
+                                                <label
+                                                    className="text-xs font-bold text-slate-500 uppercase ml-1">Descrizione</label>
                                                 {editFormErrors.description ? (
-                                                    <span className="text-xs font-bold text-rose-500">{editFormErrors.description}</span>
+                                                    <span
+                                                        className="text-xs font-bold text-rose-500">{editFormErrors.description}</span>
                                                 ) : (
-                                                    <span className={`text-xs font-bold ${editFormData.description.length > 200 ? 'text-rose-500' : 'text-slate-600'}`}>
+                                                    <span
+                                                        className={`text-xs font-bold ${editFormData.description.length > 200 ? 'text-rose-500' : 'text-slate-600'}`}>
                       {editFormData.description.length}/200
                     </span>
                                                 )}
@@ -3345,11 +3743,15 @@ const ProfilePage = () => {
                                         {/* Nome Evento */}
                                         <div className="space-y-1 md:space-y-2">
                                             <div className="flex justify-between">
-                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Nome Evento</label>
+                                                <label
+                                                    className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Nome
+                                                    Evento</label>
                                                 {editFormErrors.name ? (
-                                                    <span className="text-[10px] md:text-xs font-bold text-rose-500">{editFormErrors.name}</span>
+                                                    <span
+                                                        className="text-[10px] md:text-xs font-bold text-rose-500">{editFormErrors.name}</span>
                                                 ) : (
-                                                    <span className={`text-[10px] md:text-xs font-bold ${editFormData.name.length > 100 ? 'text-rose-500' : 'text-slate-600'}`}>
+                                                    <span
+                                                        className={`text-[10px] md:text-xs font-bold ${editFormData.name.length > 100 ? 'text-rose-500' : 'text-slate-600'}`}>
                       {editFormData.name.length}/100
                     </span>
                                                 )}
@@ -3367,8 +3769,9 @@ const ProfilePage = () => {
                                         {/* Data */}
                                         <div className="space-y-1 md:space-y-2 w-full min-w-0">
                                             <div className="flex justify-between">
-                                                <label className="text-10px md:text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
-                                                    <Clock size={12} />
+                                                <label
+                                                    className="text-10px md:text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-1.5">
+                                                    <Clock size={12}/>
                                                     Data
                                                 </label>
                                                 {editFormErrors.dateAndTime && (
@@ -3382,7 +3785,7 @@ const ProfilePage = () => {
                                                 min={minEditDateTime}
                                                 value={editFormData.dateAndTime}
                                                 onChange={(e) => handleEditInputChange('dateAndTime', e.target.value)}
-                                                style={{ boxSizing: 'border-box' }}
+                                                style={{boxSizing: 'border-box'}}
                                                 className={`${getEditInputStyle('dateAndTime')} w-full max-w-full appearance-none [-webkit-calendar-picker-indicator]:invert [-webkit-calendar-picker-indicator]:opacity-50`}
                                             />
                                         </div>
@@ -3391,11 +3794,14 @@ const ProfilePage = () => {
                                         {/* Città */}
                                         <div className="space-y-1 md:space-y-2 relative z-20">
                                             <div className="flex justify-between">
-                                                <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Città</label>
+                                                <label
+                                                    className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Città</label>
                                                 {editFormErrors.city ? (
-                                                    <span className="text-[10px] md:text-xs font-bold text-rose-500">{editFormErrors.city}</span>
+                                                    <span
+                                                        className="text-[10px] md:text-xs font-bold text-rose-500">{editFormErrors.city}</span>
                                                 ) : (
-                                                    <span className={`text-[10px] md:text-xs font-bold ${editFormData.city.length > 30 ? 'text-rose-500' : editFormData.city.length > 0 && !isEditCityValid ? 'text-amber-500' : 'text-slate-600'}`}>
+                                                    <span
+                                                        className={`text-[10px] md:text-xs font-bold ${editFormData.city.length > 30 ? 'text-rose-500' : editFormData.city.length > 0 && !isEditCityValid ? 'text-amber-500' : 'text-slate-600'}`}>
                       {editFormData.city.length > 0 && !isEditCityValid ? 'Non valida' : `${editFormData.city.length}/30`}
                     </span>
                                                 )}
@@ -3421,9 +3827,9 @@ const ProfilePage = () => {
                                                 <AnimatePresence>
                                                     {showEditCityDropdown && editFormData.city.length > 1 && (
                                                         <motion.div
-                                                            initial={{ opacity: 0, y: 5 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            exit={{ opacity: 0, y: 5 }}
+                                                            initial={{opacity: 0, y: 5}}
+                                                            animate={{opacity: 1, y: 0}}
+                                                            exit={{opacity: 0, y: 5}}
                                                             className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-white/10 rounded-xl max-h-40 overflow-y-auto shadow-2xl z-50 scrollbar-thin scrollbar-thumb-white/20"
                                                         >
                                                             <div className="p-1">
@@ -3436,10 +3842,16 @@ const ProfilePage = () => {
                                                                             type="button"
                                                                             className="w-full text-left p-2.5 hover:bg-white/10 rounded-lg text-slate-300 hover:text-white text-sm transition-colors"
                                                                             onClick={() => {
-                                                                                setEditFormData({ ...editFormData, city: c.nome });
+                                                                                setEditFormData({
+                                                                                    ...editFormData,
+                                                                                    city: c.nome
+                                                                                });
                                                                                 setShowEditCityDropdown(false);
                                                                                 if (editFormErrors.city) {
-                                                                                    setEditFormErrors((prev) => ({ ...prev, city: null }));
+                                                                                    setEditFormErrors((prev) => ({
+                                                                                        ...prev,
+                                                                                        city: null
+                                                                                    }));
                                                                                 }
                                                                             }}
                                                                         >
@@ -3447,7 +3859,9 @@ const ProfilePage = () => {
                                                                         </button>
                                                                     ))}
                                                                 {comuniList.filter((c) => c.nome.toLowerCase().startsWith(editFormData.city.toLowerCase())).length === 0 && (
-                                                                    <div className="p-3 text-center text-slate-500 text-sm">Nessuna città trovata</div>
+                                                                    <div
+                                                                        className="p-3 text-center text-slate-500 text-sm">Nessuna
+                                                                        città trovata</div>
                                                                 )}
                                                             </div>
                                                         </motion.div>
@@ -3460,8 +3874,10 @@ const ProfilePage = () => {
                                         <div className="grid grid-cols-3 gap-2 md:gap-4">
                                             <div className="col-span-2 space-y-1 md:space-y-2">
                                                 <div className="flex justify-between">
-                                                    <label className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Indirizzo</label>
-                                                    {editFormErrors.street && <span className="text-[10px] md:text-xs font-bold text-rose-500">!</span>}
+                                                    <label
+                                                        className="text-[10px] md:text-xs font-bold text-slate-500 uppercase ml-1">Indirizzo</label>
+                                                    {editFormErrors.street && <span
+                                                        className="text-[10px] md:text-xs font-bold text-rose-500">!</span>}
                                                 </div>
                                                 <input
                                                     type="text"
@@ -3476,7 +3892,8 @@ const ProfilePage = () => {
                                             {/* CAP */}
                                             <div className="space-y-1 md:space-y-2 relative z-20">
                                                 <div className="flex justify-between">
-                                                    <label className="text-10px md:text-xs font-bold text-slate-500 uppercase ml-1">
+                                                    <label
+                                                        className="text-10px md:text-xs font-bold text-slate-500 uppercase ml-1">
                                                         CAP
                                                     </label>
                                                     {editFormErrors.CAP ? (
@@ -3521,10 +3938,12 @@ const ProfilePage = () => {
                                         {(editFormErrors.street || editFormErrors.CAP) && (
                                             <div className="flex gap-4">
                                                 <div className="col-span-2 w-2/3">
-                                                    {editFormErrors.street && <p className="text-[10px] text-rose-500 ml-1">{editFormErrors.street}</p>}
+                                                    {editFormErrors.street &&
+                                                        <p className="text-[10px] text-rose-500 ml-1">{editFormErrors.street}</p>}
                                                 </div>
                                                 <div className="col-span-1 w-1/3">
-                                                    {editFormErrors.CAP && <p className="text-[10px] text-rose-500 ml-1">{editFormErrors.CAP}</p>}
+                                                    {editFormErrors.CAP &&
+                                                        <p className="text-[10px] text-rose-500 ml-1">{editFormErrors.CAP}</p>}
                                                 </div>
                                             </div>
                                         )}
@@ -3532,11 +3951,14 @@ const ProfilePage = () => {
                                         {/* Descrizione Mobile */}
                                         <div className="space-y-1 flex flex-col md:hidden">
                                             <div className="flex justify-between">
-                                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Descrizione</label>
+                                                <label
+                                                    className="text-[10px] font-bold text-slate-500 uppercase ml-1">Descrizione</label>
                                                 {editFormErrors.description ? (
-                                                    <span className="text-[10px] font-bold text-rose-500">{editFormErrors.description}</span>
+                                                    <span
+                                                        className="text-[10px] font-bold text-rose-500">{editFormErrors.description}</span>
                                                 ) : (
-                                                    <span className={`text-[10px] font-bold ${editFormData.description.length > 200 ? 'text-rose-500' : 'text-slate-600'}`}>
+                                                    <span
+                                                        className={`text-[10px] font-bold ${editFormData.description.length > 200 ? 'text-rose-500' : 'text-slate-600'}`}>
                       {editFormData.description.length}/200
                     </span>
                                                 )}

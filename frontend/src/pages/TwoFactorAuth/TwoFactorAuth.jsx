@@ -7,6 +7,8 @@ import PageTransition from '../../components/ui/PageTransition/PageTransition'
 import styles from '../LandingPage/LandingPage.module.css';
 
 import authService from '../../services/authService';
+import profileService from '../../services/profileService';
+
 import { handleAuthResponse } from '../../utils/authHandler';
 
 const TwoFactorAuth = () => {
@@ -15,7 +17,7 @@ const TwoFactorAuth = () => {
 
     const userEmail = location.state?.email;
     const userName = location.state?.name;
-
+    const university = location.state?.university;
     // --- 1. UTILS ---
     const getDurationFromServerDate = (serverDateString) => {
 
@@ -137,7 +139,6 @@ const TwoFactorAuth = () => {
         }
     };
 
-
     // --- 4. RESEND ---
     const triggerResend = async (automatic = false) => {
 
@@ -173,16 +174,18 @@ const TwoFactorAuth = () => {
 
         }
         catch (error) {
+
             toast.error("Errore nell'invio del nuovo codice.");
         }
         finally {
+
             setIsLoading(false);
         }
     };
 
-
     // --- 5. VERIFICA ---
     const handleVerify = async (e) => {
+
         e.preventDefault();
         const code = otp.join('');
         if (code.length < 6) return;
@@ -190,7 +193,11 @@ const TwoFactorAuth = () => {
         setIsLoading(true);
 
         try {
-            const response = await authService.verify2FA(accountId, code);
+            if(university!=null){
+                const response = await profileService.confirm2FAUniversity(accountId, code, userEmail, university, navigate);
+            }else {
+                const response = await authService.verify2FA(accountId, code);
+            }
 
             // SUCCESSO: Pulisci storage e naviga
             localStorage.removeItem('2fa_deadline');
@@ -239,6 +246,7 @@ const TwoFactorAuth = () => {
 
                     // Uccidi il timer per attivare il tasto "Invia nuovo codice"
                     setDeadline(Date.now());
+                    localStorage.removeItem('2fa_deadline');
                     setTimeLeft(0);
                     setIsTimerExpired(true);
                     setOtp(['', '', '', '', '', '']);
@@ -246,6 +254,7 @@ const TwoFactorAuth = () => {
 
                 // --- CASO 3: CODICE ERRATO ---
                 else if (internalCode === 'INVALID_2FA_CODE' || internalCode === 'TRY_2FA_AGAIN') {
+
                     toast.error("Codice non valido. Riprova.");
                     setOtp(['', '', '', '', '', '']);
                     inputRefs.current[0].focus();
