@@ -9,9 +9,7 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
     const navigate = useNavigate();
 
     const getInitialVote = () => {
-        if (thread.userVote === 'UPVOTE') return 1;
-        if (thread.userVote === 'DOWNVOTE') return -1;
-        return 0;
+        return thread.userVote || 0;
     };
 
     const [userVote, setUserVote] = useState(getInitialVote());
@@ -24,32 +22,112 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
     }, [thread.id, thread.userVote]);
 
     const getTopicColor = (topic) => {
-        const normalizedTopic = topic?.toUpperCase() || "";
+
+        const normalizedTopic = topic?.toUpperCase().replace(/\s+/g, '_') || "";
 
         const colors = {
+
             "GENERALE": "text-teal-300 bg-teal-500/20 border-teal-500/30",
             "APPUNTI": "text-amber-300 bg-amber-500/20 border-amber-500/30",
             "ESAMI": "text-rose-300 bg-rose-500/20 border-rose-500/30",
-            "CERCO_CASA": "text-orange-300 bg-orange-500/20 border-orange-500/30",
-            "CERCASI_COINQUILINO": "text-orange-300 bg-orange-500/20 border-orange-500/30",
-            "INFO": "text-blue-300 bg-blue-500/20 border-blue-500/30",
+            "SESSIONE": "text-red-400 bg-red-500/20 border-red-500/30",
+            "NOTTE_ESAME": "text-indigo-400 bg-indigo-500/20 border-indigo-500/30",
+            "NOTTE_PRIMA_DEGLI_ESAMI": "text-indigo-400 bg-indigo-500/20 border-indigo-500/30",
             "GRUPPO_STUDIO": "text-purple-300 bg-purple-500/20 border-purple-500/30",
-            "SESSIONE": "text-red-300 bg-red-500/20 border-red-500/30",
-            "VITA_FUORISEDE": "text-purple-300 bg-purple-500/20 border-purple-500/30",
-            "APERITIVO": "text-pink-300 bg-pink-500/20 border-pink-500/30",
-            "NOTTE_ESAME": "text-indigo-300 bg-indigo-500/20 border-indigo-500/30",
+            "CERCO_CASA": "text-orange-300 bg-orange-500/20 border-orange-500/30",
+            "CERCASI_COINQUILINO": "text-orange-400 bg-orange-600/20 border-orange-600/30",
+            "AFFITTI": "text-yellow-300 bg-yellow-600/20 border-yellow-600/30",
+            "VITA_FUORISEDE": "text-purple-400 bg-purple-600/20 border-purple-600/30",
+            "VITA_SOCIALE": "text-pink-300 bg-pink-500/20 border-pink-500/30",
+            "APERITIVO": "text-pink-400 bg-pink-600/20 border-pink-600/30",
+            "INFO": "text-blue-300 bg-blue-500/20 border-blue-500/30",
+            "INFORMAZIONI": "text-blue-300 bg-blue-500/20 border-blue-500/30",
+            "DOCENTI": "text-cyan-300 bg-cyan-500/20 border-cyan-500/30",
         };
 
         return colors[normalizedTopic] || colors[topic] || "text-slate-300 bg-slate-500/20 border-slate-500/30";
     };
 
     const getUniColor = (uni) => {
-        if (uni?.includes("Politecnico")) return "text-blue-300 bg-blue-500/20 border-blue-500/30";
-        if (uni?.includes("Sapienza") || uni?.includes("Roma")) return "text-red-300 bg-red-800/20 border-red-500/30";
-        if (uni?.includes("Bocconi") || uni?.includes("Milano")) return "text-indigo-300 bg-indigo-500/20 border-indigo-500/30";
-        if (uni?.includes("Federico II") || uni?.includes("Napoli")) return "text-yellow-200 bg-yellow-600/20 border-yellow-500/30";
+
+        if (!uni) return "text-slate-300 bg-slate-500/20 border-slate-500/30";
+
+        const uniLower = uni.toLowerCase();
+
+        if (uniLower.includes("sapienza") || uniLower.includes("tor vergata") || uniLower.includes("roma tre")) {
+            return "text-red-400 bg-red-600/20 border-red-500/30";
+        }
+
+        if (uniLower.includes("bocconi") || uniLower.includes("luiss") || uniLower.includes("lum")) {
+            return "text-indigo-400 bg-indigo-500/20 border-indigo-500/30";
+        }
+
+        if (uniLower.includes("federico") || uniLower.includes("napoli") || uniLower.includes("campania")) {
+            return "text-yellow-300 bg-yellow-600/20 border-yellow-500/30";
+        }
+
+        if (uniLower.includes("bologna") || uniLower.includes("alma mater") ||
+            uniLower.includes("padova") || uniLower.includes("pisa")) {
+            return "text-emerald-300 bg-emerald-500/20 border-emerald-500/30";
+        }
+
+        if (uniLower.includes("milano") && !uniLower.includes("politecnico") && !uniLower.includes("bocconi")) {
+            return "text-orange-300 bg-orange-500/20 border-orange-500/30";
+        }
+
+        if (uniLower.includes("torino") && !uniLower.includes("politecnico")) {
+            return "text-purple-300 bg-purple-500/20 border-purple-500/30";
+        }
+
+        if (uniLower.includes("venezia") || uniLower.includes("ca' foscari") ||
+            uniLower.includes("trieste") || uniLower.includes("genova")) {
+            return "text-cyan-300 bg-cyan-500/20 border-cyan-500/30";
+        }
+
+        if (uniLower.includes("firenze") || uniLower.includes("siena") || uniLower.includes("perugia")) {
+            return "text-amber-400 bg-amber-600/20 border-amber-600/30";
+        }
+
+        if (uniLower.includes("cattolica") || uniLower.includes("bio-medico") ||
+            uniLower.includes("san raffaele") || uniLower.includes("humanitas")) {
+            return "text-pink-300 bg-pink-500/20 border-pink-500/30";
+        }
+
+        if (uniLower.includes("calabria") || uniLower.includes("basilicata") ||
+            uniLower.includes("salento") || uniLower.includes("foggia") || uniLower.includes("bari")) {
+            return "text-lime-300 bg-lime-600/20 border-lime-600/30";
+        }
+
+        if (uniLower.includes("normale superiore") || uniLower.includes("sant'anna") ||
+            uniLower.includes("iuss") || uniLower.includes("sissa")) {
+            return "text-fuchsia-300 bg-fuchsia-500/20 border-fuchsia-500/30";
+        }
+
+        if (uniLower.includes("cagliari") || uniLower.includes("sassari") ||
+            uniLower.includes("palermo") || uniLower.includes("catania") ||
+            uniLower.includes("messina")) {
+            return "text-sky-300 bg-sky-500/20 border-sky-500/30";
+        }
+
+        if (uniLower.includes("marche") || uniLower.includes("ancona") ||
+            uniLower.includes("aquila") || uniLower.includes("teramo") ||
+            uniLower.includes("molise") || uniLower.includes("camerino")) {
+            return "text-amber-300 bg-amber-500/20 border-amber-500/30";
+        }
+
+        if (uniLower.includes("modena") || uniLower.includes("parma") ||
+            uniLower.includes("ferrara") || uniLower.includes("reggio emilia")) {
+            return "text-teal-300 bg-teal-500/20 border-teal-500/30";
+        }
+
+        if (uniLower.includes("trento") || uniLower.includes("udine") ||
+            uniLower.includes("verona") || uniLower.includes("brescia") || uniLower.includes("bergamo")) {
+            return "text-violet-300 bg-violet-500/20 border-violet-500/30";
+        }
+
         return "text-slate-300 bg-slate-500/20 border-slate-500/30";
     };
+
 
     const handleVoteApi = async (voteType) => {
         if (isVoting) return false;
@@ -61,6 +139,14 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
             if (res.data?.internalCode === 'REACT_SUCCESSFULLY') {
                 return true;
             }
+
+            if (onVoteSuccess) {
+                onVoteSuccess({
+                    votes: newVotesCount,
+                    userVote: newUserVote
+                });
+            }
+
             return false;
         } catch (error) {
             return false;
@@ -76,8 +162,11 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
         const previousCount = voteCount;
 
         if (userVote === 1) {
-            setUserVote(0);
-            setVoteCount(prev => prev - 1);
+            const newVote = 0;
+            const newCount = voteCount - 1;
+
+            setUserVote(newVote);
+            setVoteCount(newCount);
 
             const success = await handleVoteApi('UPVOTE');
 
@@ -85,16 +174,32 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
                 setUserVote(previousVote);
                 setVoteCount(previousCount);
             }
-        } else {
+            else {
+
+                if (onVoteSuccess) {
+                    onVoteSuccess({ votes: newCount, userVote: newVote });
+                }
+            }
+        }
+        else {
             const increment = userVote === -1 ? 2 : 1;
-            setUserVote(1);
-            setVoteCount(prev => prev + increment);
+            const newVote = 1;
+            const newCount = voteCount + increment;
+
+            setUserVote(newVote);
+            setVoteCount(newCount);
 
             const success = await handleVoteApi('UPVOTE');
 
             if (!success) {
                 setUserVote(previousVote);
                 setVoteCount(previousCount);
+            }
+            else {
+
+                if (onVoteSuccess) {
+                    onVoteSuccess({ votes: newCount, userVote: newVote });
+                }
             }
         }
     };
@@ -106,8 +211,11 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
         const previousCount = voteCount;
 
         if (userVote === -1) {
-            setUserVote(0);
-            setVoteCount(prev => prev + 1);
+            const newVote = 0;
+            const newCount = voteCount + 1;
+
+            setUserVote(newVote);
+            setVoteCount(newCount);
 
             const success = await handleVoteApi('DOWNVOTE');
 
@@ -115,16 +223,29 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
                 setUserVote(previousVote);
                 setVoteCount(previousCount);
             }
+            else {
+                if (onVoteSuccess) {
+                    onVoteSuccess({ votes: newCount, userVote: newVote });
+                }
+            }
         } else {
             const decrement = userVote === 1 ? 2 : 1;
-            setUserVote(-1);
-            setVoteCount(prev => prev - decrement);
+            const newVote = -1;
+            const newCount = voteCount - decrement;
+
+            setUserVote(newVote);
+            setVoteCount(newCount);
 
             const success = await handleVoteApi('DOWNVOTE');
 
             if (!success) {
                 setUserVote(previousVote);
                 setVoteCount(previousCount);
+            }
+            else {
+                if (onVoteSuccess) {
+                    onVoteSuccess({ votes: newCount, userVote: newVote });
+                }
             }
         }
     };
@@ -143,6 +264,12 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
     };
 
     const handleOpenDiscussion = () => {
+
+        const scrollContainer = document.querySelector('[data-scroll-container]');
+        if (scrollContainer) {
+            sessionStorage.setItem('threadPageScroll', scrollContainer.scrollTop);
+        }
+
         navigate(`/thread/${thread.id}`, { state: { thread: {...thread, votes: voteCount} } });
     };
 
@@ -153,7 +280,7 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="flex flex-col gap-4 p-6 bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:border-younify-blue/30 transition-colors shadow-lg w-full relative z-0"
+            className="flex flex-col gap-4 p-6 bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2rem] hover:border-younify-blue/30 transition-colors shadow-lg w-full relative z-10 hover:z-20"
         >
             <motion.div layout="position" className="flex flex-col gap-3">
                 <div className="flex items-center justify-between text-xs text-slate-400">
@@ -184,7 +311,7 @@ const ThreadCard = forwardRef(({ thread, showActions = true, layoutId, onVoteSuc
                     <span>{thread.timeAgo}</span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border truncate max-w-[150px] ${getUniColor(thread.university)}`}>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${getUniColor(thread.university)}`}>
                         {thread.university}
                     </span>
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${getTopicColor(thread.topic)}`}>
