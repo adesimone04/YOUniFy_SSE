@@ -1,6 +1,7 @@
 package it.younify.modules.sgtr.model.dto.response;
 
 
+import it.younify.modules.sgtr.model.entity.VoteType;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,4 +51,14 @@ public class CommentResponse {
      */
     private String userUsername;
 
+    /**
+     * The URL of the author's profile image.
+     */
+    private String profileImage;
+
+    /**
+     * The vote type of the currently authenticated user on this comment (e.g., UPVOTE, DOWNVOTE, or null if no vote).
+     * @see VoteType
+     */
+    private VoteType voteType;
 }

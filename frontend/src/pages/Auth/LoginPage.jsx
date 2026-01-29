@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from "react-router-dom"; // Importa useNavigate
 import { toast } from 'react-toastify';
 
-import styles from '../LandingPage/LandingPage.module.css';
 import PageTransition from '../../components/ui/PageTransition/PageTransition';
 
 // IMPORTA IL SERVIZIO DI AUTENTICAZIONE
@@ -153,15 +152,7 @@ const LoginPage = () => {
     }
 
     return (
-        <PageTransition className="h-dvh md:min-h-screen w-full bg-slate-950 flex flex-col font-sans overflow-hidden relative">
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className={`${styles.blob} ${styles.blue}`}></div>
-                <div className={`${styles.blob} ${styles.indigo}`}></div>
-                <div className={`${styles.blob} ${styles.magenta}`}></div>
-                <div className={`${styles.blob} ${styles.crimson}`}></div>
-                <div className={`${styles.blob} ${styles.purple}`}></div>
-                <div className={`${styles.blob} ${styles.amber}`}></div>
-            </div>
+        <PageTransition className="h-dvh md:min-h-screen w-full flex flex-col font-sans overflow-hidden relative">
 
             <div className="flex-1 flex items-center justify-center px-0 md:px-4 relative z-10 py-0 md:py-6">
                 <div className="relative bg-slate-900/60 border border-white/10 w-full max-w-[1050px] h-full md:h-[600px] rounded-none md:rounded-[30px] shadow-2xl flex flex-col md:flex-row overflow-hidden backdrop-blur-md">

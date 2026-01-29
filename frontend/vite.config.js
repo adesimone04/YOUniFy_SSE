@@ -5,14 +5,14 @@ import mkcert from 'vite-plugin-mkcert'
 export default defineConfig({
     plugins: [
         react(),
-        mkcert() // usa lo stesso CA di mkcert del backend
+        mkcert()
     ],
     server: {
         https: true,
         host: true,
         proxy: {
             '/api': {
-                target: 'https://192.168.1.101:8443',
+                target: 'https://192.168.1.5:8443',
                 changeOrigin: true,
                 secure: false
             }

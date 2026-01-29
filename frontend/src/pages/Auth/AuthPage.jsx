@@ -348,7 +348,7 @@ const AuthPage = () => {
             }
         });
 
-
+        // 2. Rimuovi l'errore se presente
         // Usiamo un timeout brevissimo o controlliamo lo stato precedente perché setHostData è asincrono,
         // ma per l'errore basta sapere che l'utente ha interagito.
         if (hostErrors.uniList) {
@@ -380,11 +380,11 @@ const AuthPage = () => {
     // Reset P.IVA Error on Checkbox toggle
     useEffect(() => {
         if (hostData.piva.length > 0) {
-
+            // Opzionale: rivalida al volo se vuoi
         }
     }, [isAssociation]);
 
-    // Aggiorna errore PIVA/CF al cambio della checkbox ---
+    // --- FIX: Aggiorna errore PIVA/CF al cambio della checkbox ---
     useEffect(() => {
         // Se esiste già un errore nel campo piva...
         if (hostErrors.piva) {
