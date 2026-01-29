@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * This service handles the business logic for sending notifications.
@@ -105,37 +106,21 @@ public class NotificationSendService {
 
         String receiverId = notificationRequest.getReceiverId();
 
-        User senderUser = null;
-
-        User receiverUser = null;
-        Host receiverHost = null;
-
         if (receiverId.startsWith("U")) {
 
-            receiverUser = userRepository.findById(receiverId)
+            User receiverUser = userRepository.findById(receiverId)
                     .orElseThrow(() -> new ResourceNotFoundException("User receiver not found", "USER_NOT_FOUND"));
+
+            Notification notification = Notification.builder()
+                    .senderHost(senderHost)
+                    .receiverUser(receiverUser)
+                    .type(notificationRequest.getType())
+                    .content(notificationRequest.getContent())
+                    .date(Instant.now())
+                    .build();
+
+            notificationRepository.save(notification);
         }
-        else{
-
-            if (receiverId.startsWith("H")) {
-
-                receiverHost = hostRepository.findById(receiverId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Host receiver not found", "HOST_NOT_FOUND"));
-            }
-            else throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
-        }
-
-
-        Notification notification = Notification.builder()
-                .senderUser(senderUser)
-                .senderHost(senderHost)
-                .receiverUser(receiverUser)
-                .receiverHost(receiverHost)
-                .type(notificationRequest.getType())
-                .content(notificationRequest.getContent())
-                .date(Instant.now())
-                .build();
-
-        notificationRepository.save(notification);
+        else throw new ResourceNotFoundException("ID account not exist", "ACCOUNT_NOT_FOUND");
     }
 }
