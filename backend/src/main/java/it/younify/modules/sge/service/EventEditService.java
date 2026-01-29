@@ -4,6 +4,7 @@ package it.younify.modules.sge.service;
 import it.younify.core.exception.ResourceNotFoundException;
 import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgac.service.validator.GeoValidationService;
 import it.younify.modules.sge.model.dto.request.EventEditRequest;
 import it.younify.modules.sge.model.entity.Event;
 import it.younify.modules.sge.repository.EventRepository;
@@ -33,6 +34,8 @@ public class EventEditService {
 
     private final EventRepository eventRepository;
     private final ImageStorageService imageStorageService;
+    private final GeoValidationService geoValidationService;
+
     private final String UPLOAD_DIR = "uploads/events";
 
     /**
@@ -63,11 +66,16 @@ public class EventEditService {
             Event event = opt.get();
             if(event.getHost().getID().equals(host.getID())){
 
+                String city = eventEditRequest.getCity();
+                if(geoValidationService.isValidCityOnly(city)){
+
+                    event.setCity(eventEditRequest.getCity());
+                }
+
                 event.setName(eventEditRequest.getName());
                 event.setDescription(eventEditRequest.getDescription());
                 event.setDateAndTime(eventEditRequest.getDateAndTime());
                 event.setStreet(eventEditRequest.getStreet());
-                event.setCity(eventEditRequest.getCity());
                 event.setCAP(eventEditRequest.getCAP());
 
                 MultipartFile file = eventEditRequest.getPoster();

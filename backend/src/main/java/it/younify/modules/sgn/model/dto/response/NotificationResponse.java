@@ -29,9 +29,9 @@ public class NotificationResponse {
     private String senderName;
 
     /**
-     * The name of the user who will receive the notification.
+     * The profile photo of the user who sent the notification.
      */
-    private String receiverName;
+    private String senderPhoto;
 
     /**
      * The type of the notification, which categorizes the notification's purpose.

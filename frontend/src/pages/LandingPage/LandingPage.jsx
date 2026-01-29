@@ -14,7 +14,6 @@ import TextType from '../../components/ui/TextType/TextType';
 import MetaBalls from '../../components/ui/MetaBalls/MetaBalls';
 import { LogoLoop } from '../../components/ui/LogoLoop/LogoLoop';
 // Stili CSS Module per effetti specifici (es. background blobs)
-import styles from './LandingPage.module.css';
 import WebApp from '../../components/business/InstallAppGuide';
 import Footer from '../../components/layout/Footer/Footer';
 
@@ -25,14 +24,6 @@ const LandingPage = () => {
 
     useEffect(() => {
         setIsLoaded(true);
-    }, []);
-
-    // [FIX SFONDO MOBILE] - Manteniamo anche questo per l'overscroll
-    useEffect(() => {
-        document.body.style.backgroundColor = '#020617';
-        return () => {
-            document.body.style.backgroundColor = '';
-        };
     }, []);
 
     const UNIVERSITY_TAGS_1 = [
@@ -71,18 +62,8 @@ const LandingPage = () => {
     };
 
     return (
-        <PageTransition className="relative min-h-screen w-full bg-slate-950 flex flex-col items-center overflow-x-hidden font-sans">
+        <PageTransition className="relative min-h-screen w-full flex flex-col items-center overflow-x-hidden font-sans">
             <Navbar />
-
-            {/* --- Background Layer (Blobs) --- */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className={`${styles.blob} ${styles.blue}`}></div>
-                <div className={`${styles.blob} ${styles.indigo}`}></div>
-                <div className={`${styles.blob} ${styles.magenta}`}></div>
-                <div className={`${styles.blob} ${styles.crimson}`}></div>
-                <div className={`${styles.blob} ${styles.purple}`}></div>
-                <div className={`${styles.blob} ${styles.amber}`}></div>
-            </div>
 
             <div className="fixed inset-0 z-0 pointer-events-none bg-slate-900/50 md:bg-slate-900/20 backdrop-blur-md md:backdrop-blur-none"></div>
 

@@ -7,6 +7,7 @@ import it.younify.modules.sgtr.model.entity.ThreadsVote;
 import it.younify.modules.sgtr.model.entity.VoteType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -41,4 +42,26 @@ public interface ThreadVoteRepository extends JpaRepository<ThreadsVote, Long> {
      * @return An {@link Optional} containing the vote if it exists.
      */
     Optional<ThreadsVote> findByThreadAndHost(Threads thread, Host host);
+
+
+    /**
+     * Finds all votes cast by a specific user on a given list of threads.
+     * This is useful for efficiently fetching a user's vote status for multiple threads at once.
+     *
+     * @param user The user whose votes are to be found.
+     * @param threads The list of threads to check for votes.
+     * @return A list of {@link ThreadsVote} objects.
+     */
+    List<ThreadsVote> findByUserAndThreadIn(User user, List<Threads> threads);
+
+
+    /**
+     * Finds all votes cast by a specific host on a given list of threads.
+     * This is useful for efficiently fetching a host's vote status for multiple threads at once.
+     *
+     * @param host The host whose votes are to be found.
+     * @param threads The list of threads to check for votes.
+     * @return A list of {@link ThreadsVote} objects.
+     */
+    List<ThreadsVote> findByHostAndThreadIn(Host host, List<Threads> threads);
 }
