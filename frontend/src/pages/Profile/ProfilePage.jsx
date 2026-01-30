@@ -5,7 +5,7 @@ import {
     ChevronRight, CheckCircle2, TrendingUp, MessageSquare,
     CalendarDays, X, Instagram, Receipt, CreditCard,
     AlertCircle, School, ChevronDown, CheckCircle,
-    Clock, Users, Sparkles, Upload, ImageIcon, ChevronLeft, PenLine, MessageCircle, Heart, Check, Globe2,
+    Clock, Users, Sparkles, Upload, ImageIcon, ChevronLeft, PenLine, MessageCircle, Heart, Check, Globe2, LogOut
 } from 'lucide-react';
 
 import {motion, AnimatePresence} from 'framer-motion';
@@ -26,7 +26,6 @@ import {CDL_DATA} from '../../data/cdl';
 
 
 const passwordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}/;
-// Match ricevuti
 
 
 const PremiumInput = ({label, icon: Icon, type = "text", disabled = false, error, ...props}) => {
@@ -1588,7 +1587,6 @@ const ProfilePage = () => {
             return;
         }
 
-
         const changePassRequest = {
             password: passwords.newPassword,
             confirmPassword: passwords.confirmPassword
@@ -1600,6 +1598,23 @@ const ProfilePage = () => {
         setPasswords({oldPassword: '', newPassword: '', confirmPassword: ''});
         setIsEditingPassword(false);
         setPasswordErrors({});
+    };
+
+
+    const handleLogout = async () => {
+        openConfirmModal({
+            title: "Esci dall'account",
+            message: "Sei sicuro di voler uscire? Dovrai effettuare nuovamente il login.",
+            type: "default",
+            confirmText: "Esci",
+            onConfirm: async () => {
+                try {
+                    await profileService.logout(navigate);
+                } catch (error) {
+                    console.error("Errore durante il logout:", error);
+                }
+            }
+        });
     };
 
 
@@ -3337,6 +3352,43 @@ const ProfilePage = () => {
                             </div>
                         </motion.section>
                     )}
+
+
+
+                    {/* LOGOUT */}
+                    <motion.section
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        className="rounded-3xl bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl p-6 md:p-8 overflow-hidden mb-6"
+                    >
+                        {/* Header */}
+                        <div className="mb-6">
+                            <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mb-2">
+                                Account
+                            </p>
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-red-500/20 to-orange-600/20 border border-red-500/20">
+                                    <LogOut className="h-5 w-5 text-red-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-white">Disconnetti</h3>
+                                    <p className="text-sm text-slate-400">Esci dal tuo account</p>
+                                </div>
+                            </div>
+
+                            {/* Bottone Logout */}
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={handleLogout}
+                                className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 text-white font-semibold shadow-lg hover:shadow-red-500/40 transition-all duration-300"
+                            >
+                                <LogOut className="h-5 w-5" />
+                                Esci dall'account
+                            </motion.button>
+                        </div>
+                    </motion.section>
 
 
                     {/* ==================== MODALE DETTAGLIO EVENTO ==================== */}

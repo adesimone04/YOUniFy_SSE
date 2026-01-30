@@ -86,6 +86,35 @@ class ProfileService {
         }
     }
 
+    async logout(navigate) {
+        try {
+            const response = await axiosClient.post('/auth/logout');
+
+            // Pulisci lo storage locale
+            localStorage.removeItem('isHost');
+            localStorage.removeItem('accountId');
+
+            toast.success('Logout effettuato con successo');
+
+            if (navigate) {
+                navigate('/login');
+            }
+
+            return response.data;
+        }
+        catch (error) {
+
+            localStorage.removeItem('isHost');
+            localStorage.removeItem('accountId');
+
+            if (navigate) {
+                navigate('/login');
+            }
+
+            throw this.handleError(error);
+        }
+    }
+
     handleError(error) {
 
         if (error.response) {

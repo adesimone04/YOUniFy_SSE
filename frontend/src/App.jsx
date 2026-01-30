@@ -84,6 +84,7 @@ const AnimatedRoutes = () => {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/thread" element={<ThreadPage />} />
                     <Route path="/thread/:id" element={<ThreadDetail />} />
+                    <Route path="/logout" element={<TwoFactorAuth />} />
                 </Route>
 
             </Routes>
