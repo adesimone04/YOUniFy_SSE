@@ -12,6 +12,11 @@ import lombok.Data;
 public class HostProfileViewResponse {
 
     /**
+     * The URL or reference to the user's avatar image.
+     */
+    private String avatar;
+
+    /**
      * The name of the host.
      */
     private String hostName;
@@ -40,4 +45,9 @@ public class HostProfileViewResponse {
      * A comma-separated list of universities near the host.
      */
     private String uniList;
+
+    /**
+     * The total count of CFU (credits or reputation points) accumulated by the user.
+     */
+    private int totalCfu;
 }

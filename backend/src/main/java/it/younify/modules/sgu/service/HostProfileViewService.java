@@ -1,7 +1,11 @@
 package it.younify.modules.sgu.service;
 
+import it.younify.core.service.ImageStorageService;
 import it.younify.modules.sgac.model.entity.Host;
+import it.younify.modules.sgtr.repository.CommentRepository;
+import it.younify.modules.sgtr.repository.ThreadRepository;
 import it.younify.modules.sgu.model.dto.response.HostProfileViewResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -14,7 +18,12 @@ import org.springframework.stereotype.Service;
  * @see Host
  */
 @Service
+@RequiredArgsConstructor
 public class HostProfileViewService {
+
+    private final ImageStorageService imageStorageService;
+    private final ThreadRepository threadRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * Retrieves the profile information for the currently authenticated host.
@@ -31,13 +40,17 @@ public class HostProfileViewService {
 
             Host host = (Host) principal;
 
+            int totalCfu = threadRepository.sumCFUByHostThread(host) + commentRepository.sumCFUByHostComment(host);
+
             return HostProfileViewResponse.builder()
+                    .avatar(imageStorageService.getPresignedUrl(host.getProfileImage()))
                     .hostName(host.getHostName())
                     .PIVA(host.getPIVA())
                     .PEC(host.getPEC())
                     .province(host.getProvince())
                     .city(host.getCity())
                     .uniList(host.getUniList())
+                    .totalCfu(totalCfu)
                     .build();
         }
         else throw new AccessDeniedException("Access is denied for this operation");

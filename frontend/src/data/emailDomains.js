@@ -15,5 +15,5 @@ export const ALLOWED_EMAIL_DOMAINS = [
     "@studenti.unisa.it", "@studenti.uniss.it", "@student.unisi.it", "@unistrasi.it", "@studenti.unite.it",
     "@studenti.unito.it", "@edu.unito.it", "@studenti.polito.it", "@studenti.unitn.it", "@stud.units.it",
     "@sissa.it", "@spes.uniud.it", "@campus.uniurb.it", "@stud.unive.it", "@stud.iuav.it", "@studenti.univr.it",
-    "@studenti.unitus.it"
+    "@studenti.unitus.it", "younifytester@gmail.com"
 ];

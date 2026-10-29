@@ -154,7 +154,7 @@ public class ProfileController {
      *
      * @return A {@link ResponseEntity} with an {@link ApiResponse} containing the user's profile information.
      */
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @GetMapping("/user")
     public ResponseEntity<ApiResponse<UserProfileViewResponse>> myUserProfile() {
 

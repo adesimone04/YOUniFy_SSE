@@ -50,7 +50,7 @@ const ThreadDetail = () => {
 
                     return {
                         id: c.ID || c.id,
-                        author: c.userUsername || c.author || "Anonimo",
+                        author: c.userUsername || c.author || c.hostUsername || "Anonimo",
                         content: c.content,
                         timeAgo: calculateTimeAgo(c.publicationDate || c.creationDate),
                         profileImage: c.profileImage || c.userProfileImage || null,

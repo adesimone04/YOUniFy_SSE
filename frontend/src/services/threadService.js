@@ -63,7 +63,7 @@ export const threadService = {
         return axiosClient.get(`/thread/summary/posted?page=${page}&size=${size}`);
     },
 
-    getMyCFU: () => {
-        return axiosClient.get('/thread/summary/cfu');
+    getMyComments: (page = 0, size = 10) => {
+        return axiosClient.get(`thread/summary/commented?page=${page}&size=${size}`);
     }
 };
