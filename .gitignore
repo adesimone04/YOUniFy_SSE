@@ -37,3 +37,6 @@ build/
 
 ### ENV files ###
 .env
+
+### Node / Frontend ###
+node_modules/
