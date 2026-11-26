@@ -2,7 +2,10 @@ package it.younify.modules.sgac.model.dto.request;
 
 
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -12,6 +15,9 @@ import jakarta.validation.constraints.NotBlank;
  * This DTO contains all the necessary fields for creating a new host account.
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class HostSignUpRequest {
 
     /**

@@ -2,7 +2,10 @@ package it.younify.modules.sgac.model.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 
@@ -14,6 +17,9 @@ import jakarta.validation.constraints.NotBlank;
  * This DTO contains all the necessary fields for creating a new user account.
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserSignUpRequest {
 
     /**
